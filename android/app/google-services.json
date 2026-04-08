@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "872762420880",
+    "project_id": "project2-89270",
+    "storage_bucket": "project2-89270.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872762420880:android:5317cc05ce5abba780b215",
+        "android_client_info": {
+          "package_name": "com.example.modern_medical_center"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrXhpkwQNF9pBhK7ES-WDxT4UGPMU6gsg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872762420880:android:c6b4912f29c15fbe80b215",
+        "android_client_info": {
+          "package_name": "com.example.senior_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrXhpkwQNF9pBhK7ES-WDxT4UGPMU6gsg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
