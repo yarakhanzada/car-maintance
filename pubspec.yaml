@@ -45,6 +45,7 @@ dependencies:
   flutter_local_notifications: ^21.0.0
   cloud_firestore: ^6.2.0
   http: ^1.6.0
+  shared_preferences:
  
   
 

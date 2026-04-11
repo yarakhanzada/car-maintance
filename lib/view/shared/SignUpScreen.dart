@@ -8,16 +8,16 @@ import 'package:senior_project/widgets/GlassTextField.dart';
 import 'package:senior_project/widgets/GlassScaffold.dart';
 
 class SignUpScreen extends StatelessWidget {
+  SignUpScreen({super.key});
+
   final SignUpController controller = Get.put(SignUpController());
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmpasswordController =
+  final TextEditingController confirmPasswordController =
       TextEditingController();
-
-  SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +32,7 @@ class SignUpScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 10),
-          const Text(
-            "Fill in the details to get started",
-            style: TextStyle(color: Colors.white70, fontSize: 16),
-          ),
+
           const SizedBox(height: 30),
 
           GlassCard(
@@ -47,76 +43,159 @@ class SignUpScreen extends StatelessWidget {
                   hint: "Full Name",
                   prefixIcon: Icons.person_outline,
                 ),
-                const SizedBox(height: 15),
-                GlassTextField(
-                  controller: emailController,
-                  hint: "Email",
-                  prefixIcon: Icons.email_outlined,
-                ),
-                const SizedBox(height: 15),
-                GlassTextField(
-                  controller: phoneController,
-                  hint: "Phone Number",
-                  prefixIcon: Icons.phone_android,
-                ),
+
                 const SizedBox(height: 15),
 
-                Obx(
-                  () => GlassTextField(
-                    controller: passwordController,
-                    hint: "Password",
-                    prefixIcon: Icons.lock_outline,
-                    isPassword: true,
-                    obscureText: controller.isPasswordHidden.value,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        controller.isPasswordHidden.value
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: Colors.white70,
+                /// EMAIL
+                Obx(() => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GlassTextField(
+                          controller: emailController,
+                          hint: "Email",
+                          prefixIcon: Icons.email_outlined,
+                          hasError: controller.emailError.isNotEmpty,
+                        ),
+                        if (controller.emailError.isNotEmpty)
+                          Text(
+                            controller.emailError.value,
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    )),
+
+                const SizedBox(height: 15),
+
+                /// PHONE
+                Obx(() => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GlassTextField(
+                          controller: phoneController,
+                          hint: "Phone Number",
+                          prefixIcon: Icons.phone_android,
+                          hasError: controller.phoneError.isNotEmpty,
+                        ),
+                        if (controller.phoneError.isNotEmpty)
+                          Text(
+                            controller.phoneError.value,
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    )),
+
+                const SizedBox(height: 15),
+
+                /// PASSWORD
+                Obx(() => GlassTextField(
+                      controller: passwordController,
+                      hint: "Password",
+                      prefixIcon: Icons.lock_outline,
+                      isPassword: true,
+                      obscureText: controller.isPasswordHidden.value,
+                      hasError: controller.passwordErrors.isNotEmpty,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isPasswordHidden.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: controller.togglePassword,
                       ),
-                      onPressed: controller.toggleConfirmPassword,
-                    ),
-                  ),
-                ),
+                    )),
+
+                const SizedBox(height: 10),
+
+                /// PASSWORD ERRORS
+                Obx(() {
+                  if (controller.passwordErrors.isEmpty) {
+                    return const SizedBox();
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: controller.passwordErrors
+                        .map((e) => Text(
+                              "• $e",
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 12,
+                              ),
+                            ))
+                        .toList(),
+                  );
+                }),
+
                 const SizedBox(height: 15),
 
-                Obx(
-                  () => GlassTextField(
-                    controller: confirmpasswordController,
-                    hint: "ConfirmPassword",
-                    prefixIcon: Icons.lock_outline,
-                    isPassword: true,
-                    obscureText: controller.isPasswordHidden.value,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        controller.isPasswordHidden.value
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: Colors.white70,
-                      ),
-                      onPressed: controller.toggleConfirmPassword,
-                    ),
-                  ),
-                ),
+                /// CONFIRM PASSWORD
+                Obx(() => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GlassTextField(
+                          controller: confirmPasswordController,
+                          hint: "Confirm Password",
+                          prefixIcon: Icons.lock_outline,
+                          isPassword: true,
+                          obscureText:
+                              controller.isConfirmPasswordHidden.value,
+                          hasError:
+                              controller.confirmPasswordError.isNotEmpty,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              controller.isConfirmPasswordHidden.value
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: controller.toggleConfirmPassword,
+                          ),
+                        ),
 
-                const SizedBox(height: 30),
-                CustomButton(
-                  text: "SIGN UP",
-                  onTap: () {
-                    // منطق إرسال البيانات للباك إند
-                    Get.to(() => const OTPScreen());
-                  },
-                ),
+                        if (controller.confirmPasswordError.isNotEmpty)
+                          Text(
+                            controller.confirmPasswordError.value,
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    )),
+
+                const SizedBox(height: 20),
+
+                /// BUTTON
+                Obx(() => CustomButton(
+                      text: controller.isLoading.value
+                          ? "Loading..."
+                          : "SIGN UP",
+                      onTap: () async {
+                        var result = await controller.signUp(
+                          name: nameController.text,
+                          email: emailController.text,
+                          phone: phoneController.text,
+                          password: passwordController.text,
+                          confirmPassword:
+                              confirmPasswordController.text,
+                        );
+
+                        if (result != null && result.status == 1) {
+                          Get.to(() => OTPScreen(),
+                              arguments: {
+                                "email": result.data.email,
+                                "code":
+                                    result.data.verifiedCode.toString(),
+                              });
+                        }
+                      },
+                    )),
               ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text(
-              "Already have an account? Login",
-              style: TextStyle(color: Colors.white70),
             ),
           ),
         ],

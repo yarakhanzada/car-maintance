@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/controller/LoginController.dart';
+import 'package:senior_project/view/client/ClientBottombar.dart';
 import 'package:senior_project/view/shared/SignUpScreen.dart';
 import 'package:senior_project/view/shared/ForgotPasswordScreen.dart';
 import 'package:senior_project/widgets/CustomButton.dart';
@@ -31,12 +32,10 @@ class LoginScreen extends StatelessWidget {
 
           const Text(
             "Welcome Back",
-            textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              letterSpacing: 1.5,
             ),
           ),
 
@@ -45,97 +44,124 @@ class LoginScreen extends StatelessWidget {
           GlassCard(
             child: Column(
               children: [
-                // حقل البريد الإلكتروني
-                GlassTextField(
-                  controller: emailController,
-                  hint: "Username / Email",
-                  prefixIcon: Icons.person_outline,
-                ),
-
-                const SizedBox(height: 20),
-
+                // ================= EMAIL =================
                 Obx(
                   () => GlassTextField(
-                    controller: passwordController,
-                    hint: "Password",
-                    prefixIcon: Icons.lock_outline,
-                    isPassword: true,
-                    obscureText: controller.isPasswordHidden.value,
-                    suffixIcon: _buildPasswordIcon(),
+                    controller: emailController,
+                    hint: "Username / Email",
+                    prefixIcon: Icons.person_outline,
+                    hasError: controller.emailError.value.isNotEmpty,
                   ),
                 ),
 
+                Obx(
+                  () => controller.emailError.value.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              controller.emailError.value,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                ),
+
                 const SizedBox(height: 15),
-                _buildForgotPasswordLink(),
+
+                // ================= PASSWORD =================
+             Obx(() => GlassTextField(
+  controller: passwordController,
+  hint: "Password",
+  prefixIcon: Icons.lock_outline,
+  isPassword: true,
+  obscureText: controller.isPasswordHidden.value,
+  hasError: controller.passwordError.value.isNotEmpty,
+  suffixIcon: IconButton(
+    icon: Icon(
+      controller.isPasswordHidden.value
+          ? Icons.visibility_off
+          : Icons.visibility,
+      color: Colors.white70,
+    ),
+    onPressed: controller.togglePasswordVisibility,
+  ),
+)),
+
+                Obx(
+                  () => controller.passwordError.value.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              controller.passwordError.value,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                ),
+
+                const SizedBox(height: 15),
+
+                // ================= FORGOT PASSWORD =================
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () => Get.to(() => ForgotPasswordScreen()),
+                    child: const Text(
+                      "Forgot Password?",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 30),
 
-                CustomButton(
-                  text: "LOGIN",
-                  onTap: () {
-                    // controller.login(
-                    //   email: emailController.text.trim(),
-                    //   password: passwordController.text,
-                    // );
-                  },
+                // ================= LOGIN BUTTON =================
+                Obx(
+                  () => CustomButton(
+                    text: controller.isLoading.value ? "Loading..." : "LOGIN",
+                    onTap: () async {
+                      var result = await controller.login(
+                        email: emailController.text.trim(),
+                        password: passwordController.text,
+                      );
+
+                      if (result != null && result.status == 1) {
+                        await controller.saveSession(result);
+
+                        Get.offAll(ClientBottombar());
+                      }
+                    },
+                  ),
                 ),
               ],
             ),
           ),
 
           const SizedBox(height: 25),
-          _buildSignUpLink(),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildPasswordIcon() {
-    return IconButton(
-      icon: Icon(
-        controller.isPasswordHidden.value
-            ? Icons.visibility_off
-            : Icons.visibility,
-        color: Colors.white70,
-        size: 20,
-      ),
-      onPressed: controller.togglePasswordVisibility,
-    );
-  }
-
-  Widget _buildForgotPasswordLink() {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: GestureDetector(
-        onTap: () => Get.to(() => const ForgotPasswordScreen()),
-        child: Text(
-          "Forgot Password?",
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            decoration: TextDecoration.underline,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSignUpLink() {
-    return TextButton(
-      onPressed: () => Get.to(() => SignUpScreen()),
-      child: RichText(
-        text: const TextSpan(
-          text: "Don't have an account? ",
-          style: TextStyle(color: Colors.white70),
-          children: [
-            TextSpan(
-              text: "Sign Up",
-              style: TextStyle(
-                color: Color(0xFFE55757),
-                fontWeight: FontWeight.bold,
-              ),
+          TextButton(
+            onPressed: () => Get.to(() => SignUpScreen()),
+            child: const Text(
+              "Don't have an account? Sign Up",
+              style: TextStyle(color: Colors.white70),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
