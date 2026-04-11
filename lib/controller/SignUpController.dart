@@ -16,12 +16,10 @@ class SignUpController extends GetxController {
 
   var confirmPasswordError = "".obs;
 
-  void togglePassword() =>
-      isPasswordHidden.value = !isPasswordHidden.value;
+  void togglePassword() => isPasswordHidden.value = !isPasswordHidden.value;
 
   void toggleConfirmPassword() =>
-      isConfirmPasswordHidden.value =
-          !isConfirmPasswordHidden.value;
+      isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
 
   Future<SignUpModel?> signUp({
     required String name,
@@ -45,7 +43,7 @@ class SignUpController extends GetxController {
       }
 
       var response = await http.post(
-        Uri.parse("http://192.168.1.2:8000/api/register"),
+        Uri.parse("http://192.168.42.56:8000/api/register"),
         body: {
           "name": name,
           "email": email,
@@ -53,9 +51,7 @@ class SignUpController extends GetxController {
           "password": password,
           "password_confirmation": confirmPassword,
         },
-             headers: {
-          "Accept": "application/json", 
-        },
+        headers: {"Accept": "application/json"},
       );
 
       var jsonData = jsonDecode(response.body);
@@ -69,8 +65,9 @@ class SignUpController extends GetxController {
 
         if (jsonData["data"] != null) {
           if (jsonData["data"]["password"] != null) {
-            passwordErrors.value =
-                List<String>.from(jsonData["data"]["password"]);
+            passwordErrors.value = List<String>.from(
+              jsonData["data"]["password"],
+            );
           }
 
           if (jsonData["data"]["email"] != null) {
@@ -92,5 +89,35 @@ class SignUpController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void validatePasswordLive(String value) {
+    List<String> errors = [];
+
+    if (value.isEmpty) {
+      passwordErrors.value = [];
+      return;
+    }
+
+    if (value.length < 8) {
+      errors.add("The password field must be at least 8 characters.");
+    }
+
+    if (!value.contains(RegExp(r'[A-Z]')) ||
+        !value.contains(RegExp(r'[a-z]'))) {
+      errors.add(
+        "The password field must contain at least one uppercase and one lowercase letter.",
+      );
+    }
+
+    if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      errors.add("The password field must contain at least one symbol.");
+    }
+
+    if (!value.contains(RegExp(r'[0-9]'))) {
+      errors.add("The password field must contain at least one number.");
+    }
+
+    passwordErrors.assignAll(errors);
   }
 }

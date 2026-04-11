@@ -20,7 +20,7 @@ class ClientBottombar extends StatelessWidget {
     const BookingsScreen(),
 
     const MyGarageScreen(),
-    const ProfileScreen(),
+    ProfileScreen(),
   ];
 
   @override

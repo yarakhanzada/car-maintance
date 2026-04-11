@@ -10,11 +10,11 @@ import 'package:senior_project/widgets/AuthHeaderIcon.dart';
 class ForgotPasswordScreen extends StatelessWidget {
   ForgotPasswordScreen({super.key});
 
-  final ForgotPasswordController controller =
-      Get.put(ForgotPasswordController());
+  final ForgotPasswordController controller = Get.put(
+    ForgotPasswordController(),
+  );
 
-  final TextEditingController emailController =
-      TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -45,52 +45,56 @@ class ForgotPasswordScreen extends StatelessWidget {
           const SizedBox(height: 50),
 
           // ================= EMAIL FIELD =================
-          Obx(() => GlassTextField(
-                controller: emailController,
-                hint: "Email Address",
-                prefixIcon: Icons.email_rounded,
-                hasError: controller.emailError.value.isNotEmpty,
-              )),
+          Obx(
+            () => GlassTextField(
+              controller: emailController,
+              hint: "Email Address",
+              prefixIcon: Icons.email_rounded,
+              hasError: controller.emailError.value.isNotEmpty,
+            ),
+          ),
 
-          // 🔴 error under field
-          Obx(() => controller.emailError.value.isNotEmpty
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      controller.emailError.value,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 12,
+          //  error under field
+          Obx(
+            () => controller.emailError.value.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        controller.emailError.value,
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
                       ),
                     ),
-                  ),
-                )
-              : const SizedBox()),
+                  )
+                : const SizedBox(),
+          ),
 
           const SizedBox(height: 35),
 
           // ================= BUTTON =================
-          Obx(() => CustomButton(
-                text: controller.isLoading.value
-                    ? "Loading..."
-                    : "Send Reset Code",
-                onTap: () async {
-                  bool success = await controller.sendResetCode(
-                    emailController.text.trim(),
-                  );
+          Obx(
+            () => CustomButton(
+              text: controller.isLoading.value
+                  ? "Loading..."
+                  : "Send Reset Code",
+              onTap: () async {
+                bool success = await controller.sendResetCode(
+                  emailController.text.trim(),
+                );
 
-                  if (success) {
-                    Get.to(
-                      () => OTPScreen(),
-                      arguments: {
-                        "email": emailController.text.trim(),
-                      },
-                    );
-                  }
-                },
-              )),
+                if (success) {
+                  Get.to(
+                    () => OTPScreen(),
+                    arguments: {
+                      "email": emailController.text.trim(),
+                      "type": "reset",
+                    },
+                  );
+                }
+              },
+            ),
+          ),
         ],
       ),
     );

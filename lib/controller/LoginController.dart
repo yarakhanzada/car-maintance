@@ -28,36 +28,30 @@ class LoginController extends GetxController {
       isLoading.value = true;
       clearErrors();
 
-      print("🚀 LOGIN START");
+      print(" LOGIN START");
 
       final response = await http.post(
-        Uri.parse("http://192.168.1.2:8000/api/login"),
-        body: {
-          "email": email,
-          "password": password,
-        },
-         headers: {
-          "Accept": "application/json", 
-        },
+        Uri.parse("http://192.168.42.56:8000/api/login"),
+        body: {"email": email, "password": password},
+        headers: {"Accept": "application/json"},
       );
 
-      print("📥 STATUS: ${response.statusCode}");
-      print("📥 BODY: ${response.body}");
+      print(" STATUS: ${response.statusCode}");
+      print(" BODY: ${response.body}");
 
       final jsonData = jsonDecode(response.body);
 
-      print("📊 PARSED: $jsonData");
+      print(" PARSED: $jsonData");
 
       if (jsonData["status"] == 1) {
-        print("✅ LOGIN SUCCESS");
+        print(" LOGIN SUCCESS");
         return LoginModel.fromJson(jsonData);
       }
 
-      print("❌ LOGIN FAILED");
+      print(" LOGIN FAILED");
 
       String message = jsonData["message"] ?? "Invalid credentials";
 
-      // 🔥 أهم نقطة: إذا ما في data وزّع الخطأ على الحقلين
       if (jsonData["data"] == null) {
         emailError.value = message;
         passwordError.value = message;
@@ -76,7 +70,7 @@ class LoginController extends GetxController {
       return null;
     } finally {
       isLoading.value = false;
-      print("🏁 DONE");
+      print(" DONE");
     }
   }
 

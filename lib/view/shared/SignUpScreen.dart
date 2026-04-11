@@ -47,154 +47,182 @@ class SignUpScreen extends StatelessWidget {
                 const SizedBox(height: 15),
 
                 /// EMAIL
-                Obx(() => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GlassTextField(
-                          controller: emailController,
-                          hint: "Email",
-                          prefixIcon: Icons.email_outlined,
-                          hasError: controller.emailError.isNotEmpty,
-                        ),
-                        if (controller.emailError.isNotEmpty)
-                          Text(
-                            controller.emailError.value,
-                            style: const TextStyle(
-                              color: Colors.redAccent,
-                              fontSize: 12,
-                            ),
+                Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GlassTextField(
+                        controller: emailController,
+                        hint: "Email",
+                        prefixIcon: Icons.email_outlined,
+                        hasError: controller.emailError.isNotEmpty,
+                      ),
+                      if (controller.emailError.isNotEmpty)
+                        Text(
+                          controller.emailError.value,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 12,
                           ),
-                      ],
-                    )),
+                        ),
+                    ],
+                  ),
+                ),
 
                 const SizedBox(height: 15),
 
                 /// PHONE
-                Obx(() => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GlassTextField(
-                          controller: phoneController,
-                          hint: "Phone Number",
-                          prefixIcon: Icons.phone_android,
-                          hasError: controller.phoneError.isNotEmpty,
+                Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GlassTextField(
+                        controller: phoneController,
+                        hint: "Phone Number",
+                        prefixIcon: Icons.phone_android,
+                        hasError: controller.phoneError.isNotEmpty,
+                      ),
+                      if (controller.phoneError.isNotEmpty)
+                        Text(
+                          controller.phoneError.value,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 12,
+                          ),
                         ),
-                        if (controller.phoneError.isNotEmpty)
-                          Text(
-                            controller.phoneError.value,
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                /// PASSWORD
+                Obx(
+                  () => GlassTextField(
+                    controller: passwordController,
+                    hint: "Password",
+                    prefixIcon: Icons.lock_outline,
+                    isPassword: true,
+                    obscureText: controller.isPasswordHidden.value,
+                    hasError: controller.passwordErrors.isNotEmpty,
+                    onChanged: (value) {
+                      controller.validatePasswordLive(value);
+                    },
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isPasswordHidden.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: controller.togglePassword,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 1),
+
+                /// PASSWORD ERRORS
+                Obx(() {
+                  if (controller.passwordErrors.isEmpty)
+                    return const SizedBox();
+
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8, left: 5),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.redAccent,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 5),
+                        Expanded(
+                          child: Text(
+                            controller.passwordErrors.first,
                             style: const TextStyle(
                               color: Colors.redAccent,
                               fontSize: 12,
                             ),
                           ),
-                      ],
-                    )),
-
-                const SizedBox(height: 15),
-
-                /// PASSWORD
-                Obx(() => GlassTextField(
-                      controller: passwordController,
-                      hint: "Password",
-                      prefixIcon: Icons.lock_outline,
-                      isPassword: true,
-                      obscureText: controller.isPasswordHidden.value,
-                      hasError: controller.passwordErrors.isNotEmpty,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          controller.isPasswordHidden.value
-                              ? Icons.visibility_off
-                              : Icons.visibility,
                         ),
-                        onPressed: controller.togglePassword,
-                      ),
-                    )),
-
-                const SizedBox(height: 10),
-
-                /// PASSWORD ERRORS
-                Obx(() {
-                  if (controller.passwordErrors.isEmpty) {
-                    return const SizedBox();
-                  }
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: controller.passwordErrors
-                        .map((e) => Text(
-                              "• $e",
-                              style: const TextStyle(
-                                color: Colors.redAccent,
-                                fontSize: 12,
-                              ),
-                            ))
-                        .toList(),
+                      ],
+                    ),
                   );
                 }),
 
                 const SizedBox(height: 15),
 
                 /// CONFIRM PASSWORD
-                Obx(() => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GlassTextField(
-                          controller: confirmPasswordController,
-                          hint: "Confirm Password",
-                          prefixIcon: Icons.lock_outline,
-                          isPassword: true,
-                          obscureText:
-                              controller.isConfirmPasswordHidden.value,
-                          hasError:
-                              controller.confirmPasswordError.isNotEmpty,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              controller.isConfirmPasswordHidden.value
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            onPressed: controller.toggleConfirmPassword,
+                Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GlassTextField(
+                        controller: confirmPasswordController,
+                        hint: "Confirm Password",
+                        prefixIcon: Icons.lock_reset_outlined,
+                        isPassword: true,
+                        obscureText: controller.isConfirmPasswordHidden.value,
+                        hasError: controller.confirmPasswordError.isNotEmpty,
+                        onChanged: (value) {
+                          if (value != passwordController.text) {
+                            controller.confirmPasswordError.value =
+                                "Passwords do not match";
+                          } else {
+                            controller.confirmPasswordError.value = "";
+                          }
+                        },
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            controller.isConfirmPasswordHidden.value
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                           ),
+                          onPressed: controller.toggleConfirmPassword,
                         ),
-
-                        if (controller.confirmPasswordError.isNotEmpty)
-                          Text(
+                      ),
+                      if (controller.confirmPasswordError.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5, left: 10),
+                          child: Text(
                             controller.confirmPasswordError.value,
                             style: const TextStyle(
                               color: Colors.redAccent,
                               fontSize: 12,
                             ),
                           ),
-                      ],
-                    )),
+                        ),
+                    ],
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 
                 /// BUTTON
-                Obx(() => CustomButton(
-                      text: controller.isLoading.value
-                          ? "Loading..."
-                          : "SIGN UP",
-                      onTap: () async {
-                        var result = await controller.signUp(
-                          name: nameController.text,
-                          email: emailController.text,
-                          phone: phoneController.text,
-                          password: passwordController.text,
-                          confirmPassword:
-                              confirmPasswordController.text,
-                        );
+                Obx(
+                  () => CustomButton(
+                    text: controller.isLoading.value ? "Loading..." : "SIGN UP",
+                    onTap: () async {
+                      var result = await controller.signUp(
+                        name: nameController.text,
+                        email: emailController.text,
+                        phone: phoneController.text,
+                        password: passwordController.text,
+                        confirmPassword: confirmPasswordController.text,
+                      );
 
-                        if (result != null && result.status == 1) {
-                          Get.to(() => OTPScreen(),
-                              arguments: {
-                                "email": result.data.email,
-                                "code":
-                                    result.data.verifiedCode.toString(),
-                              });
-                        }
-                      },
-                    )),
+                      if (result != null && result.status == 1) {
+                        Get.to(
+                          () => OTPScreen(),
+                          arguments: {
+                            "email": emailController.text,
+                            "type": "signup",
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ),
               ],
             ),
           ),

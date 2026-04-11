@@ -1,68 +1,50 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 class ForgotPasswordController extends GetxController {
   var isLoading = false.obs;
-
-  var emailError = "".obs;     // 👈 خطأ الإيميل
-  var generalError = "".obs;   // 👈 خطأ عام
-
-  void clearErrors() {
-    emailError.value = "";
-    generalError.value = "";
-  }
+  var emailError = "".obs;
 
   Future<bool> sendResetCode(String email) async {
+    if (email.isEmpty || !GetUtils.isEmail(email)) {
+      emailError.value = "Please enter a valid email address";
+      return false;
+    }
+
+    emailError.value = "";
+    isLoading.value = true;
+
     try {
-      isLoading.value = true;
-      clearErrors();
-
-      print("🚀 FORGOT PASSWORD START");
-      print("📦 EMAIL: $email");
-
-      final response = await http.post(
-        Uri.parse("http://192.168.1.2:8000/api/forgot-password"),
-        body: {"email": email},
+      var response = await http.post(
+        Uri.parse("http://192.168.42.56:8000/api/forgot-password"),
         headers: {
           "Accept": "application/json",
+          "Content-Type": "application/json",
         },
+        body: jsonEncode({"email": email}),
       );
 
-      print("📥 STATUS CODE: ${response.statusCode}");
-      print("📥 RESPONSE BODY: ${response.body}");
+      var jsonData = jsonDecode(response.body);
 
-      final jsonData = jsonDecode(response.body);
-
-      print("📊 PARSED JSON: $jsonData");
-
-      // ✅ نجاح
-      if (response.statusCode == 200 && jsonData["status"] == 1) {
-        print("✅ SUCCESS");
+      if (response.statusCode == 200 && jsonData['status'] == 1) {
+        Get.snackbar(
+          "Success",
+          jsonData['message'],
+          backgroundColor: Colors.grey.withOpacity(0.7),
+          colorText: Colors.white,
+        );
         return true;
+      } else {
+        emailError.value = jsonData['message'] ?? "Something went wrong";
+        return false;
       }
-
-      // ❌ خطأ API
-      print("❌ FAILED REQUEST");
-
-      // 🔴 رسالة عامة
-      generalError.value = jsonData["message"] ?? "Error";
-
-      // 🔴 أخطاء الحقول
-      if (jsonData["errors"] != null) {
-        if (jsonData["errors"]["email"] != null) {
-          emailError.value = jsonData["errors"]["email"][0];
-        }
-      }
-
-      return false;
     } catch (e) {
-      print("🔥 EXCEPTION: $e");
-      generalError.value = "Server error";
+      Get.snackbar("Error", "Connection failed: $e");
       return false;
     } finally {
       isLoading.value = false;
-      print("🏁 REQUEST FINISHED");
     }
   }
 }

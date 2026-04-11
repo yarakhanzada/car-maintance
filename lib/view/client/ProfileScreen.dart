@@ -1,12 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:senior_project/controller/profile_client_controller.dart';
 import 'package:senior_project/view/client/ComplaintsScreen.dart';
 import 'package:senior_project/view/client/EditProfileScreen.dart';
 import 'package:senior_project/view/client/FAQScreen.dart';
 import 'package:senior_project/view/client/ServiceHistoryScreen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  ProfileScreen({super.key});
+  final ProfileController controller = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +158,7 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
         IconButton(
-          onPressed: () => print("Logout Clicked"),
+          onPressed: () => _showLogoutConfirmation(),
           icon: const Icon(
             Icons.logout_rounded,
             color: Color(0xFFE55757),
@@ -346,6 +349,101 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showLogoutConfirmation() {
+    Get.dialog(
+      BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: AlertDialog(
+          backgroundColor: Colors.white.withOpacity(0.85),
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+            side: BorderSide(color: Colors.black.withOpacity(0.05)),
+          ),
+          title: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE55757).withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.logout_rounded,
+                  color: Color(0xFFE55757),
+                  size: 40,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Leaving So Soon?",
+                style: TextStyle(
+                  color: Color(0xFF1A1A1A),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            "Are you sure you want to log out? We'll miss having you here!",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.black87, fontSize: 16),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actionsPadding: const EdgeInsets.only(
+            bottom: 25,
+            left: 20,
+            right: 20,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 25,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text(
+                "Stay",
+                style: TextStyle(color: Colors.black54, fontSize: 16),
+              ),
+            ),
+            const SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () {
+                Get.back();
+                controller.logout();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE55757),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                elevation: 3,
+                shadowColor: const Color(0xFFE55757).withOpacity(0.3),
+              ),
+              child: const Text(
+                "Logout",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      barrierDismissible: true,
     );
   }
 }

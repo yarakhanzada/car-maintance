@@ -8,6 +8,7 @@ class GlassTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final bool hasError;
+  final Function(String)? onChanged;
 
   const GlassTextField({
     super.key,
@@ -18,43 +19,54 @@ class GlassTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.hasError = false,
+    this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword ? obscureText : false,
-      style: const TextStyle(color: Colors.white),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: hasError
+            ? [
+                BoxShadow(
+                  color: Colors.red.withOpacity(0.2),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ]
+            : [],
+      ),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
 
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white54),
+        obscureText: isPassword ? obscureText : false,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.white54),
+          prefixIcon: Icon(prefixIcon, color: Colors.white70),
 
-        prefixIcon: Icon(prefixIcon, color: Colors.white70),
-        suffixIcon: suffixIcon,
-
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: hasError ? Colors.red : Colors.white24,
-            width: 1.5,
+          suffixIcon: suffixIcon,
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.05),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: hasError ? Colors.red : Colors.white24,
+            ),
           ),
-        ),
 
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: hasError ? Colors.red : Colors.white24,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: hasError ? Colors.red : Colors.redAccent,
+              width: 2,
+            ),
           ),
-        ),
 
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: hasError ? Colors.red : Colors.white,
-            width: 2,
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );

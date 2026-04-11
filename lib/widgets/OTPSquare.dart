@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class OTPSquare extends StatelessWidget {
-  const OTPSquare({super.key});
+  final Function(String)? onChanged;
+
+  const OTPSquare({super.key, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +18,13 @@ class OTPSquare extends StatelessWidget {
       ),
       child: TextField(
         onChanged: (value) {
-          if (value.length == 1) FocusScope.of(context).nextFocus();
-          if (value.isEmpty) FocusScope.of(context).previousFocus();
+          if (onChanged != null) onChanged!(value);
+
+          if (value.length == 1) {
+            FocusScope.of(context).nextFocus();
+          } else if (value.isEmpty) {
+            FocusScope.of(context).previousFocus();
+          }
         },
         style: const TextStyle(
           color: Colors.white,
