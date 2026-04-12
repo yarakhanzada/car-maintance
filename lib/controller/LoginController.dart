@@ -31,7 +31,7 @@ class LoginController extends GetxController {
       print(" LOGIN START");
 
       final response = await http.post(
-        Uri.parse("http://192.168.42.56:8000/api/login"),
+        Uri.parse("http://192.168.1.2:8000/api/login"),
         body: {"email": email, "password": password},
         headers: {"Accept": "application/json"},
       );

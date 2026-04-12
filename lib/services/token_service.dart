@@ -23,6 +23,6 @@ class TokenService {
 
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs.setString("token", "null");
   }
 }

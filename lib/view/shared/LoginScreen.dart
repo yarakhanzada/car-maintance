@@ -142,7 +142,6 @@ class LoginScreen extends StatelessWidget {
 
                       if (result != null && result.status == 1) {
                         await controller.saveSession(result);
-
                         Get.offAll(ClientBottombar());
                       }
                     },
