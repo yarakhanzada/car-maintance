@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/profile_client_controller.dart';
+import 'package:senior_project/controller/logout_controller.dart';
 import 'package:senior_project/view/client/ComplaintsScreen.dart';
 import 'package:senior_project/view/client/EditProfileScreen.dart';
 import 'package:senior_project/view/client/FAQScreen.dart';
@@ -10,7 +10,7 @@ import 'package:senior_project/widgets/logout_widget.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
-  final ProfileController controller = Get.put(ProfileController());
+  final LogoutController controller = Get.put(LogoutController());
 
   @override
   Widget build(BuildContext context) {

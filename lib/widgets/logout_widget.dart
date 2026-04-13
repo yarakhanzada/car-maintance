@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/profile_client_controller.dart';
+import 'package:senior_project/controller/logout_controller.dart';
 
 class LogoutWidget extends StatelessWidget {
   final bool isListTile;
@@ -10,7 +10,7 @@ class LogoutWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProfileController controller = Get.put(ProfileController());
+    final LogoutController controller = Get.put(LogoutController());
 
     if (isListTile) {
       return ListTile(
@@ -54,7 +54,7 @@ class LogoutWidget extends StatelessWidget {
     );
   }
 
-  void _showLogoutConfirmation(ProfileController controller) {
+  void _showLogoutConfirmation(LogoutController controller) {
     Get.dialog(
       BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),

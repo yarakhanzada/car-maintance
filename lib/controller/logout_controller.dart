@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:senior_project/view/shared/LoginScreen.dart';
 import 'package:senior_project/services/token_service.dart';
 
-class ProfileController extends GetxController {
+class LogoutController extends GetxController {
   var isLoading = false.obs;
   Future<void> logout() async {
     String? token = await TokenService.getToken();

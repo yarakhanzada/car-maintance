@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/profile_client_controller.dart';
+import 'package:senior_project/controller/logout_controller.dart';
 import 'package:senior_project/widgets/logout_widget.dart';
 
 class DriverProfileScreen extends StatelessWidget {
@@ -9,7 +9,7 @@ class DriverProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProfileController controller = Get.put(ProfileController());
+    final LogoutController controller = Get.put(LogoutController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
