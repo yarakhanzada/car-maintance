@@ -20,9 +20,18 @@ class TokenService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString("refresh_token");
   }
+   static Future<void> saveRole(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("role", role);
+  }
+
+  static Future<String?> getRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("role");
+  }
 
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("token", "null");
+    await prefs.clear();
   }
 }
