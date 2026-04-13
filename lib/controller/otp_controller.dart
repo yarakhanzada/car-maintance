@@ -3,10 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:senior_project/main.dart';
 import 'package:senior_project/view/client/ClientBottombar.dart';
 import 'package:senior_project/view/shared/LoginScreen.dart';
 import 'package:senior_project/view/shared/ServiceStationScreen.dart';
 import 'package:senior_project/view/shared/reset_password_screen.dart';
+
+import 'package:senior_project/services/api_config.dart';
 
 class OTPController extends GetxController {
   var isLoading = false.obs;
@@ -41,7 +44,7 @@ class OTPController extends GetxController {
     try {
       isResending.value = true;
       var response = await http.post(
-        Uri.parse("http://192.168.42.56:8000/api/resend-code"),
+        Uri.parse("${ApiConfig.baseUrl}/resend-code"),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
@@ -96,7 +99,7 @@ class OTPController extends GetxController {
     try {
       isLoading.value = true;
       var response = await http.post(
-        Uri.parse("http://192.168.42.56:8000/api/verify"),
+        Uri.parse("${ApiConfig.baseUrl}/verify"),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:senior_project/main.dart';
 import '../model/signup_model.dart';
 
+import 'package:senior_project/services/api_config.dart';
 class SignUpController extends GetxController {
   var isPasswordHidden = true.obs;
   var isConfirmPasswordHidden = true.obs;
@@ -43,7 +45,7 @@ class SignUpController extends GetxController {
       }
 
       var response = await http.post(
-        Uri.parse("http://192.168.42.56:8000/api/register"),
+        Uri.parse("${ApiConfig.baseUrl}/register"),
         body: {
           "name": name,
           "email": email,
