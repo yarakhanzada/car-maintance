@@ -1,16 +1,21 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:senior_project/controller/profile_client_controller.dart';
+import 'package:senior_project/widgets/logout_widget.dart';
 
 class DriverProfileScreen extends StatelessWidget {
   const DriverProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final ProfileController controller = Get.put(ProfileController());
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       body: Stack(
         children: [
-          _buildVisualBackground(), 
+          _buildVisualBackground(),
           SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -19,9 +24,9 @@ class DriverProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  _buildModernHeader(), 
+                  _buildModernHeader(),
                   const SizedBox(height: 30),
-                  _buildHeroProfileCard(), 
+                  _buildHeroProfileCard(),
                   const SizedBox(height: 25),
                   _buildBentoGridSection(),
                   const SizedBox(height: 30),
@@ -46,7 +51,6 @@ class DriverProfileScreen extends StatelessWidget {
     );
   }
 
-  
   Widget _buildVisualBackground() {
     return Positioned.fill(
       child: Stack(
@@ -84,7 +88,6 @@ class DriverProfileScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildModernHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,10 +122,7 @@ class DriverProfileScreen extends StatelessWidget {
               Colors.black87,
             ),
             const SizedBox(width: 12),
-            _buildHeaderCircleBtn(
-              Icons.logout_rounded,
-              const Color(0xFFE55757),
-            ),
+            const LogoutWidget(),
           ],
         ),
       ],

@@ -111,8 +111,8 @@ class OTPController extends GetxController {
           jsonData['message'],
           backgroundColor: Colors.grey,
         );
-          Get.offAll(() => LoginScreen());
-       } else {
+        Get.offAll(() => LoginScreen());
+      } else {
         Get.snackbar(
           "Failed",
           jsonData['message'] ?? "Wrong code",

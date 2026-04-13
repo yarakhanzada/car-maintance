@@ -13,7 +13,6 @@ class DriverBottombar extends StatelessWidget {
     DriverNavigationController(),
   );
 
-
   final List<Widget> screens = [
     const DriverOrdersScreen(), // DriverOrdersScreen
     const DriverMapScreen(),

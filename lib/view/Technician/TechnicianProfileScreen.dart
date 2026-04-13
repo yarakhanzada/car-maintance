@@ -1,31 +1,33 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:senior_project/controller/profile_client_controller.dart';
+import 'package:senior_project/widgets/logout_widget.dart';
 
 class TechnicianProfileScreen extends StatelessWidget {
   const TechnicianProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final ProfileController controller = Get.put(ProfileController());
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       body: Stack(
         children: [
-          _buildTopRedBackground(), 
+          _buildTopRedBackground(),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  _buildProfileHeader(), 
+                  _buildProfileHeader(),
                   const SizedBox(height: 30),
 
-                 
                   _buildExpertiseBento(),
 
                   const SizedBox(height: 25),
 
-               
                   _buildActionList(),
 
                   const SizedBox(height: 100),
@@ -70,7 +72,7 @@ class TechnicianProfileScreen extends StatelessWidget {
                 Icons.verified_rounded,
                 color: Colors.white,
                 size: 18,
-              ), 
+              ),
             ),
           ],
         ),
@@ -118,7 +120,6 @@ class TechnicianProfileScreen extends StatelessWidget {
     );
   }
 
-  
   Widget _buildActionList() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -136,17 +137,11 @@ class TechnicianProfileScreen extends StatelessWidget {
           _buildActionItem("App Language", Icons.translate_rounded),
           _buildActionItem("Support & Help", Icons.help_outline_rounded),
           const Divider(indent: 20, endIndent: 20),
-          _buildActionItem(
-            "Logout Account",
-            Icons.power_settings_new_rounded,
-            isExit: true,
-          ),
+          const LogoutWidget(isListTile: true),
         ],
       ),
     );
   }
-
-  
 
   Widget _buildBentoBox(
     String label,
