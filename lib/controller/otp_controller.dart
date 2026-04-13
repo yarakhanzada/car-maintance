@@ -39,7 +39,7 @@ class OTPController extends GetxController {
     try {
       isResending.value = true;
       var response = await http.post(
-        Uri.parse("http://192.168.1.2:8000/api/resend-code"),
+        Uri.parse("http://192.168.42.56:8000/api/resend-code"),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
@@ -94,7 +94,7 @@ class OTPController extends GetxController {
     try {
       isLoading.value = true;
       var response = await http.post(
-        Uri.parse("http://192.168.1.2:8000/api/verify"),
+        Uri.parse("http://192.168.42.56:8000/api/verify"),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",

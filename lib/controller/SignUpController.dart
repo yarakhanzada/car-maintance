@@ -43,7 +43,7 @@ class SignUpController extends GetxController {
       }
 
       var response = await http.post(
-        Uri.parse("http://192.168.1.2:8000/api/register"),
+        Uri.parse("http://192.168.42.56:8000/api/register"),
         body: {
           "name": name,
           "email": email,

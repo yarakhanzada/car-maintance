@@ -18,7 +18,7 @@ class ForgotPasswordController extends GetxController {
 
     try {
       var response = await http.post(
-        Uri.parse("http://192.168.1.2:8000/api/forgot-password"),
+        Uri.parse("http://192.168.42.56:8000/api/forgot-password"),
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",

@@ -11,7 +11,7 @@ class AuthController extends GetxController {
       if (refresh == null) return false;
 
       var response = await http.post(
-        Uri.parse("http://192.168.1.2:8000/refresh"),
+        Uri.parse("http://192.168.42.56:8000/refresh"),
         body: {"refresh_token": refresh},
       );
 

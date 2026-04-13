@@ -11,13 +11,13 @@ class ProfileController extends GetxController {
     String? token = await TokenService.getToken();
 
     await TokenService.clearToken();
-  
+
     Get.offAll(() => LoginScreen());
 
     if (token != null) {
       try {
         http.post(
-          Uri.parse("http://192.168.1.2:8000/api/logout"),
+          Uri.parse("http://192.168.42.56:8000/api/logout"),
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",
