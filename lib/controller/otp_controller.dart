@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/view/client/ClientBottombar.dart';
+import 'package:senior_project/view/shared/LoginScreen.dart';
+import 'package:senior_project/view/shared/ServiceStationScreen.dart';
 import 'package:senior_project/view/shared/reset_password_screen.dart';
 
 class OTPController extends GetxController {
@@ -103,15 +105,14 @@ class OTPController extends GetxController {
       );
 
       var jsonData = jsonDecode(response.body);
-
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         Get.snackbar(
           "Success",
           jsonData['message'],
           backgroundColor: Colors.grey,
         );
-        Get.offAll(() => ClientBottombar());
-      } else {
+          Get.offAll(() => LoginScreen());
+       } else {
         Get.snackbar(
           "Failed",
           jsonData['message'] ?? "Wrong code",

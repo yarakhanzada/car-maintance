@@ -53,12 +53,13 @@ class SignUpController extends GetxController {
         },
         headers: {"Accept": "application/json"},
       );
-
+     
       var jsonData = jsonDecode(response.body);
+   
+   if (jsonData["status"] == 1) {
 
-      if (jsonData["status"] == 1) {
-        return SignUpModel.fromJson(jsonData);
-      }
+  return SignUpModel.fromJson(jsonData);
+}
 
       if (jsonData["status"] == 0) {
         generalError.value = jsonData["message"];

@@ -11,8 +11,15 @@ class midl extends GetMiddleware {
 
 
     if (token != null && token != "null") {
-      return const RouteSettings(name: "/client");
+        if (role == "customer") {
+        return const RouteSettings(name: "/client");
+      } else if (role == "driver") {
+        return const RouteSettings(name: "/driver");
+      } else if (role == "technician") {
+        return const RouteSettings(name: "/tech");
+      }
     }
+    
 
     return null;
   }

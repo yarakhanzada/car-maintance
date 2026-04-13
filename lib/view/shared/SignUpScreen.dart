@@ -210,8 +210,9 @@ class SignUpScreen extends StatelessWidget {
                         password: passwordController.text,
                         confirmPassword: confirmPasswordController.text,
                       );
-
+                    
                       if (result != null && result.status == 1) {
+                    
                         Get.to(
                           () => OTPScreen(),
                           arguments: {

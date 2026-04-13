@@ -134,17 +134,12 @@ class LoginScreen extends StatelessWidget {
                 Obx(
                   () => CustomButton(
                     text: controller.isLoading.value ? "Loading..." : "LOGIN",
-                    onTap: () async {
-                      var result = await controller.login(
-                        email: emailController.text.trim(),
-                        password: passwordController.text,
-                      );
-
-                      if (result != null && result.status == 1) {
-                        await controller.saveSession(result);
-                        Get.offAll(ClientBottombar());
-                      }
-                    },
+                   onTap: () {
+  controller.handleLogin(
+    email: emailController.text.trim(),
+    password: passwordController.text,
+  );
+},
                   ),
                 ),
               ],
