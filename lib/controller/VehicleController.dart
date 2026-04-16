@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../../services/api_helper.dart';
 import '../../services/api_config.dart';
-import '../../services/token_service.dart';
 import '../../model/VehicleModel.dart';
 
 class VehicleController extends GetxController {
@@ -20,16 +18,10 @@ class VehicleController extends GetxController {
   // 1. عرض السيارات
   Future<void> getVehicles() async {
     try {
-      print(" loading vehicles");
       isLoading(true);
-      String? token = await TokenService.getToken();
 
-      final response = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}/customer/vehicles"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Accept": "application/json",
-        },
+      final response = await ApiHelper.get(
+        "${ApiConfig.baseUrl}/customer/vehicles",
       );
 
       if (response.statusCode == 200) {
@@ -39,18 +31,14 @@ class VehicleController extends GetxController {
           vehicleList.value = data
               .map((v) => VehicleModel.fromJson(v))
               .toList();
-          print(" Done Found ${vehicleList.length} vehicles.");
-        } else {
-          print(" Status is 0: ${jsonData['message']}");
         }
       } else {
-        print(" Server Error: ${response.statusCode}");
+        print("Server Error: ${response.statusCode}");
       }
     } catch (e) {
       print("Exception in getVehicles: $e");
     } finally {
       isLoading(false);
-      print("End of loading.");
     }
   }
 
@@ -62,7 +50,6 @@ class VehicleController extends GetxController {
     required String chassis,
   }) async {
     try {
-      print("  add new vehicle...");
       isLoading(true);
 
       final response = await ApiHelper.post(
@@ -78,55 +65,13 @@ class VehicleController extends GetxController {
       final jsonData = jsonDecode(response.body);
 
       if (response.statusCode == 200 || jsonData['status'] == 1) {
-        print(">>> Added Successfully ");
-
-        Get.snackbar(
-          "نجاح",
-          "تمت إضافة السيارة بنجاح",
-          backgroundColor: Colors.grey[850],
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(15),
-          borderRadius: 15,
-        );
+        _showSnackBar("نجاح", "تمت إضافة السيارة بنجاح", Colors.grey[850]!);
         getVehicles();
       } else {
-        print(" Add failed check validation");
-
-        String errorMsg = jsonData['message'] ?? " مشكلة بالإضافة";
-
-        if (jsonData['data'] != null && jsonData['data'] is Map) {
-          Map<String, dynamic> errors = jsonData['data'];
-          List<String> details = [];
-          errors.forEach((k, v) {
-            if (v is List)
-              details.addAll(v.map((e) => e.toString()));
-            else
-              details.add(v.toString());
-          });
-          if (details.isNotEmpty) errorMsg = details.join("\n");
-        }
-
-        Get.snackbar(
-          "تنبيه",
-          errorMsg,
-          backgroundColor: Colors.grey[900],
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 4),
-          margin: const EdgeInsets.all(15),
-          borderRadius: 15,
-        );
+        _handleApiError(jsonData);
       }
     } catch (e) {
-      print(" Catch error in add: $e");
-      Get.snackbar(
-        "خطأ",
-        " خطأ بالاتصال",
-        backgroundColor: Colors.grey[900],
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showSnackBar("خطأ", "خطأ بالاتصال", Colors.grey[900]!);
     } finally {
       isLoading(false);
     }
@@ -135,43 +80,56 @@ class VehicleController extends GetxController {
   // 3. حذف سيارة
   Future<void> deleteVehicle(int id) async {
     try {
-      print(" deleting vehicle id: $id");
       isLoading(true);
 
-      final response = await ApiHelper.post(
+      final response = await ApiHelper.delete(
         "${ApiConfig.baseUrl}/customer/vehicles/$id",
-        {"_method": "DELETE"},
       );
 
       final jsonData = jsonDecode(response.body);
 
       if (response.statusCode == 200 || jsonData['status'] == 1) {
-        print(">>> Delete Done.");
         vehicleList.removeWhere((v) => v.id == id);
-
-        Get.snackbar(
-          "حذف",
-          "تم حذف السيارة",
-          backgroundColor: Colors.grey[850],
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(15),
-          borderRadius: 15,
-        );
+        _showSnackBar("حذف", "تم حذف السيارة", Colors.grey[850]!);
       } else {
-        print("Couldn't delete: ${jsonData['message']}");
-        Get.snackbar(
+        _showSnackBar(
           "خطأ",
           jsonData['message'] ?? "لم ينجح الحذف",
-          backgroundColor: Colors.grey[900],
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
+          Colors.grey[900]!,
         );
       }
     } catch (e) {
-      print(" Catch error in delete: $e");
+      print("Catch error in delete: $e");
     } finally {
       isLoading(false);
     }
+  }
+
+  void _showSnackBar(String title, String message, Color bgColor) {
+    Get.snackbar(
+      title,
+      message,
+      backgroundColor: bgColor,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(15),
+      borderRadius: 15,
+    );
+  }
+
+  void _handleApiError(Map<String, dynamic> jsonData) {
+    String errorMsg = jsonData['message'] ?? "مشكلة في العملية";
+    if (jsonData['data'] != null && jsonData['data'] is Map) {
+      Map<String, dynamic> errors = jsonData['data'];
+      List<String> details = [];
+      errors.forEach((k, v) {
+        if (v is List)
+          details.addAll(v.map((e) => e.toString()));
+        else
+          details.add(v.toString());
+      });
+      if (details.isNotEmpty) errorMsg = details.join("\n");
+    }
+    _showSnackBar("تنبيه", errorMsg, Colors.grey[900]!);
   }
 }

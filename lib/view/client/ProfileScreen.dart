@@ -48,7 +48,6 @@ class ProfileScreen extends StatelessWidget {
                         _buildHeader(user),
                         const SizedBox(height: 30),
                         _buildSubscriptionCard(width),
-                      
                       ],
                     ),
                   ),
@@ -64,15 +63,17 @@ class ProfileScreen extends StatelessWidget {
                         Icons.person_outline,
                         "Edit Profile",
                         "Update your personal data",
-                         () async {
-  final result = await Get.to(() => EditProfileScreen(), arguments: user);
+                        () async {
+                          final result = await Get.to(
+                            () => EditProfileScreen(),
+                            arguments: user,
+                          );
 
-  if (result == true) {
-    controller.getProfile();
-  }
-}
-
-),
+                          if (result == true) {
+                            controller.getProfile();
+                          }
+                        },
+                      ),
 
                       _buildMenuTile(
                         Icons.history,
@@ -116,19 +117,20 @@ class ProfileScreen extends StatelessWidget {
       children: [
         Row(
           children: [
-            const CircleAvatar(
-              radius: 35,
-              child: Icon(Icons.person, size: 35),
-            ),
+            const CircleAvatar(radius: 35, child: Icon(Icons.person, size: 35)),
             const SizedBox(width: 15),
 
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,children: [
-                Text(user.name,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold)),
-                Text(user.email,
-                    style: const TextStyle(color: Colors.grey)),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(user.email, style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ],
@@ -137,7 +139,6 @@ class ProfileScreen extends StatelessWidget {
       ],
     );
   }
-
 
   Widget _buildSubscriptionCard(double width) {
     return InkWell(
@@ -241,7 +242,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildPermissions(user) {
     return Wrap(
       spacing: 8,
@@ -254,13 +254,16 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(title,
-          style: const TextStyle(fontWeight: FontWeight.bold)),
+      child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 
   Widget _buildMenuTile(
-      IconData icon, String title, String subtitle, VoidCallback onTap) {
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback onTap,
+  ) {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),

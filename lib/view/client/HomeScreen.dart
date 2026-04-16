@@ -312,7 +312,7 @@ class HomeScreen extends StatelessWidget {
           _buildGlassIconButton(Icons.notifications_none, () {
             Get.to(
               () => ClientNotificationsScreen(),
-              transition: Transition.cupertino, // أنيميشن احترافي
+              transition: Transition.cupertino,
             );
           }),
         ],

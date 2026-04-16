@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:senior_project/services/api_config.dart';
-import 'package:senior_project/services/token_service.dart';
+import 'package:senior_project/services/api_helper.dart';
 
 class EditProfileController extends GetxController {
   final nameController = TextEditingController();
@@ -15,13 +14,11 @@ class EditProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
     final user = Get.arguments;
-
     if (user != null) {
-      nameController.text = user.name;
-      emailController.text = user.email;
-      phoneController.text = user.phone;
+      nameController.text = user.name ?? "";
+      emailController.text = user.email ?? "";
+      phoneController.text = user.phone ?? "";
     }
   }
 
@@ -29,51 +26,38 @@ class EditProfileController extends GetxController {
     try {
       isLoading.value = true;
 
-      String? token = await TokenService.getToken();
-
-      final response = await http.put(
-        Uri.parse("${ApiConfig.baseUrl}/profile"),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode({
-          "name": nameController.text,
-          "phone": phoneController.text,
-        }),
-      );
+      final response = await ApiHelper.put("${ApiConfig.baseUrl}/profile", {
+        "name": nameController.text,
+        "phone": phoneController.text,
+      });
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data["status"] == 1) {
         Get.back(result: true);
-
-        Get.snackbar(
-          "Success",
-          data["message"],
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-        );
+        _showSnackBar("Success", data["message"], Colors.grey[850]!);
       } else {
-        Get.snackbar(
+        _showSnackBar(
           "Error",
           data["message"] ?? "Update failed",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          Colors.grey[850]!,
         );
       }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Something went wrong",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showSnackBar("Error", "Something went wrong", Colors.grey[850]!);
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _showSnackBar(String title, String message, Color color) {
+    Get.snackbar(
+      title,
+      message,
+      backgroundColor: color,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
 
   @override
