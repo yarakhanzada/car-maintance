@@ -7,6 +7,8 @@ class Midlecontroller extends GetxController {
   Future<void> checkLogin() async {
     final token = await TokenService.getToken();
     final role = await TokenService.getRole();
+    print("tttttttttttttttttt");
+    print(token);
 
     if (token != null) {
       if (role == "customer") {

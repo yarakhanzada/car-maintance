@@ -1,16 +1,20 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/logout_controller.dart';
-import 'package:senior_project/view/client/ComplaintsScreen.dart';
-import 'package:senior_project/view/client/EditProfileScreen.dart';
-import 'package:senior_project/view/client/FAQScreen.dart';
-import 'package:senior_project/view/client/ServiceHistoryScreen.dart';
-import 'package:senior_project/widgets/logout_widget.dart';
+
+import '../../controller/profile_controller.dart';
+import '../../controller/logout_controller.dart';
+import 'EditProfileScreen.dart';
+import 'ServiceHistoryScreen.dart';
+import 'ComplaintsScreen.dart';
+import 'FAQScreen.dart';
+import '../../widgets/logout_widget.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
-  final LogoutController controller = Get.put(LogoutController());
+
+  final ProfileController controller = Get.put(ProfileController());
+  final LogoutController logoutController = Get.put(LogoutController());
 
   @override
   Widget build(BuildContext context) {
@@ -21,139 +25,110 @@ class ProfileScreen extends StatelessWidget {
       body: Stack(
         children: [
           _buildBackgroundGradient(),
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(25, 60, 25, 20),
-                  child: Column(
-                    children: [
-                      _buildProfileHeaderWithLogout(),
-                      const SizedBox(height: 30),
-                      _buildSubscriptionCard(width),
-                    ],
+
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final user = controller.profile.value;
+
+            if (user == null) {
+              return const Center(child: Text("No Data"));
+            }
+
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(25, 60, 25, 20),
+                    child: Column(
+                      children: [
+                        _buildHeader(user),
+                        const SizedBox(height: 30),
+                        _buildSubscriptionCard(width),
+                      
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _buildSectionTitle("Account Settings"),
-                    _buildMenuTile(
-                      Icons.person_outline_rounded,
-                      "Edit Profile",
-                      "Update your personal data",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const EditProfileScreen(),
-                        ),
-                      ),
-                    ),
-                    _buildMenuTile(
-                      Icons.history_rounded,
-                      "Service History",
-                      "Check your past car services",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ServiceHistoryScreen(),
-                        ),
-                      ),
-                    ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _buildSectionTitle("Account Settings"),
 
-                    const SizedBox(height: 20),
-                    _buildSectionTitle("Support & Feedback"),
-                    _buildMenuTile(
-                      Icons.rate_review_outlined,
-                      "Complaints & Ratings",
-                      "Share your experience with us",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ComplaintsScreen(),
-                        ),
-                      ),
-                    ),
-                    _buildMenuTile(
-                      Icons.help_outline_rounded,
-                      "FAQs",
-                      "Common questions and answers",
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FAQScreen(),
-                        ),
-                      ),
-                    ),
+                      _buildMenuTile(
+                        Icons.person_outline,
+                        "Edit Profile",
+                        "Update your personal data",
+                         () async {
+  final result = await Get.to(() => EditProfileScreen(), arguments: user);
 
-                    const SizedBox(height: 100),
-                  ]),
+  if (result == true) {
+    controller.getProfile();
+  }
+}
+
+),
+
+                      _buildMenuTile(
+                        Icons.history,
+                        "Service History",
+                        "Check your past services",
+                        () => Get.to(() => const ServiceHistoryScreen()),
+                      ),
+
+                      const SizedBox(height: 20),
+                      _buildSectionTitle("Support & Feedback"),
+
+                      _buildMenuTile(
+                        Icons.rate_review_outlined,
+                        "Complaints",
+                        "Share your experience",
+                        () => Get.to(() => const ComplaintsScreen()),
+                      ),
+
+                      _buildMenuTile(
+                        Icons.help_outline,
+                        "FAQs",
+                        "Common questions",
+                        () => Get.to(() => const FAQScreen()),
+                      ),
+
+                      const SizedBox(height: 100),
+                    ]),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _buildBackgroundGradient() {
-    return Positioned(
-      top: -100,
-      right: -50,
-      child: Container(
-        width: 300,
-        height: 300,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: const Color(0xFFE55757).withOpacity(0.05),
-        ),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
-          child: Container(color: Colors.transparent),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileHeaderWithLogout() {
+  Widget _buildHeader(user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE55757), width: 2),
-              ),
-              child: const CircleAvatar(
-                radius: 35,
-                backgroundColor: Colors.grey,
-                child: Icon(Icons.person, size: 35, color: Colors.white),
-              ),
+            const CircleAvatar(
+              radius: 35,
+              child: Icon(Icons.person, size: 35),
             ),
             const SizedBox(width: 15),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Yara khanzada",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A1A),
-                  ),
-                ),
-                Text(
-                  "yarakh@example.com",
-                  style: TextStyle(color: Colors.grey, fontSize: 13),
-                ),
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,children: [
+                Text(user.name,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold)),
+                Text(user.email,
+                    style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ],
@@ -162,6 +137,7 @@ class ProfileScreen extends StatelessWidget {
       ],
     );
   }
+
 
   Widget _buildSubscriptionCard(double width) {
     return InkWell(
@@ -265,81 +241,45 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+
+  Widget _buildPermissions(user) {
+    return Wrap(
+      spacing: 8,
+      children: user.permissions.map<Widget>((perm) {
+        return Chip(label: Text(perm));
+      }).toList(),
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          color: Colors.black54,
-          letterSpacing: 0.5,
-        ),
-      ),
+      child: Text(title,
+          style: const TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 
   Widget _buildMenuTile(
-    IconData icon,
-    String title,
-    String subtitle,
-    VoidCallback onTap,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.black.withOpacity(0.02)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F7),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: const Color(0xFF1A1A1A)),
-                ),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-              ],
-            ),
-          ),
+      IconData icon, String title, String subtitle, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildBackgroundGradient() {
+    return Positioned(
+      top: -100,
+      right: -50,
+      child: Container(
+        width: 300,
+        height: 300,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.red.withOpacity(0.05),
         ),
       ),
     );

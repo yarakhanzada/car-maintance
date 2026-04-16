@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:senior_project/services/api_config.dart';
 import '../services/token_service.dart';
 
 class AuthController extends GetxController {
@@ -11,7 +12,7 @@ class AuthController extends GetxController {
       if (refresh == null) return false;
 
       var response = await http.post(
-        Uri.parse("http://192.168.42.56:8000/refresh"),
+        Uri.parse("${ApiConfig.baseUrl}/refresh"),
         body: {"refresh_token": refresh},
       );
 

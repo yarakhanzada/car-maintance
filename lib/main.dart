@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:senior_project/controller/logout_controller.dart';
 import 'package:senior_project/controller/notification_service.dart';
 import 'package:senior_project/firebase_options.dart';
 import 'package:senior_project/services/token_service.dart';

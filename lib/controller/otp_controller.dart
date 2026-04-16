@@ -108,6 +108,8 @@ class OTPController extends GetxController {
       );
 
       var jsonData = jsonDecode(response.body);
+      print("????????????????????");
+      print(jsonData);
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         Get.snackbar(
           "Success",

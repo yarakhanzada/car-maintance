@@ -1,19 +1,19 @@
 class SignUpModel {
   final int status;
   final String message;
-  final int id;
+  final String? email;
 
   SignUpModel({
     required this.status,
     required this.message,
-    required this.id,
+    this.email,
   });
 
   factory SignUpModel.fromJson(Map<String, dynamic> json) {
     return SignUpModel(
       status: json["status"],
       message: json["message"],
-      id: json["data"]["id"],
+      email: json["data"]?["email"],
     );
   }
 }
