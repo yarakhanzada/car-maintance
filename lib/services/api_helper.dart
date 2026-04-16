@@ -13,9 +13,7 @@ class ApiHelper {
     var response = await http.post(
       Uri.parse(url),
       body: body,
-      headers: {
-        "Authorization": "Bearer $token",
-      },
+      headers: {"Authorization": "Bearer $token"},
     );
 
     if (response.statusCode == 401) {
@@ -27,9 +25,7 @@ class ApiHelper {
         return await http.post(
           Uri.parse(url),
           body: body,
-          headers: {
-            "Authorization": "Bearer $newToken",
-          },
+          headers: {"Authorization": "Bearer $newToken"},
         );
       }
     }
