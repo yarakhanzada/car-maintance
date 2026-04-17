@@ -7,6 +7,8 @@ import 'package:senior_project/view/shared/LoginScreen.dart';
 
 import 'package:senior_project/services/api_config.dart';
 
+import '../services/api_helper.dart';
+
 class ResetPasswordController extends GetxController {
   var isLoading = false.obs;
   var obscurePassword = true.obs;
@@ -38,19 +40,16 @@ class ResetPasswordController extends GetxController {
         "Payload JSON: ${jsonEncode({"email": email.trim(), "code": code.trim(), "password": password, "password_confirmation": confirmPassword})}",
       );
       print("---------------------------------------");
-      var response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/reset-password"),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "email": email.trim(),
-          "code": code.trim(),
-          "password": password,
-          "password_confirmation": confirmPassword,
-        }),
-      );
+      var response = await ApiHelper.post(
+  "${ApiConfig.baseUrl}/reset-password",
+  {
+    "email": email.trim(),
+    "code": code.trim(),
+    "password": password,
+    "password_confirmation": confirmPassword,
+  },
+  skipAuth: true,
+);
 
       var jsonData = jsonDecode(response.body);
 

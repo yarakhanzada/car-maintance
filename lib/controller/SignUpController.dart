@@ -5,6 +5,8 @@ import 'package:senior_project/main.dart';
 import '../model/signup_model.dart';
 
 import 'package:senior_project/services/api_config.dart';
+
+import '../services/api_helper.dart';
 class SignUpController extends GetxController {
   var isPasswordHidden = true.obs;
   var isConfirmPasswordHidden = true.obs;
@@ -44,17 +46,17 @@ class SignUpController extends GetxController {
         return null;
       }
 
-      var response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/register"),
-        body: {
-          "name": name,
-          "email": email,
-          "phone": phone,
-          "password": password,
-          "password_confirmation": confirmPassword,
-        },
-        headers: {"Accept": "application/json"},
-      );
+var response = await ApiHelper.post(
+  "${ApiConfig.baseUrl}/register",
+  {
+    "name": name,
+    "email": email,
+    "phone": phone,
+    "password": password,
+    "password_confirmation": confirmPassword,
+  },
+  skipAuth: true,
+);
      
       var jsonData = jsonDecode(response.body);
       print("?????????????????????????????????n");

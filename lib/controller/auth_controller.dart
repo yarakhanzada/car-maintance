@@ -7,8 +7,7 @@ import '../services/token_service.dart';
 class AuthController extends GetxController {
   Future<bool> refreshToken() async {
     try {
-      String? refreshToken = await TokenService.getRefreshToken();
-
+      String?refreshToken= await TokenService.getRefreshToken();
       if (refreshToken == null || refreshToken.isEmpty) return false;
 
       var response = await http.post(
@@ -21,7 +20,9 @@ class AuthController extends GetxController {
       );
 
       var jsonData = jsonDecode(response.body);
-
+      print("llllllllllllllllllllllllllllllllll");
+      print(jsonData)
+;
       if (response.statusCode == 200 && jsonData["status"] == 1) {
         if (jsonData["data"] != null &&
             jsonData["data"]["access_token"] != null) {

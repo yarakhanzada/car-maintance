@@ -8,28 +8,31 @@ import 'package:senior_project/services/token_service.dart';
 
 import 'package:senior_project/services/api_config.dart';
 
+import '../services/api_helper.dart';
+
 class LogoutController extends GetxController {
   var isLoading = false.obs;
+
   Future<void> logout() async {
+    isLoading.value = true;
+
     String? token = await TokenService.getToken();
 
     await TokenService.clearToken();
 
     Get.offAll(() => LoginScreen());
 
-    if (token != null) {
-      try {
-        http.post(
-          Uri.parse("${ApiConfig.baseUrl}/logout"),
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": "Bearer $token",
-          },
+    try {
+      if (token != null && token.isNotEmpty) {
+        await ApiHelper.post(
+          "${ApiConfig.baseUrl}/logout",
+          {},
         );
-      } catch (e) {
-        print("Silent logout error: $e");
       }
+    } catch (e) {
+      print("Silent logout error: $e");
     }
+
+    isLoading.value = false;
   }
 }

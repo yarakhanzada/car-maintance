@@ -5,6 +5,8 @@ import 'package:senior_project/model/profile_model.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/token_service.dart';
 
+import '../services/api_helper.dart';
+
 class ProfileController extends GetxController {
   var isLoading = true.obs;
   var profile = Rxn<ProfileModel>();
@@ -20,14 +22,9 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
       String? token = await TokenService.getToken();
-      final response = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}/me"),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
+     final response = await ApiHelper.get(
+  "${ApiConfig.baseUrl}/me",
+);
         final data = jsonDecode(response.body);
         print("??????????????????????");
         print(data);

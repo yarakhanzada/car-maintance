@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/view/client/ClientBottombar.dart';
 import '../model/login_model.dart';
+import '../services/api_helper.dart';
 import '../services/token_service.dart';
 
 class LoginController extends GetxController {
@@ -33,11 +34,14 @@ class LoginController extends GetxController {
     try {
       print("LOGIN START");
 
-      final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/login"),
-        body: {"email": email, "password": password},
-        headers: {"Accept": "application/json"},
-      );
+   final response = await ApiHelper.post(
+  "${ApiConfig.baseUrl}/login",
+  {
+    "email": email,
+    "password": password,
+  },
+  skipAuth: true,
+);
 
       print("STATUS: ${response.statusCode}");
       print("BODY: ${response.body}");

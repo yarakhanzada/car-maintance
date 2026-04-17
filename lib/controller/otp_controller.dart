@@ -11,6 +11,8 @@ import 'package:senior_project/view/shared/reset_password_screen.dart';
 
 import 'package:senior_project/services/api_config.dart';
 
+import '../services/api_helper.dart';
+
 class OTPController extends GetxController {
   var isLoading = false.obs;
   List<String> otpCodes = List.filled(6, "");
@@ -98,14 +100,14 @@ class OTPController extends GetxController {
 
     try {
       isLoading.value = true;
-      var response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/verify"),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({"email": email, "code": fullCode}),
-      );
+     var response = await ApiHelper.post(
+  "${ApiConfig.baseUrl}/verify",
+  {
+    "email": email,
+    "code": fullCode,
+  },
+  skipAuth: true,
+);
 
       var jsonData = jsonDecode(response.body);
       print("????????????????????");

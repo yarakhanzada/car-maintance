@@ -7,24 +7,32 @@ import '../controller/auth_controller.dart';
 class ApiHelper {
   static Future<Map<String, String>> _getHeaders() async {
     String? token = await TokenService.getToken();
-    Map<String, String> headers = {
+
+    return {
       "Accept": "application/json",
       "Content-Type": "application/json",
+      if (token != null && token.isNotEmpty)
+        "Authorization": "Bearer $token",
     };
-
-    if (token != null && token.isNotEmpty) {
-      headers["Authorization"] = "Bearer $token";
-    }
-
-    return headers;
   }
 
   static Future<http.Response> request(
     String url, {
     required String method,
     Map<String, dynamic>? body,
+    bool isRetry = false,
+    bool skipAuth = false,
   }) async {
-    final headers = await _getHeaders();
+
+    final headers = skipAuth
+        ? {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          }
+        : await _getHeaders();
+
+  
+
     final uri = Uri.parse(url);
     final encodedBody = body != null ? jsonEncode(body) : null;
 
@@ -39,18 +47,15 @@ class ApiHelper {
           response = await http.put(uri, headers: headers, body: encodedBody);
           break;
         case 'DELETE':
-          response = await http.delete(
-            uri,
-            headers: headers,
-            body: encodedBody,
-          );
+          response = await http.delete(uri, headers: headers, body: encodedBody);
           break;
-        default: // POST
+        default:
           response = await http.post(uri, headers: headers, body: encodedBody);
       }
 
-      if (response.statusCode == 401) {
-        print(" Unauthorized! Attempting to refresh token...");
+
+      if (response.statusCode == 401 && !isRetry && !skipAuth) {
+       
 
         final authController = Get.isRegistered<AuthController>()
             ? Get.find<AuthController>()
@@ -58,31 +63,57 @@ class ApiHelper {
 
         bool refreshed = await authController.refreshToken();
 
+      
+
         if (refreshed) {
-          print(" Token refreshed successfully. Retrying...");
-          return await request(url, method: method, body: body);
+         
+
+          return await request(
+            url,
+            method: method,
+            body: body,
+            isRetry: true,
+          );
         } else {
-          print(" Refresh token failed. Redirecting...");
+
+
           await TokenService.clearToken();
-          Get.offAllNamed('/login');
-          return http.Response(jsonEncode({"message": "Session Expired"}), 401);
+          Get.offAllNamed('/ww');
+
+          return http.Response(
+            jsonEncode({"message": "Session Expired"}),
+            401,
+          );
         }
       }
 
+   
       return response;
     } catch (e) {
-      print(" API Helper Error: $e");
+
       rethrow;
     }
   }
 
-  static Future<http.Response> get(String url) => request(url, method: 'GET');
-  static Future<http.Response> post(String url, Map<String, dynamic> body) =>
-      request(url, method: 'POST', body: body);
-  static Future<http.Response> put(String url, Map<String, dynamic> body) =>
+  static Future<http.Response> get(String url) =>
+      request(url, method: 'GET');
+
+  static Future<http.Response> post(
+    String url,
+    Map<String, dynamic> body, {
+    bool skipAuth = false,
+  }) =>
+      request(url, method: 'POST', body: body, skipAuth: skipAuth);
+
+  static Future<http.Response> put(
+    String url,
+    Map<String, dynamic> body,
+  ) =>
       request(url, method: 'PUT', body: body);
+
   static Future<http.Response> delete(
     String url, {
     Map<String, dynamic>? body,
-  }) => request(url, method: 'DELETE', body: body);
+  }) =>
+      request(url, method: 'DELETE', body: body);
 }

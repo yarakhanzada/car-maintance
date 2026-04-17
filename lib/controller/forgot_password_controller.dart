@@ -6,6 +6,8 @@ import 'package:senior_project/main.dart';
 
 import 'package:senior_project/services/api_config.dart';
 
+import '../services/api_helper.dart';
+
 class ForgotPasswordController extends GetxController {
   var isLoading = false.obs;
   var emailError = "".obs;
@@ -20,14 +22,13 @@ class ForgotPasswordController extends GetxController {
     isLoading.value = true;
 
     try {
-      var response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/forgot-password"),
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({"email": email}),
-      );
+  var response = await ApiHelper.post(
+  "${ApiConfig.baseUrl}/forgot-password",
+  {
+    "email": email,
+  },
+  skipAuth: true,
+);
 
       var jsonData = jsonDecode(response.body);
       print("????????????????????");
