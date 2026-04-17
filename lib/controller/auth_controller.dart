@@ -6,9 +6,13 @@ import '../services/token_service.dart';
 
 class AuthController extends GetxController {
   Future<bool> refreshToken() async {
+    print(" [Refresh]  تحديث التوكن");
     try {
-      String?refreshToken= await TokenService.getRefreshToken();
-      if (refreshToken == null || refreshToken.isEmpty) return false;
+      String? refreshToken = await TokenService.getRefreshToken();
+
+      if (refreshToken == null || refreshToken.isEmpty) {
+        return false;
+      }
 
       var response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/refresh"),
@@ -20,23 +24,23 @@ class AuthController extends GetxController {
       );
 
       var jsonData = jsonDecode(response.body);
-      print("llllllllllllllllllllllllllllllllll");
-      print(jsonData)
-;
+      print(" [Refresh]  : $jsonData");
+
       if (response.statusCode == 200 && jsonData["status"] == 1) {
         if (jsonData["data"] != null &&
             jsonData["data"]["access_token"] != null) {
-          await TokenService.saveToken(jsonData["data"]["access_token"]);
+          String newToken = jsonData["data"]["access_token"];
+          await TokenService.saveToken(newToken);
 
-          print(" Success: New Access Token received!");
           return true;
+        } else {
+          print(" غير موجود ");
         }
       }
 
-      print(" Refresh Failed: ${jsonData['message']}");
       return false;
     } catch (e) {
-      print(" Refresh Error: $e");
+      print(" [Refresh] (Exception): $e");
       return false;
     }
   }

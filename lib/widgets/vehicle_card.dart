@@ -11,6 +11,7 @@ class VehicleCard extends StatefulWidget {
   final VoidCallback? onSelect;
   final bool isOpened;
   final Function(bool) onSlide;
+  final bool isSelected;
 
   const VehicleCard({
     super.key,
@@ -23,6 +24,7 @@ class VehicleCard extends StatefulWidget {
     this.onSelect,
     required this.isOpened,
     required this.onSlide,
+    this.isSelected = false,
   });
 
   @override
@@ -154,6 +156,9 @@ class _VehicleCardState extends State<VehicleCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
+        border: widget.isSelected
+            ? Border.all(color: const Color(0xFFE55757), width: 1.5)
+            : Border.all(color: Colors.transparent, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/widgets/garage_widgets.dart';
 import 'package:senior_project/widgets/vehicle_card.dart';
 import '../../controller/VehicleController.dart';
@@ -115,49 +116,57 @@ class _MyGarageScreenState extends State<MyGarageScreen> {
 
                     return SliverPadding(
                       padding: EdgeInsets.symmetric(horizontal: width * 0.06),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final vehicle = controller.vehicleList[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: VehicleCard(
-                              brand: vehicle.brand,
-                              model: vehicle.model,
-                              year: vehicle.year.toString(),
-                              chassis: vehicle.chassisNumber,
-                              isOpened: openedVehicleId == vehicle.id,
-                              onSlide: (isOpened) {
-                                setState(() {
-                                  openedVehicleId = isOpened
-                                      ? vehicle.id
-                                      : null;
-                                });
-                              },
-                              onDelete: () {
-                                Get.defaultDialog(
-                                  title: "Delete Vehicle",
-                                  middleText:
-                                      "Are you sure you want to remove this vehicle?",
-                                  textConfirm: "Delete",
-                                  textCancel: "Cancel",
-                                  confirmTextColor: Colors.white,
-                                  buttonColor: const Color(0xFFE55757),
-                                  onConfirm: () {
-                                    controller.deleteVehicle(vehicle.id);
-                                    Get.back();
-                                  },
-                                );
-                              },
-                              onEdit: () {},
-                              onSelect: () {
-                                Get.snackbar(
-                                  "Selection",
-                                  "Vehicle ${vehicle.model} selected",
-                                );
-                              },
-                            ),
-                          );
-                        }, childCount: controller.vehicleList.length),
+                      sliver: Obx(
+                        () => SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final vehicle = controller.vehicleList[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: VehicleCard(
+                                brand: vehicle.brand,
+                                model: vehicle.model,
+                                year: vehicle.year.toString(),
+                                chassis: vehicle.chassisNumber,
+                                isOpened: openedVehicleId == vehicle.id,
+                                isSelected:
+                                    controller.selectedVehicleId.value ==
+                                    vehicle.id,
+                                onSlide: (isOpened) {
+                                  setState(() {
+                                    openedVehicleId = isOpened
+                                        ? vehicle.id
+                                        : null;
+                                  });
+                                },
+                                onDelete: () {
+                                  Get.defaultDialog(
+                                    title: "Delete Vehicle",
+                                    middleText:
+                                        "Are you sure you want to remove this vehicle?",
+                                    textConfirm: "Delete",
+                                    textCancel: "Cancel",
+                                    confirmTextColor: Colors.white,
+                                    buttonColor: const Color(0xFFE55757),
+                                    onConfirm: () {
+                                      controller.deleteVehicle(vehicle.id);
+                                      Get.back();
+                                    },
+                                  );
+                                },
+                                onEdit: () {},
+                                onSelect: () {
+                                  controller.selectVehicle(vehicle.id);
+                                  setState(() {
+                                    openedVehicleId = null;
+                                  });
+                                },
+                              ),
+                            );
+                          }, childCount: controller.vehicleList.length),
+                        ),
                       ),
                     );
                   }),

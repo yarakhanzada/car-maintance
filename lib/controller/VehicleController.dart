@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../services/api_helper.dart';
 import '../../services/api_config.dart';
@@ -8,11 +9,34 @@ import '../../model/VehicleModel.dart';
 class VehicleController extends GetxController {
   var isLoading = true.obs;
   var vehicleList = <VehicleModel>[].obs;
+  var selectedVehicleId = RxnInt();
 
   @override
   void onInit() {
     getVehicles();
+    _loadSelectedVehicle();
     super.onInit();
+  }
+
+  void selectVehicle(int id) async {
+    selectedVehicleId.value = id;
+    print(" Selected Vehicle ID : $id");
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selected_vehicle_id', id);
+
+    _showSnackBar(
+      "Selected Vehicle",
+      "Selected Vehicle ID: $id",
+      Colors.grey[850]!,
+    );
+  }
+
+  void _loadSelectedVehicle() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? storedId = prefs.getInt('selected_vehicle_id');
+    if (storedId != null) {
+      selectedVehicleId.value = storedId;
+    }
   }
 
   // 1. عرض السيارات
