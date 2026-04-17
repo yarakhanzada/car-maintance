@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/api_helper.dart';
 
@@ -24,6 +25,14 @@ class EditProfileController extends GetxController {
 
   Future<void> updateProfile() async {
     try {
+        final authController = Get.isRegistered<AuthController>()
+            ? Get.find<AuthController>()
+            : Get.put(AuthController());
+
+        bool refreshed = await authController.refreshToken();
+        if(refreshed){
+          print("MMMMMMMMMMMMMMMMMMMMMMMM");
+        }
       isLoading.value = true;
 
       final response = await ApiHelper.put("${ApiConfig.baseUrl}/profile", {

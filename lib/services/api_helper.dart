@@ -55,15 +55,12 @@ class ApiHelper {
 
 
       if (response.statusCode == 401 && !isRetry && !skipAuth) {
-       
 
         final authController = Get.isRegistered<AuthController>()
             ? Get.find<AuthController>()
             : Get.put(AuthController());
 
         bool refreshed = await authController.refreshToken();
-
-      
 
         if (refreshed) {
          
@@ -75,8 +72,6 @@ class ApiHelper {
             isRetry: true,
           );
         } else {
-
-
           await TokenService.clearToken();
           Get.offAllNamed('/ww');
 

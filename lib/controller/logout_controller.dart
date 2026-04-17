@@ -20,7 +20,7 @@ class LogoutController extends GetxController {
 
     await TokenService.clearToken();
 
-    Get.offAll(() => LoginScreen());
+    Get.offAllNamed('/ww');
 
     try {
       if (token != null && token.isNotEmpty) {
