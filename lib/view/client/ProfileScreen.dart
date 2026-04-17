@@ -25,7 +25,6 @@ class ProfileScreen extends StatelessWidget {
       body: Stack(
         children: [
           _buildBackgroundGradient(),
-
           Obx(() {
             if (controller.isLoading.value) {
               return const Center(child: CircularProgressIndicator());
@@ -45,22 +44,20 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(25, 60, 25, 20),
                     child: Column(
                       children: [
-                        _buildHeader(user),
+                        _buildProfileHeaderWithLogout(user),
                         const SizedBox(height: 30),
                         _buildSubscriptionCard(width),
                       ],
                     ),
                   ),
                 ),
-
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 25),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       _buildSectionTitle("Account Settings"),
-
                       _buildMenuTile(
-                        Icons.person_outline,
+                        Icons.person_outline_rounded,
                         "Edit Profile",
                         "Update your personal data",
                         () async {
@@ -68,37 +65,31 @@ class ProfileScreen extends StatelessWidget {
                             () => EditProfileScreen(),
                             arguments: user,
                           );
-
                           if (result == true) {
                             controller.getProfile();
                           }
                         },
                       ),
-
                       _buildMenuTile(
-                        Icons.history,
+                        Icons.history_rounded,
                         "Service History",
-                        "Check your past services",
+                        "Check your past car services",
                         () => Get.to(() => const ServiceHistoryScreen()),
                       ),
-
                       const SizedBox(height: 20),
                       _buildSectionTitle("Support & Feedback"),
-
                       _buildMenuTile(
                         Icons.rate_review_outlined,
-                        "Complaints",
-                        "Share your experience",
+                        "Complaints & Ratings",
+                        "Share your experience with us",
                         () => Get.to(() => const ComplaintsScreen()),
                       ),
-
                       _buildMenuTile(
-                        Icons.help_outline,
+                        Icons.help_outline_rounded,
                         "FAQs",
-                        "Common questions",
+                        "Common questions and answers",
                         () => Get.to(() => const FAQScreen()),
                       ),
-
                       const SizedBox(height: 100),
                     ]),
                   ),
@@ -111,32 +102,73 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(user) {
+  Widget _buildProfileHeaderWithLogout(user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            const CircleAvatar(radius: 35, child: Icon(Icons.person, size: 35)),
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE55757), width: 2),
+              ),
+              child: const CircleAvatar(
+                radius: 35,
+                backgroundColor: Colors.grey,
+                child: Icon(Icons.person, size: 35, color: Colors.white),
+              ),
+            ),
             const SizedBox(width: 15),
-
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.name,
+                  user.name ?? "",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1A1A),
                   ),
                 ),
-                Text(user.email, style: const TextStyle(color: Colors.grey)),
+                Text(
+                  user.email ?? "",
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 13,
+                  ),
+                ),
               ],
             ),
           ],
         ),
-        const LogoutWidget(),
+        IconButton(
+          onPressed: () {
+            logoutController.logout();
+          },
+          icon: const Icon(
+            Icons.logout_rounded,
+            color: Color(0xFFE55757),
+            size: 28,
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildBackgroundGradient() {
+    return Positioned(
+      top: -100,
+      right: -50,
+      child: Container(
+        width: 300,
+        height: 300,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFFE55757).withOpacity(0.05),
+        ),
+      ),
     );
   }
 
@@ -242,19 +274,17 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPermissions(user) {
-    return Wrap(
-      spacing: 8,
-      children: user.permissions.map<Widget>((perm) {
-        return Chip(label: Text(perm));
-      }).toList(),
-    );
-  }
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+          color: Colors.black54,
+        ),
+      ),
     );
   }
 
@@ -264,25 +294,60 @@ class ProfileScreen extends StatelessWidget {
     String subtitle,
     VoidCallback onTap,
   ) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: onTap,
-    );
-  }
-
-  Widget _buildBackgroundGradient() {
-    return Positioned(
-      top: -100,
-      right: -50,
-      child: Container(
-        width: 300,
-        height: 300,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.red.withOpacity(0.05),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.black.withOpacity(0.02)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: const Color(0xFF1A1A1A)),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: Colors.grey,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

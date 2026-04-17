@@ -21,7 +21,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService.init();
+ // String? token = await TokenService.getToken();
 
+  //  await TokenService.clearToken();
 
   NotificationService.getDeviceToken();
 
