@@ -3,13 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/routes/transitions_type.dart';
-import 'package:senior_project/controller/location_service.dart';
-import 'package:senior_project/view/client/ClientNotificationsScreen.dart';
-import 'package:senior_project/view/client/TowingRequestScreen.dart';
-import 'package:senior_project/view/client/MaintenanceRequestScreen.dart';
+import 'package:senior_project/controller/VehicleController.dart';
+
+import '../../controller/location_service.dart';
+import '../../controller/profile_controller.dart';
+
+
+import 'ClientNotificationsScreen.dart';
+import 'TowingRequestScreen.dart';
+import 'MaintenanceRequestScreen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key});
+
+  final ProfileController profileController = Get.put(ProfileController());
+  final VehicleController vehicleController = Get.put(VehicleController());
 
   Future<void> _handleEmergencyRequest(BuildContext context) async {
     showDialog(
@@ -48,7 +56,6 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F7),
       body: Stack(
         children: [
-          // 1. Background Image
           Positioned(
             top: 0,
             left: 0,
@@ -77,8 +84,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // 2. Main Content
           SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -126,6 +131,68 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeader(double width) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 10),
+      child: Obx(() {
+        final user = profileController.profile.value;
+        final vehicles = vehicleController.vehicleList;
+        final selectedId = vehicleController.selectedVehicleId.value;
+
+        final selectedVehicle = vehicles.firstWhereOrNull(
+          (v) => v.id == selectedId,
+        );
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 26,
+                  backgroundColor: Color(0xFFE55757),
+                  child: Icon(Icons.person, color: Colors.white, size: 28),
+                ),
+                const SizedBox(width: 15),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Hello, ${user?.name ?? "User"}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        shadows: [
+                          Shadow(color: Colors.black45, blurRadius: 10)
+                        ],
+                      ),
+                    ),
+                    Text(
+                      selectedVehicle != null
+                          ? "Vehicle: ${selectedVehicle.brand} ${selectedVehicle.model}"
+                          : "No Vehicle Selected",
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            _buildGlassIconButton(Icons.notifications_none, () {
+              Get.to(
+                () => ClientNotificationsScreen(),
+                transition: Transition.cupertino,
+              );
+            }),
+          ],
+        );
+      }),
     );
   }
 
@@ -209,19 +276,9 @@ class HomeScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildServiceCard(
-          context,
-          width,
-          "Repair",
-          Icons.build_circle_outlined,
-        ),
+        _buildServiceCard(context, width, "Repair", Icons.build_circle_outlined),
         _buildServiceCard(context, width, "Checking", Icons.analytics_outlined),
-        _buildServiceCard(
-          context,
-          width,
-          "Spare Parts",
-          Icons.settings_outlined,
-        ),
+        _buildServiceCard(context, width, "Spare Parts", Icons.settings_outlined),
       ],
     );
   }
@@ -237,7 +294,8 @@ class HomeScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MaintenanceRequestScreen(categoryName: title),
+            builder: (context) =>
+                MaintenanceRequestScreen(categoryName: title),
           ),
         );
       },
@@ -270,52 +328,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(double width) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              const CircleAvatar(
-                radius: 26,
-                backgroundColor: Color(0xFFE55757),
-                child: Icon(Icons.person, color: Colors.white, size: 28),
-              ),
-              const SizedBox(width: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    "Hello, Yara",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                      shadows: [Shadow(color: Colors.black45, blurRadius: 10)],
-                    ),
-                  ),
-                  Text(
-                    "Vehicle: Audi R8",
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          // _buildGlassIconButton(Icons.notifications_none),
-          _buildGlassIconButton(Icons.notifications_none, () {
-            Get.to(
-              () => ClientNotificationsScreen(),
-              transition: Transition.cupertino,
-            );
-          }),
-        ],
       ),
     );
   }

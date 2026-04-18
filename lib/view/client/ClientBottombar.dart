@@ -16,7 +16,7 @@ class ClientBottombar extends StatelessWidget {
   final NavigationController controller = Get.put(NavigationController());
 
   final List<Widget> screens = [
-    const HomeScreen(),
+    HomeScreen(),
     const BookingsScreen(),
 
     MyGarageScreen(),
