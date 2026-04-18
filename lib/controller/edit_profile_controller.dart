@@ -25,14 +25,6 @@ class EditProfileController extends GetxController {
 
   Future<void> updateProfile() async {
     try {
-        final authController = Get.isRegistered<AuthController>()
-            ? Get.find<AuthController>()
-            : Get.put(AuthController());
-
-        bool refreshed = await authController.refreshToken();
-        if(refreshed){
-          print("MMMMMMMMMMMMMMMMMMMMMMMM");
-        }
       isLoading.value = true;
 
       final response = await ApiHelper.put("${ApiConfig.baseUrl}/profile", {
