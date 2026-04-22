@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -9,7 +8,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 
 class RequestTrackingScreen extends StatefulWidget {
-  const RequestTrackingScreen({super.key});
+  final Map<String, dynamic> requestData;
+
+  const RequestTrackingScreen({super.key, required this.requestData});
 
   @override
   State<RequestTrackingScreen> createState() => _RequestTrackingScreenState();
@@ -20,27 +21,36 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
   StreamSubscription<Position>? _positionStream;
   List<LatLng> _routePoints = [];
 
-  String _duration = "Calculated...";
-  String _distance = "Calculating...";
+  late String _duration;
+  late String _distance;
+  late String _fee;
+  late String _requestId;
 
   LatLng _userLocation = const LatLng(33.5138, 36.2765);
   LatLng _towTruckLocation = const LatLng(33.5045, 36.2575);
 
-  double _truckRotation = 0.0;
-  bool _isFirstLoad = true;
-
   @override
   void initState() {
     super.initState();
+    _parseInitialData();
     _initLocationServices();
   }
 
-  Future<void> _initLocationServices() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
+  void _parseInitialData() {
+    final data = widget.requestData;
 
+    setState(() {
+      _requestId = (data['service_request']?['id'] ?? "0").toString();
+      _distance =
+          "${(data['distance_km'] as num?)?.toStringAsFixed(1) ?? "0"} km";
+      _duration =
+          "${(data['estimated_time_minutes'] as num?)?.toStringAsFixed(0) ?? "0"} mins";
+      _fee =
+          "${(data['estimated_cost'] as num?)?.toStringAsFixed(0) ?? "0"} SYP";
+    });
+  }
+
+  Future<void> _initLocationServices() async {
     Position position = await Geolocator.getCurrentPosition();
     if (mounted) {
       setState(() {
@@ -53,13 +63,11 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
         Geolocator.getPositionStream(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
-            distanceFilter: 5,
+            distanceFilter: 10,
           ),
         ).listen((Position pos) {
           if (mounted) {
-            setState(() {
-              _userLocation = LatLng(pos.latitude, pos.longitude);
-            });
+            setState(() => _userLocation = LatLng(pos.latitude, pos.longitude));
             _getRealRoute(_towTruckLocation, _userLocation);
           }
         });
@@ -78,16 +86,11 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
         final route = data['features'][0];
         final List<dynamic> coords = route['geometry']['coordinates'];
 
-        double dist = route['properties']['summary']['distance'] / 1000;
-        double dur = route['properties']['summary']['duration'] / 60;
-
         if (mounted) {
           setState(() {
             _routePoints = coords
                 .map((c) => LatLng(c[1] as double, c[0] as double))
                 .toList();
-            _distance = "${dist.toStringAsFixed(1)} km";
-            _duration = "${dur.toStringAsFixed(0)} mins";
           });
         }
       }
@@ -117,14 +120,14 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('requests')
-            .doc('request_123')
+            .doc(_requestId)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.exists) {
-            var data = snapshot.data!.data() as Map<String, dynamic>;
-            LatLng newPos = LatLng(
-              (data['truck_lat'] as num).toDouble(),
-              (data['truck_lng'] as num).toDouble(),
+            var fbData = snapshot.data!.data() as Map<String, dynamic>;
+            _towTruckLocation = LatLng(
+              (fbData['truck_lat'] as num).toDouble(),
+              (fbData['truck_lng'] as num).toDouble(),
             );
           }
 
@@ -158,116 +161,29 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
                     markers: [
                       Marker(
                         point: _userLocation,
-                        width: 60,
-                        height: 60,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.blue.withOpacity(0.15),
-                              ),
-                            ),
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.blue.withOpacity(0.3),
-                              ),
-                            ),
-                            Container(
-                              width: 18,
-                              height: 18,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 5,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: const BoxDecoration(
-                                color: Colors.blue,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ],
+                        width: 40,
+                        height: 40,
+                        child: const Icon(
+                          Icons.person_pin_circle,
+                          color: Colors.blue,
+                          size: 40,
                         ),
                       ),
                       Marker(
                         point: _towTruckLocation,
-                        width: 40,
-                        height: 40,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Color(0xFFE55757),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Container(
-                              width: 25,
-                              height: 25,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFE55757),
-                                shape: BoxShape.circle,
-                              ),
-
-                              child: const Icon(
-                                Icons.local_shipping,
-                                color: Colors.white,
-                                size: 25,
-                              ),
-                            ),
-                          ),
-                        ),
+                        width: 45,
+                        height: 45,
+                        child: _buildTowTruckMarker(),
                       ),
                     ],
                   ),
                 ],
               ),
-
-              Positioned(
-                top: 50,
-                left: 20,
-                child: _topButton(
-                  Icons.arrow_back_ios_new,
-                  () => Navigator.pop(context),
-                ),
-              ),
-              Positioned(
-                right: 20,
-                bottom: 280,
-                child: FloatingActionButton(
-                  mini: true,
-                  backgroundColor: Colors.white,
-                  onPressed: _zoomToFit,
-                  child: const Icon(
-                    Icons.center_focus_strong,
-                    color: Color(0xFFE55757),
-                  ),
-                ),
-              ),
+              Positioned(top: 50, left: 20, child: _backButton()),
+              Positioned(right: 20, bottom: 300, child: _centerButton()),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: _buildDriverInfoSheet(),
+                child: _buildInfoSheet(),
               ),
             ],
           );
@@ -276,20 +192,17 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
     );
   }
 
-  Widget _topButton(IconData icon, VoidCallback onTap) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.all(10),
+  Widget _buildTowTruckMarker() {
+    return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Color(0xFFE55757),
         shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
-      child: Icon(icon, color: Colors.black, size: 20),
-    ),
-  );
+      child: const Icon(Icons.local_shipping, color: Colors.white, size: 25),
+    );
+  }
 
-  Widget _buildDriverInfoSheet() {
+  Widget _buildInfoSheet() {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.all(15),
@@ -297,7 +210,7 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 20)],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -307,23 +220,22 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
             children: [
               _infoTile("Arrival", _duration, Colors.green),
               _infoTile("Distance", _distance, Colors.black),
-              _infoTile("Fee", "60k SYP", Colors.blue),
+              _infoTile("Fee", _fee, Colors.blue),
             ],
           ),
           const Divider(height: 30),
-          ListTile(
+          const ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const CircleAvatar(
-              radius: 25,
+            leading: CircleAvatar(
               backgroundColor: Color(0xFFE55757),
               child: Icon(Icons.person, color: Colors.white),
             ),
-            title: const Text(
+            title: Text(
               "Samer Al-Ahmad",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: const Text("White GMC Tow Truck"),
-            trailing: _actionCircle(Icons.phone, Colors.green),
+            subtitle: Text("White GMC Tow Truck"),
+            trailing: Icon(Icons.phone, color: Colors.green),
           ),
         ],
       ),
@@ -339,12 +251,24 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
       ),
     ],
   );
-  Widget _actionCircle(IconData i, Color c) => Container(
-    padding: const EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      color: c.withOpacity(0.1),
-      shape: BoxShape.circle,
+
+  Widget _backButton() => GestureDetector(
+    onTap: () => Navigator.pop(context),
+    child: Container(
+      padding: const EdgeInsets.all(10),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+      ),
+      child: const Icon(Icons.arrow_back_ios_new, size: 20),
     ),
-    child: Icon(i, color: c, size: 22),
+  );
+
+  Widget _centerButton() => FloatingActionButton(
+    mini: true,
+    backgroundColor: Colors.white,
+    onPressed: _zoomToFit,
+    child: const Icon(Icons.center_focus_strong, color: Color(0xFFE55757)),
   );
 }

@@ -1,105 +1,220 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:convert';
-import '../../services/api_helper.dart';
-import '../../services/api_config.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:senior_project/controller/VehicleController.dart';
+import 'package:senior_project/controller/auth_controller.dart';
+import 'package:senior_project/services/api_config.dart';
+import 'package:senior_project/services/token_service.dart';
+import 'package:senior_project/services/api_helper.dart';
 
 class MaintenanceController extends GetxController {
   var isLoading = false.obs;
+  var isimmediate = true.obs;
 
+  var selectedDate = DateTime.now().obs;
+  var selectedTime = TimeOfDay.now().obs;
+  var selectedVehicleId = RxnInt();
   final problemController = TextEditingController();
-  final dateController = TextEditingController();
+  final RxList<XFile> images = <XFile>[].obs;
 
-  void clearFields() {
-    problemController.clear();
-    dateController.clear();
-  }
-
-  Future<void> sendMaintenanceRequest({
-    required int vehicleId,
-    required String maintenanceType, // "immediate" أو "scheduled"
-    String? scheduledDate,
-    required String problemType,
-  }) async {
-    try {
-      isLoading(true);
-
-      Map<String, dynamic> body = {
-        "vehicles_id": vehicleId,
-        "maintenance_type": maintenanceType,
-        "problem_type": problemType,
-      };
-
-      if (maintenanceType == "scheduled" && scheduledDate != null) {
-        body["scheduled_date"] = scheduledDate;
-      }
-
-      final response = await ApiHelper.post(
-        "${ApiConfig.baseUrl}/requests/maintenance",
-        body,
-      );
-
-      final jsonData = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || jsonData['status'] == 1) {
-        print("lllllllllllllllllllllllllll");
-        String successMessage =
-            jsonData['message'] ?? "Request created successfully";
-
-        clearFields();
-
-        _showSnackBar("Success", successMessage, Colors.grey[850]!);
-      } else {
-        _handleApiError(jsonData);
-      }
-    } catch (e) {
-      print("Error in Maintenance Request: $e");
-      _showSnackBar("Error", " خطأ  ", Colors.red[900]!);
-    } finally {
-      isLoading(false);
-    }
-  }
+  final VehicleController _vehicleCtrl = Get.find<VehicleController>();
+  List get userVehicles => _vehicleCtrl.vehicleList;
 
   @override
-  void onClose() {
-    problemController.dispose();
-    dateController.dispose();
-    super.onClose();
+  void onInit() {
+    super.onInit();
+    _setImmediateDefaults();
   }
 
-  void _showSnackBar(String title, String message, Color bgColor) {
+  void updateMaintenanceType(bool immediate) {
+    if (isimmediate.value == immediate) return;
+
+    isimmediate.value = immediate;
+
+    problemController.clear();
+    images.clear();
+    _setImmediateDefaults();
+  }
+
+  void _setImmediateDefaults() {
+    selectedDate.value = DateTime.now();
+    selectedTime.value = TimeOfDay.now();
+  }
+
+  void _showServerSnackBar(String title, String message) {
     Get.snackbar(
       title,
       message,
-      backgroundColor: bgColor,
-      colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.grey[900]!.withOpacity(0.9),
+      colorText: Colors.white,
       margin: const EdgeInsets.all(15),
-      borderRadius: 15,
-      duration: const Duration(seconds: 3),
+      borderRadius: 10,
     );
   }
 
-  void _handleApiError(Map<String, dynamic> jsonData) {
-    String errorMsg = jsonData['message'] ?? "فشلت العملية";
+  Future<void> submitRequest(int departmentId) async {
+    if (selectedVehicleId.value == null) {
+      _showServerSnackBar("تنبيه", "يرجى اختيار السيارة");
+      return;
+    }
 
-    if (jsonData['data'] != null && jsonData['data'] is Map) {
-      Map<String, dynamic> errors = jsonData['data'];
-      List<String> details = [];
+    isLoading.value = true;
 
-      errors.forEach((key, value) {
-        if (value is List) {
-          details.addAll(value.map((e) => e.toString()));
-        } else {
-          details.add(value.toString());
+    try {
+      if (isimmediate.value) {
+        selectedDate.value = DateTime.now();
+        selectedTime.value = TimeOfDay.now();
+      }
+
+      String formattedTime =
+          "${selectedTime.value.hour.toString().padLeft(2, '0')}:${selectedTime.value.minute.toString().padLeft(2, '0')}";
+
+      Map<String, String> fields = {
+        'vehicles_id': selectedVehicleId.value.toString(),
+        'maintenance_type': isimmediate.value ? 'immediate' : 'scheduled',
+        'scheduled_date': selectedDate.value.toString().split(' ')[0],
+        'scheduled_time': formattedTime,
+        'department_id': departmentId.toString(),
+      };
+
+      if (problemController.text.isNotEmpty) {
+        fields['problem_type'] = problemController.text;
+      }
+
+      final url = "${ApiConfig.baseUrl}/requests/maintenance";
+      var response = await _sendMultipartRequest(url, fields, images);
+
+      print("------- API DEBUG START -------");
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+      print("------- API DEBUG END ---------");
+
+      final jsonData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && jsonData['status'] == 1) {
+        Get.back();
+        _showServerSnackBar("نجاح", jsonData['message']);
+      } else {
+        String errorMsg = jsonData['message'] ?? "فشل الطلب";
+        if (jsonData['data'] != null && jsonData['data'] is Map) {
+          Map<String, dynamic> errors = jsonData['data'];
+          if (errors.isNotEmpty) {
+            errorMsg = errors.values.first[0].toString();
+          }
         }
-      });
+        _showServerSnackBar("فشل", errorMsg);
+      }
+    } catch (e) {
+      print("Catch Error: $e");
+      _showServerSnackBar(
+        "خطأ",
+        "حدث خطأ غير متوقع: ${e.toString().split(':').last}",
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
-      if (details.isNotEmpty) {
-        errorMsg = details.join("\n");
+  Future<void> pickTime(BuildContext context) async {
+    TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 8, minute: 0),
+      helpText: "اختر وقت بين 8:00 صباحاً و 1:00 ظهراً",
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFFE55757),
+              onSurface: Color(0xFF1A1A1A),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      if (picked.hour < 8 || picked.hour >= 13) {
+        _showServerSnackBar(
+          "تنبيه",
+          "يرجى اختيار وقت بين الساعة 8:00 صباحاً والـ 1:00 ظهراً",
+        );
+      } else {
+        selectedTime.value = picked;
+      }
+    }
+  }
+
+  Future<http.Response> _sendMultipartRequest(
+    String url,
+    Map<String, String> fields,
+    List<XFile> files, {
+    bool isRetry = false,
+  }) async {
+    var request = http.MultipartRequest("POST", Uri.parse(url));
+
+    String? token = await TokenService.getToken();
+    request.headers.addAll({
+      "Accept": "application/json",
+      if (token != null) "Authorization": "Bearer $token",
+    });
+
+    request.fields.addAll(fields);
+
+    for (var file in files) {
+      request.files.add(
+        await http.MultipartFile.fromPath('images[]', file.path),
+      );
+    }
+
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 401 && !isRetry) {
+      final authController = Get.find<AuthController>();
+      bool refreshed = await authController.refreshToken();
+
+      if (refreshed) {
+        return await _sendMultipartRequest(url, fields, files, isRetry: true);
       }
     }
 
-    _showSnackBar("Alert", errorMsg, Colors.grey[900]!);
+    return response;
+  }
+
+  Future<void> pickDate(BuildContext context) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _firstValidDate(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2027, 12, 31),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFFE55757),
+              onPrimary: Colors.white,
+              onSurface: Color(0xFF1A1A1A),
+            ),
+          ),
+          child: child!,
+        );
+      },
+      selectableDayPredicate: (DateTime day) =>
+          day.weekday != DateTime.friday && day.weekday != DateTime.saturday,
+    );
+    if (picked != null) selectedDate.value = picked;
+  }
+
+  DateTime _firstValidDate() {
+    DateTime date = DateTime.now();
+    while (date.weekday == DateTime.friday ||
+        date.weekday == DateTime.saturday) {
+      date = date.add(const Duration(days: 1));
+    }
+    return date;
   }
 }
