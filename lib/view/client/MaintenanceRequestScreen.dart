@@ -74,15 +74,10 @@ class MaintenanceRequestScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 15),
                           _buildImageUploader(),
-                          const SizedBox(height: 40),
-                          controller.isLoading.value
-                              ? const Center(
-                                  child: CircularProgressIndicator(
-                                    color: Color(0xFFE55757),
-                                  ),
-                                )
-                              : _buildSubmitButton(),
                           const SizedBox(height: 30),
+
+                          _buildSubmitButton(),
+                          const SizedBox(height: 40),
                         ],
                       ),
                     ),

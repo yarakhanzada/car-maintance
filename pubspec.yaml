@@ -47,7 +47,6 @@ dependencies:
   http: ^1.6.0
   shared_preferences:
   loading_animation_widget: ^1.3.0
-  location: ^8.0.1
  
   
 

@@ -57,7 +57,7 @@ class MaintenanceController extends GetxController {
 
   Future<void> submitRequest(int departmentId) async {
     if (selectedVehicleId.value == null) {
-      _showServerSnackBar("تنبيه", "يرجى اختيار السيارة");
+      _showServerSnackBar("Warning", "Please select a vehicle");
       return;
     }
 
@@ -96,22 +96,22 @@ class MaintenanceController extends GetxController {
 
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         Get.back();
-        _showServerSnackBar("نجاح", jsonData['message']);
+        _showServerSnackBar("Success", jsonData['message']);
       } else {
-        String errorMsg = jsonData['message'] ?? "فشل الطلب";
+        String errorMsg = jsonData['message'] ?? "Request failed";
         if (jsonData['data'] != null && jsonData['data'] is Map) {
           Map<String, dynamic> errors = jsonData['data'];
           if (errors.isNotEmpty) {
             errorMsg = errors.values.first[0].toString();
           }
         }
-        _showServerSnackBar("فشل", errorMsg);
+        _showServerSnackBar("Failed", errorMsg);
       }
     } catch (e) {
       print("Catch Error: $e");
       _showServerSnackBar(
-        "خطأ",
-        "حدث خطأ غير متوقع: ${e.toString().split(':').last}",
+        "Error",
+        "An unexpected error occurred: ${e.toString().split(':').last}",
       );
     } finally {
       isLoading.value = false;
@@ -122,7 +122,7 @@ class MaintenanceController extends GetxController {
     TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: const TimeOfDay(hour: 8, minute: 0),
-      helpText: "اختر وقت بين 8:00 صباحاً و 1:00 ظهراً",
+      helpText: "Select a time between 8:00 AM and 1:00 PM",
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -139,8 +139,8 @@ class MaintenanceController extends GetxController {
     if (picked != null) {
       if (picked.hour < 8 || picked.hour >= 13) {
         _showServerSnackBar(
-          "تنبيه",
-          "يرجى اختيار وقت بين الساعة 8:00 صباحاً والـ 1:00 ظهراً",
+          "Warning",
+          "Please select a time between 8:00 AM and 1:00 PM",
         );
       } else {
         selectedTime.value = picked;
