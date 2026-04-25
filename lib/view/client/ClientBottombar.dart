@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:senior_project/view/client/BookingsScreen.dart';
+import 'package:senior_project/view/client/completed_services_screen.dart';
 import 'package:senior_project/view/client/Chatbot.dart';
 import 'package:senior_project/view/client/HomeScreen.dart';
 import 'package:senior_project/view/client/MyGarageScreen.dart';
@@ -17,7 +17,7 @@ class ClientBottombar extends StatelessWidget {
 
   final List<Widget> screens = [
     HomeScreen(),
-    const BookingsScreen(),
+    const CompletedServicesScreen(),
 
     MyGarageScreen(),
     ProfileScreen(),
@@ -98,7 +98,7 @@ class ClientBottombar extends StatelessWidget {
                     GButton(icon: Icons.home_rounded, text: 'Home'),
                     GButton(
                       icon: Icons.calendar_today_rounded,
-                      text: 'Bookings',
+                      text: 'Completed',
                     ),
                     GButton(icon: Icons.directions_car_rounded, text: 'Garage'),
                     GButton(icon: Icons.person_rounded, text: 'Profile'),
