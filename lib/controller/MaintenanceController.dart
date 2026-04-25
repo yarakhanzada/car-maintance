@@ -2,11 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
 import 'package:senior_project/controller/VehicleController.dart';
-import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/services/api_config.dart';
-import 'package:senior_project/services/token_service.dart';
 import 'package:senior_project/services/api_helper.dart';
 
 class MaintenanceController extends GetxController {
@@ -30,9 +27,7 @@ class MaintenanceController extends GetxController {
 
   void updateMaintenanceType(bool immediate) {
     if (isimmediate.value == immediate) return;
-
     isimmediate.value = immediate;
-
     problemController.clear();
     images.clear();
     _setImmediateDefaults();
@@ -72,7 +67,7 @@ class MaintenanceController extends GetxController {
       String formattedTime =
           "${selectedTime.value.hour.toString().padLeft(2, '0')}:${selectedTime.value.minute.toString().padLeft(2, '0')}";
 
-      Map<String, String> fields = {
+      Map<String, dynamic> fields = {
         'vehicles_id': selectedVehicleId.value.toString(),
         'maintenance_type': isimmediate.value ? 'immediate' : 'scheduled',
         'scheduled_date': selectedDate.value.toString().split(' ')[0],
@@ -85,7 +80,8 @@ class MaintenanceController extends GetxController {
       }
 
       final url = "${ApiConfig.baseUrl}/requests/maintenance";
-      var response = await _sendMultipartRequest(url, fields, images);
+
+      var response = await ApiHelper.postWithImages(url, fields, images);
 
       print("------- API DEBUG START -------");
       print("Status Code: ${response.statusCode}");
@@ -123,24 +119,22 @@ class MaintenanceController extends GetxController {
       context: context,
       initialTime: const TimeOfDay(hour: 8, minute: 0),
       helpText: "Select a time between 8:00 AM and 1:00 PM",
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFFE55757),
-              onSurface: Color(0xFF1A1A1A),
-            ),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFFE55757),
+            onSurface: Color(0xFF1A1A1A),
           ),
-          child: child!,
-        );
-      },
+        ),
+        child: child!,
+      ),
     );
 
     if (picked != null) {
       if (picked.hour < 8 || picked.hour >= 13) {
         _showServerSnackBar(
           "Warning",
-          "Please select a time between 8:00 AM and 1:00 PM",
+          "Select time between 8:00 AM and 1:00 PM",
         );
       } else {
         selectedTime.value = picked;
@@ -148,64 +142,36 @@ class MaintenanceController extends GetxController {
     }
   }
 
-  Future<http.Response> _sendMultipartRequest(
-    String url,
-    Map<String, String> fields,
-    List<XFile> files, {
-    bool isRetry = false,
-  }) async {
-    var request = http.MultipartRequest("POST", Uri.parse(url));
-
-    String? token = await TokenService.getToken();
-    request.headers.addAll({
-      "Accept": "application/json",
-      if (token != null) "Authorization": "Bearer $token",
-    });
-
-    request.fields.addAll(fields);
-
-    for (var file in files) {
-      request.files.add(
-        await http.MultipartFile.fromPath('images[]', file.path),
-      );
-    }
-
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode == 401 && !isRetry) {
-      final authController = Get.find<AuthController>();
-      bool refreshed = await authController.refreshToken();
-
-      if (refreshed) {
-        return await _sendMultipartRequest(url, fields, files, isRetry: true);
-      }
-    }
-
-    return response;
-  }
-
   Future<void> pickDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
       context: context,
+
       initialDate: _firstValidDate(),
+
       firstDate: DateTime.now(),
-      lastDate: DateTime(2027, 12, 31),
+
+      lastDate: DateTime(2030, 12, 31),
+
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: Color(0xFFE55757),
+
               onPrimary: Colors.white,
+
               onSurface: Color(0xFF1A1A1A),
             ),
           ),
+
           child: child!,
         );
       },
+
       selectableDayPredicate: (DateTime day) =>
           day.weekday != DateTime.friday && day.weekday != DateTime.saturday,
     );
+
     if (picked != null) selectedDate.value = picked;
   }
 

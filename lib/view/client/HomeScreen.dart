@@ -13,6 +13,7 @@ import 'package:senior_project/view/client/ClientNotificationsScreen.dart';
 import 'package:senior_project/view/client/MaintenanceRequestScreen.dart';
 
 import 'package:senior_project/services/api_config.dart';
+import 'package:senior_project/view/client/TowingFormScreen.dart';
 import 'package:senior_project/view/client/TowingRequestScreen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -294,7 +295,10 @@ class HomeScreen extends StatelessWidget {
       () => GestureDetector(
         onTap: towingController.isLoading.value
             ? null
-            : () => towingController.sendTowingRequest(),
+            : () {
+                towingController.resetForm();
+                Get.to(() => const TowingFormScreen());
+              },
         child: Opacity(
           opacity: towingController.isLoading.value ? 0.6 : 1.0,
           child: ClipRRect(
@@ -323,15 +327,11 @@ class HomeScreen extends StatelessWidget {
                             color: const Color(0xFFE55757).withOpacity(0.2),
                           ),
                         ),
-                        towingController.isLoading.value
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : const Icon(
-                                Icons.local_shipping_rounded,
-                                color: Color(0xFFE55757),
-                                size: 35,
-                              ),
+                        Icon(
+                          Icons.local_shipping_rounded,
+                          color: Color(0xFFE55757),
+                          size: 35,
+                        ),
                       ],
                     ),
                     const SizedBox(width: 15),

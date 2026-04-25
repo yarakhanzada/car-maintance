@@ -1,6 +1,8 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:senior_project/services/location_service.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/api_helper.dart';
@@ -10,58 +12,77 @@ import 'package:senior_project/controller/VehicleController.dart';
 class TowingController extends GetxController {
   var isLoading = false.obs;
 
+  var selectedVehicleId = RxnInt();
+  final problemController = TextEditingController();
+  final RxList<XFile> images = <XFile>[].obs;
+
+  final VehicleController _vehicleCtrl = Get.find<VehicleController>();
+  List get userVehicles => _vehicleCtrl.vehicleList;
+
   Future<void> sendTowingRequest() async {
+    if (selectedVehicleId.value == null) {
+      Get.snackbar("Warning", "Please select a vehicle first");
+      return;
+    }
+
     if (isLoading.value) return;
     isLoading.value = true;
 
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
       if (!serviceEnabled) {
-        await Geolocator.openLocationSettings();
-
+        // await Geolocator.openLocationSettings();
         isLoading.value = false;
-        Get.snackbar("تنبيه", "يرجى تفعيل الموقع ثم الضغط على الزر مرة أخرى");
+        Get.snackbar(
+          "Warning",
+          "Please enable location services then press the button again",
+        );
         return;
       }
 
       var position = await LocationService.getCurrentLocation();
-
       if (position == null) {
         isLoading.value = false;
-        Get.snackbar("خطأ", "لم نتمكن من تحديد موقعك");
+        Get.snackbar("Error", "We couldn't determine your location");
         return;
       }
 
-      final vehicleId = Get.find<VehicleController>().selectedVehicleId.value;
-
       Map<String, dynamic> body = {
-        "vehicles_id": vehicleId,
-        "latitude": position.latitude,
-        "longitude": position.longitude,
-        "problem_type": "Towing Request",
+        "vehicles_id": selectedVehicleId.value.toString(),
+        "latitude": position.latitude.toString(),
+        "longitude": position.longitude.toString(),
+        "problem_type": problemController.text.isEmpty
+            ? "Towing Request"
+            : problemController.text,
       };
 
-      var response = await ApiHelper.post(
-        "${ApiConfig.baseUrl}/requests/towing",
-        body,
-      );
+      final url = "${ApiConfig.baseUrl}/requests/towing";
+      var response = await ApiHelper.postWithImages(url, body, images);
+
       var data = jsonDecode(response.body);
 
+      print("------- TOWING DEBUG START -------");
+      print("Status: ${response.statusCode}");
+      print("Body: ${response.body}");
+      print("------- TOWING DEBUG END ---------");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.to(() => RequestTrackingScreen(requestData: data['data']));
-        print(
-          "------------------------Response Data: ${data['data']}---------------------------",
-        );
+        Get.off(() => RequestTrackingScreen(requestData: data['data']));
       } else {
-        Get.snackbar("Validation Error", data['message'] ?? "Check your data");
-        print("Full Error Response: ${response.body}");
+        String errorMsg = data['message'] ?? "فشل إرسال الطلب";
+        Get.snackbar("Error", errorMsg);
       }
     } catch (e) {
-      print(" Error: $e");
-      Get.snackbar("خطأ", "حدث خطأ غير متوقع");
+      print("Towing Catch Error: $e");
+      Get.snackbar("Error", "حدث خطأ غير متوقع: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void resetForm() {
+    selectedVehicleId.value = null;
+    problemController.clear();
+    images.clear();
   }
 }
