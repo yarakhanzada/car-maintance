@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:senior_project/services/api_config.dart';
+import 'package:senior_project/services/notification_service.dart';
 import 'package:senior_project/view/client/ClientBottombar.dart';
 import '../model/login_model.dart';
 import '../services/token_service.dart';
@@ -75,6 +76,8 @@ class LoginController extends GetxController {
     print("SUCCESS LOGIN");
 
     await saveSession(result);
+
+    await NotificationService.getDeviceToken();
 
     final role = result.data.user.roles.isNotEmpty
         ? result.data.user.roles.first

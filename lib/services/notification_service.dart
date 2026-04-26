@@ -1,5 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
+import 'package:senior_project/controller/fcmtokenController.dart';
 
 class NotificationService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -14,15 +16,17 @@ class NotificationService {
 
       if (token != null) {
         print("**********************************************");
-        print("✅ SUCCESS! Your Device Token is:");
+        print(" SUCCESS! Your Device Token is:");
         print(token);
         print("**********************************************");
+        final fcmController = Get.put(FcmController());
+        await fcmController.updateDeviceToken(token);
       }
     } catch (e) {
-      print("❌ خطأ في جلب التوكن: $e");
+      print(" خطأ في جلب التوكن: $e");
 
       if (e.toString().contains('SERVICE_NOT_AVAILABLE')) {
-        print("🔄 جاري إعادة محاولة الاتصال بسيرفرات Firebase...");
+        print(" جاري إعادة محاولة الاتصال بسيرفرات Firebase...");
         await Future.delayed(const Duration(seconds: 10));
         return getDeviceToken();
       }
@@ -40,7 +44,7 @@ class NotificationService {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('🔔 تم منح إذن الإشعارات من قبل المستخدم');
+      print(' تم منح إذن الإشعارات من قبل المستخدم');
     }
 
     // 2. إعدادات الأندرويد (أيقونة التطبيق)
@@ -58,7 +62,7 @@ class NotificationService {
     await _localNotifications.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        print("🖱️ تم الضغط على الإشعار: ${response.payload}");
+        print(" تم الضغط على الإشعار: ${response.payload}");
       },
     );
 
@@ -69,7 +73,7 @@ class NotificationService {
   static void _setupHandlers() {
     //   التطبيق مفتوح أمام المستخدم
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("📩 وصل إشعار جديد (والتطبيق مفتوح):");
+      print(" وصل إشعار جديد (والتطبيق مفتوح):");
       print("العنوان: ${message.notification?.title}");
 
       _showLocalNotification(message);
@@ -87,7 +91,7 @@ class NotificationService {
     RemoteNotification? notification = message.notification;
 
     if (notification != null) {
-      print("🛠️ محاولة إظهار التنبيه المنبثق على الشاشة...");
+      print(" محاولة إظهار التنبيه المنبثق على الشاشة...");
 
       _localNotifications.show(
         id: notification.hashCode,
