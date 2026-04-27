@@ -1,20 +1,16 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+
 import 'package:senior_project/controller/TowingController.dart';
 import 'package:senior_project/controller/VehicleController.dart';
 import 'package:senior_project/controller/departmentController.dart';
-
 import 'package:senior_project/controller/profile_controller.dart';
-import 'package:senior_project/model/department_model.dart';
-
-import 'package:senior_project/view/client/ClientNotificationsScreen.dart';
-import 'package:senior_project/view/client/MaintenanceRequestScreen.dart';
-
 import 'package:senior_project/services/api_config.dart';
+import 'package:senior_project/view/client/MaintenanceRequestScreen.dart';
+import 'package:senior_project/view/client/NotificationsScreen.dart';
 import 'package:senior_project/view/client/TowingFormScreen.dart';
-import 'package:senior_project/view/client/TowingRequestScreen.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -23,87 +19,140 @@ class HomeScreen extends StatelessWidget {
   final VehicleController vehicleController = Get.put(VehicleController());
   final DepartmentController deptController = Get.put(DepartmentController());
   final TowingController towingController = Get.put(TowingController());
+
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
+    final double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: screenHeight * 0.55,
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('lib/images/towtrucker.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.3),
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.5),
-                      const Color(0xFFF5F5F7),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+      backgroundColor: const Color(0xFFFBFBFD),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildModernHeader(),
+
+              const SizedBox(height: 10),
+              _buildEnhancedQuickActions(width),
+
+              const SizedBox(height: 35),
+              _buildSectionHeader("MONTHLY PACKAGES"),
+              _buildPremiumPackagesSlider(width),
+
+              const SizedBox(height: 35),
+              _buildSectionHeader("Main DEPARTMENTS"),
+              Obx(() => _buildFullImageDepartmentsGrid()),
+
+              const SizedBox(height: 100),
+            ],
           ),
-          SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(25),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Obx(() {
+              final user = profileController.profile.value;
+              final carName = vehicleController.vehicleList.isNotEmpty
+                  ? "${vehicleController.vehicleList[0].brand} ${vehicleController.vehicleList[0].model}"
+                  : "No car selected";
+
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(screenWidth),
-                  SizedBox(height: screenHeight * 0.18),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.06,
+                  const Text(
+                    "Welcome back,",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    user?.name ?? "User",
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE55757).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          "Quick Emergency",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            letterSpacing: 1.1,
-                            fontWeight: FontWeight.w600,
+                        const Icon(
+                          Icons.directions_car_filled_rounded,
+                          size: 14,
+                          color: Color(0xFFE55757),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          carName,
+                          style: const TextStyle(
+                            color: Color(0xFFE55757),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        _buildEmergencyButton(context, screenWidth),
-                        const SizedBox(height: 30),
-                        const Text(
-                          "Main Departments",
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16,
-                            letterSpacing: 1.1,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        Obx(() => _buildServicesList(context, screenWidth)),
-                        const SizedBox(height: 110),
                       ],
                     ),
                   ),
                 ],
+              );
+            }),
+          ),
+          _buildActionCircle(Icons.notifications_none_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedQuickActions(double width) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildActionCard(
+              title: "General\nMaintenance",
+              subtitle: "Professional care",
+              icon: Icons.settings_suggest_rounded,
+              color: const Color(0xFF1A1A1A),
+              onTap: () => Get.to(
+                () => MaintenanceRequestScreen(
+                  categoryName: "General Maintenance",
+                  categoryId: 0,
+                ),
               ),
+            ),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: _buildActionCard(
+              title: "Emergency\nTowing",
+              subtitle: "24/7 Service",
+              icon: Icons.local_shipping_rounded,
+              color: const Color(0xFFE55757),
+              onTap: () => Get.to(() => const TowingFormScreen()),
             ),
           ),
         ],
@@ -111,282 +160,333 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesList(BuildContext context, double width) {
-    if (deptController.isLoading.value) {
-      return const Center(
-        child: CircularProgressIndicator(color: Color(0xFFE55757)),
-      );
-    }
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: deptController.departments.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
-      itemBuilder: (context, index) => _buildServiceCardList(
-        context,
-        width,
-        deptController.departments[index],
-      ),
-    );
-  }
-
-  Widget _buildServiceCardList(
-    BuildContext context,
-    double width,
-    Department dept,
-  ) {
-    String base = ApiConfig.baseUrl.replaceAll('/api', '');
-    String imageUrl =
-        "$base${dept.image.startsWith('/') ? dept.image : '/${dept.image}'}";
-
+  Widget _buildActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: () => Get.to(
-        () => MaintenanceRequestScreen(
-          categoryName: dept.name,
-          categoryId: dept.id,
-        ),
-      ),
+      onTap: onTap,
       child: Container(
-        height: 130,
+        height: 150,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          color: color,
+          borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              color: color.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-        child: Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.network(
-                imageUrl,
-                width: double.infinity,
-                height: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (c, e, s) => Container(color: Colors.grey[300]),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Colors.black.withOpacity(0.75),
-                    Colors.black.withOpacity(0.2),
-                    Colors.transparent,
-                  ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -15,
+                top: -15,
+                child: Icon(
+                  icon,
+                  size: 100,
+                  color: Colors.white.withOpacity(0.08),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    dept.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: width * 0.55,
-                    child: Text(
-                      dept.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.85),
-                        fontSize: 13,
-                        height: 1.2,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 15,
-              bottom: 15,
-              child: CircleAvatar(
-                radius: 16,
-                backgroundColor: Colors.white.withOpacity(0.25),
-                child: const Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(double width) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 10),
-      child: Obx(() {
-        final user = profileController.profile.value;
-        final vehicles = vehicleController.vehicleList;
-        final selectedId = vehicleController.selectedVehicleId.value;
-        final selectedVehicle = vehicles.firstWhereOrNull(
-          (v) => v.id == selectedId,
-        );
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 26,
-                  backgroundColor: Color(0xFFE55757),
-                  child: Icon(Icons.person, color: Colors.white, size: 28),
-                ),
-                const SizedBox(width: 15),
-                Column(
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Hello, ${user?.name ?? "User"}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        shadows: [
-                          Shadow(color: Colors.black45, blurRadius: 10),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      selectedVehicle != null
-                          ? "Vehicle: ${selectedVehicle.brand} ${selectedVehicle.model}"
-                          : "No Vehicle Selected",
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            _buildGlassIconButton(Icons.notifications_none, () {}),
-          ],
-        );
-      }),
-    );
-  }
-
-  Widget _buildEmergencyButton(BuildContext context, double width) {
-    return Obx(
-      () => GestureDetector(
-        onTap: towingController.isLoading.value
-            ? null
-            : () {
-                towingController.resetForm();
-                Get.to(() => const TowingFormScreen());
-              },
-        child: Opacity(
-          opacity: towingController.isLoading.value ? 0.6 : 1.0,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-              child: Container(
-                width: double.infinity,
-                height: 90,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: Colors.white.withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFE55757).withOpacity(0.2),
-                          ),
-                        ),
-                        Icon(
-                          Icons.local_shipping_rounded,
-                          color: Color(0xFFE55757),
-                          size: 35,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 15),
-                    const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Request Tow Truck",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        Text(
-                          "24/7 Emergency Service",
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE55757),
-                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.arrow_forward_ios,
+                      child: Icon(icon, color: Colors.white, size: 24),
+                    ),
+                    const Spacer(),
+                    Text(
+                      title,
+                      style: const TextStyle(
                         color: Colors.white,
-                        size: 14,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 11,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildGlassIconButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.3)),
+  Widget _buildPremiumPackagesSlider(double width) {
+    final List<Map<String, dynamic>> packages = [
+      {
+        "title": "SILVER",
+
+        "price": "25 JOD",
+
+        "grad": [Colors.blueGrey, Colors.grey],
+      },
+
+      {
+        "title": "GOLDEN",
+
+        "price": "55 JOD",
+
+        "grad": [const Color(0xFFFFD700), const Color(0xFFB8860B)],
+      },
+
+      {
+        "title": "PLATINUM",
+
+        "price": "99 JOD",
+
+        "grad": [const Color(0xFF2C3E50), Colors.black],
+      },
+    ];
+
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 180,
+
+        enlargeCenterPage: true,
+
+        autoPlay: true,
+
+        viewportFraction: 0.85,
+      ),
+
+      items: packages.map((pkg) {
+        return Container(
+          width: width,
+
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+
+            gradient: LinearGradient(
+              colors: pkg['grad'],
+
+              begin: Alignment.topLeft,
+
+              end: Alignment.bottomRight,
+            ),
+          ),
+
+          child: Stack(
+            children: [
+              Positioned(
+                right: -20,
+
+                bottom: -20,
+
+                child: Icon(
+                  Icons.stars,
+
+                  size: 150,
+
+                  color: Colors.white.withOpacity(0.1),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(25),
+
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                  children: [
+                    Text(
+                      pkg['title'],
+
+                      style: const TextStyle(
+                        color: Colors.white,
+
+                        letterSpacing: 2,
+
+                        fontWeight: FontWeight.w300,
+
+                        fontSize: 14,
+                      ),
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    const Text(
+                      "Membership Plan",
+
+                      style: TextStyle(
+                        color: Colors.white,
+
+                        fontWeight: FontWeight.bold,
+
+                        fontSize: 20,
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                      children: [
+                        Text(
+                          pkg['price'],
+
+                          style: const TextStyle(
+                            color: Colors.white,
+
+                            fontSize: 24,
+
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+
+                        const Icon(
+                          Icons.arrow_forward_outlined,
+
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildFullImageDepartmentsGrid() {
+    if (deptController.isLoading.value)
+      return const Center(child: CircularProgressIndicator());
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
+        childAspectRatio: 1.2,
+      ),
+      itemCount: deptController.departments.length,
+      itemBuilder: (context, index) {
+        final dept = deptController.departments[index];
+        String baseUrl = ApiConfig.baseUrl.replaceAll('/api', '');
+        if (!baseUrl.endsWith('/')) baseUrl += '/';
+        String imageUrl =
+            baseUrl +
+            (dept.image.startsWith('/') ? dept.image.substring(1) : dept.image);
+
+        return GestureDetector(
+          onTap: () => Get.to(
+            () => MaintenanceRequestScreen(
+              categoryName: dept.name,
+              categoryId: dept.id,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(25),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.car_repair),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.85),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: Text(
+                      dept.name.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 25, bottom: 15),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.5,
+          color: Colors.blueGrey,
         ),
-        child: Icon(icon, color: Colors.white, size: 24),
+      ),
+    );
+  }
+
+  Widget _buildActionCircle(IconData icon) {
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => NotificationsScreen()); 
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+          ],
+        ),
+        child: Icon(icon, color: Colors.black, size: 24),
       ),
     );
   }
