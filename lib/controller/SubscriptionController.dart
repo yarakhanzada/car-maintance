@@ -134,4 +134,63 @@ class SubscriptionController extends GetxController {
       isSubscribing(false);
     }
   }
+
+  //  إلغاء الاشتراك
+  Future<void> cancelSubscription(int subscriptionId) async {
+    try {
+      print(
+        "SubscriptionController: Initiating cancellation for ID: $subscriptionId",
+      );
+      isLoading(true);
+
+      var response = await ApiHelper.post(
+        "${ApiConfig.baseUrl}/customer/subscriptions/$subscriptionId/cancel",
+        {},
+      );
+
+      var jsonData = response.body is String
+          ? json.decode(response.body)
+          : response.body;
+
+      if (response.statusCode == 200 && jsonData['status'] == 1) {
+        print("SubscriptionController: Cancelled successfully");
+
+        _showSuccessSnackBar(
+          jsonData['message'] ?? "Subscription cancelled successfully.",
+        );
+      } else {
+        print("SubscriptionController: Server error: ${jsonData['message']}");
+        _showErrorSnackBar(
+          jsonData['message'] ?? "Failed to cancel subscription.",
+        );
+      }
+    } catch (e) {
+      print("SubscriptionController: Exception during cancellation: $e");
+      _showErrorSnackBar("An error occurred. Please try again.");
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  void _showSuccessSnackBar(String message) {
+    Get.snackbar(
+      "Success",
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.grey.withOpacity(0.8),
+      colorText: Colors.black,
+      margin: const EdgeInsets.all(15),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    Get.snackbar(
+      "Error",
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.grey.withOpacity(0.8),
+      colorText: Colors.black,
+      margin: const EdgeInsets.all(15),
+    );
+  }
 }

@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:senior_project/controller/SubscriptionController.dart';
-
 import 'package:senior_project/controller/TowingController.dart';
 import 'package:senior_project/controller/VehicleController.dart';
 import 'package:senior_project/controller/departmentController.dart';
 import 'package:senior_project/controller/profile_controller.dart';
 import 'package:senior_project/model/subscriptionModel.dart';
 import 'package:senior_project/services/api_config.dart';
+import 'package:senior_project/view/client/ClientNotificationsScreen.dart';
 import 'package:senior_project/view/client/MaintenanceRequestScreen.dart';
-import 'package:senior_project/view/client/NotificationsScreen.dart';
 import 'package:senior_project/view/client/TowingFormScreen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -604,7 +603,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildActionCircle(IconData icon) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => NotificationsScreen());
+        Get.to(() => ClientNotificationsScreen());
       },
       child: Container(
         padding: const EdgeInsets.all(12),
