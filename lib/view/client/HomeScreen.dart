@@ -2,11 +2,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:senior_project/controller/SubscriptionController.dart';
 
 import 'package:senior_project/controller/TowingController.dart';
 import 'package:senior_project/controller/VehicleController.dart';
 import 'package:senior_project/controller/departmentController.dart';
 import 'package:senior_project/controller/profile_controller.dart';
+import 'package:senior_project/model/subscriptionModel.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/view/client/MaintenanceRequestScreen.dart';
 import 'package:senior_project/view/client/NotificationsScreen.dart';
@@ -19,6 +21,9 @@ class HomeScreen extends StatelessWidget {
   final VehicleController vehicleController = Get.put(VehicleController());
   final DepartmentController deptController = Get.put(DepartmentController());
   final TowingController towingController = Get.put(TowingController());
+  final SubscriptionController subscriptionController = Get.put(
+    SubscriptionController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -237,142 +242,266 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildPremiumPackagesSlider(double width) {
-    final List<Map<String, dynamic>> packages = [
-      {
-        "title": "SILVER",
+    return Obx(() {
+      if (subscriptionController.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-        "price": "25 JOD",
+      if (subscriptionController.subscriptions.isEmpty) {
+        return const Center(child: Text("No packages available"));
+      }
 
-        "grad": [Colors.blueGrey, Colors.grey],
-      },
+      return CarouselSlider(
+        options: CarouselOptions(
+          height: 220, // زيادة طفيفة لضمان الراحة
+          enlargeCenterPage: true,
+          autoPlay: true,
+          viewportFraction: 0.85,
+        ),
+        items: subscriptionController.subscriptions.map((item) {
+          List<Color> getGradient() {
+            String name = item.name?.toLowerCase() ?? "";
+            if (name.contains("silver"))
+              return [Colors.blueGrey, Colors.grey.shade400];
+            if (name.contains("gold"))
+              return [const Color(0xFFFFD700), const Color(0xFFB8860B)];
+            if (name.contains("platinum"))
+              return [const Color(0xFF232526), Colors.black];
+            return [const Color(0xFFE55757), const Color(0xFFB71C1C)];
+          }
 
-      {
-        "title": "GOLDEN",
-
-        "price": "55 JOD",
-
-        "grad": [const Color(0xFFFFD700), const Color(0xFFB8860B)],
-      },
-
-      {
-        "title": "PLATINUM",
-
-        "price": "99 JOD",
-
-        "grad": [const Color(0xFF2C3E50), Colors.black],
-      },
-    ];
-
-    return CarouselSlider(
-      options: CarouselOptions(
-        height: 180,
-
-        enlargeCenterPage: true,
-
-        autoPlay: true,
-
-        viewportFraction: 0.85,
-      ),
-
-      items: packages.map((pkg) {
-        return Container(
-          width: width,
-
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-
-            gradient: LinearGradient(
-              colors: pkg['grad'],
-
-              begin: Alignment.topLeft,
-
-              end: Alignment.bottomRight,
-            ),
-          ),
-
-          child: Stack(
-            children: [
-              Positioned(
-                right: -20,
-
-                bottom: -20,
-
-                child: Icon(
-                  Icons.stars,
-
-                  size: 150,
-
-                  color: Colors.white.withOpacity(0.1),
+          return GestureDetector(
+            onTap: () => _showCoolSubscriptionSheet(item),
+            child: Container(
+              width: width,
+              margin: const EdgeInsets.symmetric(vertical: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  colors: getGradient(),
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: getGradient()[0].withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-
-              Padding(
-                padding: const EdgeInsets.all(25),
-
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: Stack(
                   children: [
-                    Text(
-                      pkg['title'],
-
-                      style: const TextStyle(
-                        color: Colors.white,
-
-                        letterSpacing: 2,
-
-                        fontWeight: FontWeight.w300,
-
-                        fontSize: 14,
+                    Positioned(
+                      right: -30,
+                      top: -30,
+                      child: Icon(
+                        Icons.workspace_premium,
+                        size: 160,
+                        color: Colors.white.withOpacity(0.1),
                       ),
                     ),
-
-                    const SizedBox(height: 5),
-
-                    const Text(
-                      "Membership Plan",
-
-                      style: TextStyle(
-                        color: Colors.white,
-
-                        fontWeight: FontWeight.bold,
-
-                        fontSize: 20,
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                      children: [
-                        Text(
-                          pkg['price'],
-
-                          style: const TextStyle(
-                            color: Colors.white,
-
-                            fontSize: 24,
-
-                            fontWeight: FontWeight.w900,
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (item.name ?? "PLAN").toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                              letterSpacing: 1.2,
+                            ),
                           ),
-                        ),
-
-                        const Icon(
-                          Icons.arrow_forward_outlined,
-
-                          color: Colors.white,
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: Text(
+                              item.description ?? "",
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 13,
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "${item.price} SYP",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const CircleAvatar(
+                                backgroundColor: Colors.white24,
+                                radius: 18,
+                                child: Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
+          );
+        }).toList(),
+      );
+    });
+  }
+
+  void _showCoolSubscriptionSheet(SubscriptionModel item) {
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(35)),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 25),
+
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.auto_awesome,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Text(
+                        item.name ?? "Subscription Plan",
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                const Text(
+                  "Why join this plan?",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  item.description ?? "",
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 15,
+                    height: 1.5,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Total Price",
+                            style: TextStyle(color: Colors.grey[500]),
+                          ),
+                          Text(
+                            "${item.price} SYP",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      const Icon(Icons.verified_user, color: Colors.green),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                      subscriptionController.subscribeToPackage(item.id!);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text(
+                      "Confirm & Subscribe",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+              ],
+            ),
           ),
-        );
-      }).toList(),
+        ),
+      ),
+      isScrollControlled: true,
+      barrierColor: Colors.black54,
     );
   }
 
@@ -475,7 +604,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildActionCircle(IconData icon) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => NotificationsScreen()); 
+        Get.to(() => NotificationsScreen());
       },
       child: Container(
         padding: const EdgeInsets.all(12),
