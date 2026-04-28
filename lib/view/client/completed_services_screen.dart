@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:senior_project/controller/completed_services_controller.dart';
 import 'package:senior_project/model/completed_service_model.dart';
+import 'package:senior_project/view/client/completed_service_details_screen.dart';
 
 class CompletedServicesScreen extends StatefulWidget {
   const CompletedServicesScreen({super.key});
@@ -18,6 +19,12 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
   void initState() {
     super.initState();
     _futureServices = _controller.fetchCompletedServices();
+  }
+
+  void _refreshData() {
+    setState(() {
+      _futureServices = _controller.fetchCompletedServices();
+    });
   }
 
   @override
@@ -38,14 +45,21 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator(color: Color(0xFFE55757), strokeWidth: 2.5));
-                      } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}"));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return _buildEmptyState();
                       }
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) => _buildServiceCard(snapshot.data![index]),
+
+                      return RefreshIndicator(
+                        onRefresh: () async => _refreshData(),
+                        color: const Color(0xFFE55757),
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) => _buildServiceCard(snapshot.data![index]),
+                        ),
                       );
                     },
                   ),
@@ -79,88 +93,81 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
   }
 
   Widget _buildServiceCard(CompletedServiceModel service) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: const Border(left: BorderSide(color: Color(0xFF4CAF50), width: 5)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 8))],
+    double cost = double.tryParse(service.finalCost) ?? 0.0;
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => CompletedServiceDetailsScreen(service: service)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: const Color(0xFFE55757).withOpacity(0.08),
-                  child: const Icon(Icons.check_circle_outline, color: Color(0xFFE55757), size: 18),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: const Border(left: BorderSide(color: Color(0xFF4CAF50), width: 5)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 8))],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: const Color(0xFFE55757).withOpacity(0.08),
+                    child: const Icon(Icons.check_circle_outline, color: Color(0xFFE55757), size: 18),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          service.problemType.toUpperCase().replaceAll('_', ' '),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A), height: 1.2),
+                        ),
+                        const SizedBox(height: 2),
+                        Text("${service.brand} ${service.model}", style: const TextStyle(color: Color(0xFF888888), fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text("${cost.toStringAsFixed(0)} \$", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF1A1A1A))),
+                ],
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Divider(height: 1, thickness: 0.4, color: Color(0xFFEEEEEE)),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        service.problemType.toUpperCase().replaceAll('_', ' '),
-                        softWrap: true,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A), height: 1.2),
-                      ),
-                      const SizedBox(height: 2),
-                      Text("${service.brand} ${service.model}", style: const TextStyle(color: Color(0xFF888888), fontSize: 11)),
+                      const Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey),
+                      const SizedBox(width: 5),
+                      Text(service.completedAt.split('T')[0], style: const TextStyle(color: Color(0xFF666666), fontSize: 11, fontWeight: FontWeight.w500)),
                     ],
                   ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  "\$${double.parse(service.finalCost).toStringAsFixed(0)}",
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF1A1A1A)),
-                ),
-              ],
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1, thickness: 0.4, color: Color(0xFFEEEEEE)),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey),
-                    const SizedBox(width: 5),
-                    Text(
-                      service.completedAt.split('T')[0],
-                      style: const TextStyle(color: Color(0xFF666666), fontSize: 11, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    service.isComplained
-                        ? _buildStatusBadge(Icons.report_gmailerrorred_rounded, "Reported", Colors.red[400]!)
-                        : _buildSmallActionBtn(
-                            icon: Icons.report_problem_outlined,
-                            label: "Report",
-                            color: const Color(0xFFE55757),
-                            onTap: () => _showComplaintSheet(service.id),
-                          ),
-                    const SizedBox(width: 6),
-                    service.isRated
-                        ? _buildStatusBadge(Icons.star_rounded, "${service.score}", Colors.amber[700]!)
-                        : _buildSmallActionBtn(
-                            icon: Icons.star_rounded,
-                            label: "Rate",
-                            color: Colors.amber[700]!,
-                            onTap: () => _showRatingSheet(service.id, service.problemType),
-                          ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+                  Row(
+                    children: [
+                      if (service.isComplained)
+                        _buildStatusBadge(Icons.report_gmailerrorred_rounded, "Reported", Colors.red[400]!)
+                      else
+                        _buildSmallActionBtn(icon: Icons.report_problem_outlined, label: "Report", color: const Color(0xFFE55757), onTap: () => _showComplaintSheet(service.id)),
+                      const SizedBox(width: 6),
+                      if (service.isRated)
+                        _buildStatusBadge(Icons.star_rounded, "${service.score}", Colors.amber[700]!)
+                      else
+                        _buildSmallActionBtn(icon: Icons.star_rounded, label: "Rate", color: Colors.amber[700]!, onTap: () => _showRatingSheet(service.id, service.problemType)),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -217,12 +224,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
             TextField(
               controller: complaintController,
               maxLines: 4,
-              decoration: InputDecoration(
-                hintText: "What went wrong?",
-                filled: true,
-                fillColor: const Color(0xFFF7F7F7),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-              ),
+              decoration: InputDecoration(hintText: "What went wrong?", filled: true, fillColor: const Color(0xFFF7F7F7), border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none)),
             ),
             const SizedBox(height: 18),
             SizedBox(
@@ -236,7 +238,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                   if (mounted) {
                     Navigator.pop(context);
                     _showSnackBar(result['message'], result['success']);
-                    if (result['success']) setState(() { _futureServices = _controller.fetchCompletedServices(); });
+                    if (result['success']) _refreshData();
                   }
                 },
                 child: const Text("Submit", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -289,7 +291,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                     if (mounted) {
                       Navigator.pop(context);
                       _showSnackBar(result['message'], result['success']);
-                      if (result['success']) setState(() { _futureServices = _controller.fetchCompletedServices(); });
+                      if (result['success']) _refreshData();
                     }
                   },
                   child: const Text("Submit", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
