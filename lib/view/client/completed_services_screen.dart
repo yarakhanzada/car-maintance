@@ -4,6 +4,7 @@ import 'package:senior_project/controller/completed_services_controller.dart';
 import 'package:senior_project/model/completed_service_model.dart';
 import 'package:senior_project/view/client/completed_service_details_screen.dart';
 
+
 class CompletedServicesScreen extends StatefulWidget {
   const CompletedServicesScreen({super.key});
 
@@ -25,6 +26,15 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     setState(() {
       _futureServices = _controller.fetchCompletedServices();
     });
+  }
+
+
+  String _formatPrice(dynamic price) {
+    if (price == null || price.toString() == 'null') return "0";
+    double? val = double.tryParse(price.toString());
+    if (val == null) return "0";
+    if (val == val.toInt()) return val.toInt().toString();
+    return val.toStringAsFixed(2);
   }
 
   @override
@@ -93,13 +103,11 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
   }
 
   Widget _buildServiceCard(CompletedServiceModel service) {
-    double cost = double.tryParse(service.finalCost) ?? 0.0;
-
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => CompletedServiceDetailsScreen(service: service)),
-      ),
+      ).then((_) => _refreshData()), // تحديث البيانات عند العودة من شاشة التفاصيل
       child: Container(
         margin: const EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
@@ -134,7 +142,8 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Text("${cost.toStringAsFixed(0)} \$", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF1A1A1A))),
+                  // استخدام دالة التنسيق لإزالة الأصفار
+                  Text("${_formatPrice(service.finalCost)} \$", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF1A1A1A))),
                 ],
               ),
               const Padding(
@@ -159,7 +168,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                         _buildSmallActionBtn(icon: Icons.report_problem_outlined, label: "Report", color: const Color(0xFFE55757), onTap: () => _showComplaintSheet(service.id)),
                       const SizedBox(width: 6),
                       if (service.isRated)
-                        _buildStatusBadge(Icons.star_rounded, "${service.score}", Colors.amber[700]!)
+                        _buildStatusBadge(Icons.star_rounded, _formatPrice(service.score), Colors.amber[700]!)
                       else
                         _buildSmallActionBtn(icon: Icons.star_rounded, label: "Rate", color: Colors.amber[700]!, onTap: () => _showRatingSheet(service.id, service.problemType)),
                     ],
@@ -237,8 +246,9 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                   var result = await _controller.submitComplaint(requestId: requestId, complaintText: complaintController.text);
                   if (mounted) {
                     Navigator.pop(context);
-                    _showSnackBar(result['message'], result['success']);
-                    if (result['success']) _refreshData();
+                    // حماية الـ null هنا أيضاً
+                    _showSnackBar(result?['message'] ?? "Error submitting complaint", result?['success'] ?? false);
+                    if (result?['success'] == true) _refreshData();
                   }
                 },
                 child: const Text("Submit", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -287,11 +297,24 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A1A1A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
                   onPressed: () async {
                     if (tempRating == 0) return;
-                    var result = await _controller.submitRating(requestId: requestId, rating: tempRating, comment: commentController.text);
+
+                    var result = await _controller.submitRating(
+                      requestId: requestId, 
+                      rating: tempRating, 
+                      comment: commentController.text
+                    );
+
                     if (mounted) {
                       Navigator.pop(context);
-                      _showSnackBar(result['message'], result['success']);
-                      if (result['success']) _refreshData();
+                      // تم تطبيق الحل الدفاعي هنا لمنع الـ Exception
+                      String message = result?['message'] ?? "Something went wrong";
+                      bool isSuccess = result?['success'] ?? false;
+
+                      _showSnackBar(message, isSuccess);
+
+                      if (isSuccess) {
+                        _refreshData();
+                      }
                     }
                   },
                   child: const Text("Submit", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),

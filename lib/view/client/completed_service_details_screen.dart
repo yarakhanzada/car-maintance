@@ -271,8 +271,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildDetailedInvoice() {
+Widget _buildDetailedInvoice() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -284,24 +283,34 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
         children: [
           _buildInvoiceRow("Subtotal", "\$${_formatPrice(service.subtotal)}", Colors.white.withOpacity(0.6)),
           const SizedBox(height: 10),
-          if (double.tryParse(service.immediatePremium) != 0) 
-          _buildInvoiceRow("Immediate Premium", "+\$${_formatPrice(service.immediatePremium)}", Colors.orangeAccent),
-          const SizedBox(height: 10),
-          _buildInvoiceRow("${service.subscription} Discount", "-\$${_formatPrice(service.discountAmount)}", const Color(0xFF4CAF50)),
+          
+          if (double.tryParse(service.immediatePremium.toString()) != 0) ...[
+            _buildInvoiceRow("Immediate Premium", "+\$${_formatPrice(service.immediatePremium)}", Colors.orangeAccent),
+            const SizedBox(height: 10),
+          ],
+
+          _buildInvoiceRow(
+            "${service.subscription} (${_formatPrice(service.discountPercentage)}%)", 
+            "-\$${_formatPrice(service.discountAmount)}", 
+            const Color(0xFF4CAF50)
+          ),
+          
           const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Divider(color: Colors.white12, thickness: 1)),
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Total Paid", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-              Text("\$${_formatPrice(service.finalCost)}", 
-                style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
+              Text(
+                "\$${_formatPrice(service.finalCost)}", 
+                style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)
+              ),
             ],
           ),
         ],
       ),
     );
   }
-
   Widget _buildInvoiceRow(String label, String value, Color color) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

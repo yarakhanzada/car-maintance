@@ -34,7 +34,8 @@ class SubscriptionController extends GetxController {
         if (jsonData['status'] == 1 || jsonData['status'] == "1") {
           var list = jsonData['data'] as List;
           mySubscriptions.assignAll(list);
-
+         print("lllllllllllllllllllllllllllllllllllllllllllll");
+         print(list);
           Get.snackbar(
             "Success",
             jsonData['message'] ?? "Your subscriptions loaded.",
@@ -135,7 +136,7 @@ class SubscriptionController extends GetxController {
     }
   }
 
-  //  إلغاء الاشتراك
+  
   Future<void> cancelSubscription(int subscriptionId) async {
     try {
       print(
@@ -151,7 +152,8 @@ class SubscriptionController extends GetxController {
       var jsonData = response.body is String
           ? json.decode(response.body)
           : response.body;
-
+       print("llllllllllllllllllllllllllllll");
+       print(jsonData);
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         print("SubscriptionController: Cancelled successfully");
 

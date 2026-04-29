@@ -8,6 +8,7 @@ class CompletedServiceModel {
   final String chassisNumber; 
   final String finalCost;
   final String discountAmount;
+  final String discountPercentage; 
   final String subtotal;
   final String subscription;
   final String completedAt;
@@ -31,6 +32,7 @@ class CompletedServiceModel {
     required this.chassisNumber,
     required this.finalCost,
     required this.discountAmount,
+    required this.discountPercentage,
     required this.subtotal,
     required this.subscription,
     required this.completedAt,
@@ -46,10 +48,11 @@ class CompletedServiceModel {
   });
 
   factory CompletedServiceModel.fromJson(Map<String, dynamic> json) {
-    final vehicle = json['vehicle'] ?? {};
-    final bill = json['bill'] ?? {};
-    final rating = json['rating_details'] ?? {};
-    final complaint = json['complaint_details'] ?? {};
+
+    final vehicle = json['vehicle'] is Map ? json['vehicle'] : {};
+    final bill = json['bill'] is Map ? json['bill'] : {};
+    final rating = json['rating_details'] is Map ? json['rating_details'] : {};
+    final complaint = json['complaint_details'] is Map ? json['complaint_details'] : {};
 
     return CompletedServiceModel(
       id: json['id'] ?? 0,
@@ -61,6 +64,7 @@ class CompletedServiceModel {
       chassisNumber: vehicle['chassis_number'] ?? "N/A", 
       finalCost: bill['total_cost']?.toString() ?? "0",
       discountAmount: bill['discount_amount']?.toString() ?? "0",
+      discountPercentage: bill['discount_percentage']?.toString() ?? "0", 
       subtotal: bill['subtotal_cost']?.toString() ?? "0",
       subscription: bill['subscription'] ?? "None",
       completedAt: json['completed_request_at'] ?? json['created_at'] ?? "",
