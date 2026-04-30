@@ -65,11 +65,14 @@ class HomeScreen extends StatelessWidget {
         children: [
           Expanded(
             child: Obx(() {
+              final selectedVehicle = vehicleController.vehicleList
+                  .firstWhereOrNull(
+                    (v) => v.id == vehicleController.selectedVehicleId.value,
+                  );
               final user = profileController.profile.value;
-              final carName = vehicleController.vehicleList.isNotEmpty
-                  ? "${vehicleController.vehicleList[0].brand} ${vehicleController.vehicleList[0].model}"
+              final carName = selectedVehicle != null
+                  ? "${selectedVehicle.brand} ${selectedVehicle.model}"
                   : "No car selected";
-
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -252,7 +255,7 @@ class HomeScreen extends StatelessWidget {
 
       return CarouselSlider(
         options: CarouselOptions(
-          height: 220, // زيادة طفيفة لضمان الراحة
+          height: 220,
           enlargeCenterPage: true,
           autoPlay: true,
           viewportFraction: 0.85,

@@ -1,12 +1,7 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:http/http.dart' as http;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:senior_project/controller/TowingTrackingController.dart';
 
 class RequestTrackingScreen extends StatefulWidget {
   final Map<String, dynamic> requestData;
@@ -18,124 +13,62 @@ class RequestTrackingScreen extends StatefulWidget {
 
 class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
   final MapController _mapController = MapController();
-  List<LatLng> _routePoints = [];
-  StreamSubscription<Position>? _positionStream;
+  late TowingTrackingController _controller;
 
   late String _estimatedDuration;
   late String _estimatedDistance;
   late String _estimatedFee;
   late String _requestId;
 
-  LatLng _userLocation = const LatLng(33.5138, 36.2765);
-  LatLng? _towTruckLocation;
-
   @override
   void initState() {
     super.initState();
     _parseInitialData();
-    _initLocationServices();
+
+    _controller = TowingTrackingController(
+      requestData: widget.requestData,
+      onUpdate: () {
+        if (mounted) setState(() {});
+      },
+    );
+    _controller.initSocket();
+    _controller.initLocationServices().then((_) {
+      _mapController.move(_controller.userLocation, 15.0);
+    });
   }
 
   void _parseInitialData() {
     final data = widget.requestData;
-    setState(() {
-      _requestId = (data['service_request']?['id'] ?? "0").toString();
-      _estimatedDistance =
-          "${(data['distance_km'] as num?)?.toStringAsFixed(1) ?? "0"} km";
-      _estimatedDuration =
-          "${(data['estimated_time_minutes'] as num?)?.toStringAsFixed(0) ?? "0"} mins";
-      _estimatedFee =
-          "${(data['estimated_cost'] as num?)?.toStringAsFixed(0) ?? "0"} SYP";
-    });
-  }
-
-  Future<void> _initLocationServices() async {
-    Position position = await Geolocator.getCurrentPosition();
-    if (mounted) {
-      setState(() {
-        _userLocation = LatLng(position.latitude, position.longitude);
-      });
-      _mapController.move(_userLocation, 15.0);
-    }
-
-    _positionStream =
-        Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 10,
-          ),
-        ).listen((Position pos) {
-          if (mounted) {
-            setState(() => _userLocation = LatLng(pos.latitude, pos.longitude));
-          }
-        });
-  }
-
-  Future<void> _updateRoute(LatLng truckPos) async {
-    const String apiKey =
-        'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjU0N2NmOWJkYjFmYjQwODM5YmZlNWRjMmQ1ODIzNmQ4IiwiaCI6Im11cm11cjY0In0='; // استبدليه بمفتاحك
-    final String url =
-        'https://api.openrouteservice.org/v2/directions/driving-car?api_key=$apiKey&start=${truckPos.longitude},${truckPos.latitude}&end=${_userLocation.longitude},${_userLocation.latitude}';
-
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> coords =
-            data['features'][0]['geometry']['coordinates'];
-        if (mounted) {
-          setState(() {
-            _routePoints = coords
-                .map((c) => LatLng(c[1] as double, c[0] as double))
-                .toList();
-          });
-        }
-      }
-    } catch (e) {
-      print("Routing Error: $e");
-    }
+    _requestId = (data['service_request']?['id'] ?? "0").toString();
+    _estimatedDistance =
+        "${(data['distance_km'] as num?)?.toStringAsFixed(1) ?? "0"} km";
+    _estimatedDuration =
+        "${(data['estimated_time_minutes'] as num?)?.toStringAsFixed(0) ?? "0"} mins";
+    _estimatedFee =
+        "${(data['estimated_cost'] as num?)?.toStringAsFixed(0) ?? "0"} SYP";
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('requests')
-            .doc(_requestId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          bool isAccepted = false;
-          Map<String, dynamic>? driverData;
+      body: Stack(
+        children: [
+          _buildMap(_controller.isAccepted),
 
-          if (snapshot.hasData && snapshot.data!.exists) {
-            var fbData = snapshot.data!.data() as Map<String, dynamic>;
-
-            if (fbData['status'] == 'accepted' || fbData['truck_lat'] != null) {
-              isAccepted = true;
-              driverData = fbData;
-              _towTruckLocation = LatLng(
-                (fbData['truck_lat'] as num).toDouble(),
-                (fbData['truck_lng'] as num).toDouble(),
-              );
-              _updateRoute(_towTruckLocation!);
-            }
-          }
-
-          return Stack(
-            children: [
-              _buildMap(isAccepted),
-
-              Positioned(top: 50, left: 20, child: _backButton()),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: isAccepted
-                    ? _buildDriverArrivalSheet(driverData!)
-                    : _buildSearchingSheet(),
-              ),
-            ],
-          );
-        },
+          Positioned(top: 50, left: 20, child: _backButton()),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: _controller.isAccepted
+                ? _buildDriverArrivalSheet(
+                    _controller.driverData ??
+                        {
+                          'driver_name': 'سائق السحب',
+                          'truck_model': 'Tow Truck',
+                        },
+                  )
+                : _buildSearchingSheet(),
+          ),
+        ],
       ),
     );
   }
@@ -143,17 +76,20 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
   Widget _buildMap(bool isAccepted) {
     return FlutterMap(
       mapController: _mapController,
-      options: MapOptions(initialCenter: _userLocation, initialZoom: 15.0),
+      options: MapOptions(
+        initialCenter: _controller.userLocation,
+        initialZoom: 15.0,
+      ),
       children: [
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: 'com.example.senior_project',
         ),
-        if (isAccepted && _routePoints.isNotEmpty)
+        if (isAccepted && _controller.routePoints.isNotEmpty)
           PolylineLayer(
             polylines: [
               Polyline(
-                points: _routePoints,
+                points: _controller.routePoints,
                 color: const Color(0xFFE55757),
                 strokeWidth: 4,
               ),
@@ -162,15 +98,18 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
         MarkerLayer(
           markers: [
             Marker(
-              point: _userLocation,
+              point: _controller.userLocation,
               child: const Icon(
                 Icons.person_pin_circle,
                 color: Colors.blue,
                 size: 40,
               ),
             ),
-            if (isAccepted && _towTruckLocation != null)
-              Marker(point: _towTruckLocation!, child: _buildTowTruckMarker()),
+            if (isAccepted && _controller.towTruckLocation != null)
+              Marker(
+                point: _controller.towTruckLocation!,
+                child: _buildTowTruckMarker(),
+              ),
           ],
         ),
       ],
@@ -260,6 +199,7 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
       ),
     ],
   );
+
   Widget _buildTowTruckMarker() => Container(
     decoration: const BoxDecoration(
       color: Color(0xFFE55757),
@@ -275,4 +215,11 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
       child: Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.black),
     ),
   );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _mapController.dispose();
+    super.dispose();
+  }
 }
