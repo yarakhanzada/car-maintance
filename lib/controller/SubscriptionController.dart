@@ -25,25 +25,20 @@ class SubscriptionController extends GetxController {
       var response = await ApiHelper.get(
         "${ApiConfig.baseUrl}/customer/subscriptions",
       );
-
+      final data = jsonDecode(response.body);
+      print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
+      print(data);
       if (response.statusCode == 200) {
         var jsonData = response.body is String
             ? json.decode(response.body)
             : response.body;
 
-        if (jsonData['status'] == 1 || jsonData['status'] == "1") {
-          var list = jsonData['data'] as List;
-          mySubscriptions.assignAll(list);
-         print("lllllllllllllllllllllllllllllllllllllllllllll");
-         print(list);
-          Get.snackbar(
-            "Success",
-            jsonData['message'] ?? "Your subscriptions loaded.",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.black87,
-            colorText: Colors.white,
-          );
-        } else {
+       if (jsonData['status'] == 1 || jsonData['status'] == "1") {
+  var singleSubscription = jsonData['data']; 
+  mySubscriptions.assignAll([singleSubscription]); 
+  
+  print("Subscription loaded successfully as a list");
+} else {
           Get.snackbar(
             "Alert",
             jsonData['message'] ?? "No active subscriptions found",
@@ -124,6 +119,9 @@ class SubscriptionController extends GetxController {
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.grey.withOpacity(0.1),
           );
+          await Get.find<SubscriptionController>().getMySubscriptions();
+  
+          Get.back();
         }
       } else {
         String errorMsg = jsonData['message'] ?? "Subscription failed";
@@ -137,42 +135,6 @@ class SubscriptionController extends GetxController {
   }
 
   
-  Future<void> cancelSubscription(int subscriptionId) async {
-    try {
-      print(
-        "SubscriptionController: Initiating cancellation for ID: $subscriptionId",
-      );
-      isLoading(true);
-
-      var response = await ApiHelper.post(
-        "${ApiConfig.baseUrl}/customer/subscriptions/$subscriptionId/cancel",
-        {},
-      );
-
-      var jsonData = response.body is String
-          ? json.decode(response.body)
-          : response.body;
-       print("llllllllllllllllllllllllllllll");
-       print(jsonData);
-      if (response.statusCode == 200 && jsonData['status'] == 1) {
-        print("SubscriptionController: Cancelled successfully");
-
-        _showSuccessSnackBar(
-          jsonData['message'] ?? "Subscription cancelled successfully.",
-        );
-      } else {
-        print("SubscriptionController: Server error: ${jsonData['message']}");
-        _showErrorSnackBar(
-          jsonData['message'] ?? "Failed to cancel subscription.",
-        );
-      }
-    } catch (e) {
-      print("SubscriptionController: Exception during cancellation: $e");
-      _showErrorSnackBar("An error occurred. Please try again.");
-    } finally {
-      isLoading(false);
-    }
-  }
 
   void _showSuccessSnackBar(String message) {
     Get.snackbar(
