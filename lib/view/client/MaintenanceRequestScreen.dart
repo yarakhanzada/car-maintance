@@ -9,12 +9,12 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class MaintenanceRequestScreen extends StatelessWidget {
   final String categoryName;
-  final int categoryId;
+  final int? categoryId;
 
   MaintenanceRequestScreen({
     super.key,
     required this.categoryName,
-    required this.categoryId,
+    this.categoryId,
   });
 
   final controller = Get.put(MaintenanceController());
@@ -325,7 +325,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
             )
           : CustomButton(
               text: "CONFIRM REQUEST",
-              onTap: () => controller.submitRequest(categoryId),
+              onTap: () => controller.submitRequest(categoryId ?? null),
             ),
     );
   }

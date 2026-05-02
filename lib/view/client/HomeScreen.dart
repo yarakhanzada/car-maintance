@@ -46,7 +46,7 @@ class HomeScreen extends StatelessWidget {
               _buildPremiumPackagesSlider(width),
 
               const SizedBox(height: 35),
-              _buildSectionHeader("Main DEPARTMENTS"),
+              _buildSectionHeader("MAIN DEPARTMENTS"),
               Obx(() => _buildFullImageDepartmentsGrid()),
 
               const SizedBox(height: 100),
@@ -147,7 +147,6 @@ class HomeScreen extends StatelessWidget {
               onTap: () => Get.to(
                 () => MaintenanceRequestScreen(
                   categoryName: "General Maintenance",
-                  categoryId: 0,
                 ),
               ),
             ),

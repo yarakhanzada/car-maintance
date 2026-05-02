@@ -50,7 +50,7 @@ class MaintenanceController extends GetxController {
     );
   }
 
-  Future<void> submitRequest(int departmentId) async {
+  Future<void> submitRequest(int? departmentId) async {
     if (selectedVehicleId.value == null) {
       _showServerSnackBar("Warning", "Please select a vehicle");
       return;
@@ -72,8 +72,11 @@ class MaintenanceController extends GetxController {
         'maintenance_type': isimmediate.value ? 'immediate' : 'scheduled',
         'scheduled_date': selectedDate.value.toString().split(' ')[0],
         'scheduled_time': formattedTime,
-        'department_id': departmentId.toString(),
       };
+
+      if (departmentId != null && departmentId > 0) {
+        fields['department_id'] = departmentId.toString();
+      }
 
       if (problemController.text.isNotEmpty) {
         fields['problem_type'] = problemController.text;
