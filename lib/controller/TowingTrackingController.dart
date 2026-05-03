@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../services/token_service.dart';
 
 class TowingTrackingController {
   final Map<String, dynamic> requestData;
-  late IO.Socket socket;
+  IO.Socket? socket;
 
   bool isAccepted = false;
   Map<String, dynamic>? driverData;
@@ -20,45 +22,140 @@ class TowingTrackingController {
   StreamSubscription<Position>? positionStream;
   Function? onUpdate;
 
+  late String customerId;
+  late String driverId;
+
   TowingTrackingController({required this.requestData, this.onUpdate});
 
-  Future<void> initSocket() async {
-    final token = await TokenService.getToken() ?? '';
-    if (token.isEmpty) {
-      print(" Token is empty. Cannot connect.");
-      return;
+  Future<void> initLocationServices() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      userLocation = LatLng(position.latitude, position.longitude);
+
+      positionStream =
+          Geolocator.getPositionStream(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.high,
+              distanceFilter: 10,
+            ),
+          ).listen((Position pos) {
+            userLocation = LatLng(pos.latitude, pos.longitude);
+
+            if (socket != null && socket!.connected) {
+              socket!.emit('update_customer_location', {
+                'customer_id': customerId,
+                'driver_id': driverId,
+                'latitude': userLocation.latitude,
+                'longitude': userLocation.longitude,
+              });
+            }
+            if (onUpdate != null) onUpdate!();
+          });
+    } catch (e) {
+      print("Error in initLocationServices: $e");
     }
+    if (onUpdate != null) onUpdate!();
+  }
 
-    socket = IO.io(
-      ApiConfig.socketServerUrl,
-      IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .setAuth({'token': 'Bearer $token'})
-          .build(),
-    );
+  Future<void> initSocket() async {
+    try {
+      final authController = Get.isRegistered<AuthController>()
+          ? Get.find<AuthController>()
+          : Get.put(AuthController());
 
-    socket.connect();
+      await authController.refreshToken();
 
-    socket.onConnect((_) {
-      print(' Connected to Node.js Socket server');
-      final customerId = requestData['customer_id'];
-      final driverId = requestData['driver_id'];
+      final token = await TokenService.getToken() ?? '';
+      if (token.isEmpty) {
+        print("⚠️ Token is empty. Cannot connect.");
+        return;
+      }
 
-      socket.emit('subscribe_to_driver', {
+      final data = requestData.containsKey('data')
+          ? requestData['data']
+          : requestData;
+      final serviceRequest = data['service_request'];
+
+      customerId =
+          (serviceRequest?['customer_id'] ??
+                  data['customer_id'] ??
+                  requestData['customer_id'] ??
+                  "0")
+              .toString();
+      driverId =
+          (serviceRequest?['driver_id'] ??
+                  data['driver_id'] ??
+                  requestData['driver_id'] ??
+                  "0")
+              .toString();
+
+      print('👤 Customer ID: $customerId, Driver ID: $driverId');
+
+      if (socket != null) {
+        socket!.disconnect();
+        socket!.dispose();
+      }
+
+      socket = IO.io(
+        ApiConfig.socketServerUrl,
+        IO.OptionBuilder()
+            .setTransports(['websocket'])
+            .disableAutoConnect()
+            .setAuth({'token': token})
+            .build(),
+      );
+
+      _setupSocketListeners();
+      socket!.connect();
+    } catch (e) {
+      print("❌ Error in initSocket: $e");
+    }
+  }
+
+  void _setupSocketListeners() {
+    if (socket == null) return;
+
+    socket!.onConnect((_) {
+      print('🚀 Connected to Node.js Socket server');
+
+      socket!.emit('subscribe_to_driver', {
         'customer_id': customerId,
         'driver_id': driverId,
       });
     });
 
-    socket.on('token_expired', (data) async {
-      print(' Token expired, updating token...');
+    socket!.on('token_expired', (data) async {
+      print('⏳ Token expired event received, updating token...');
       await updateTokenAndReconnect();
     });
 
-    socket.on('driver_location_update', (data) {
+    socket!.onConnectError((err) async {
+      print('❌ Connect Error: $err');
+      final errStr = err.toString().toLowerCase();
+
+      if (errStr.contains('jwt expired') ||
+          errStr.contains('401') ||
+          errStr.contains('auth_error') ||
+          errStr.contains('invalid or expired')) {
+        print(
+          '🔄 Token expired during socket connection, refreshing and reconnecting...',
+        );
+        await updateTokenAndReconnect();
+      }
+    });
+
+    socket!.onError((err) => print('⚠️ Socket Error: $err'));
+
+    socket!.on('driver_location_update', (data) {
       isAccepted = true;
-      driverData = {'driver_name': 'سائق السحب', 'truck_model': 'Tow Truck'};
+
+      driverData = {
+        'driver_name': data['driver_name'] ?? 'سائق السحب',
+        'truck_model': data['truck_model'] ?? 'Tow Truck',
+      };
+
       towTruckLocation = LatLng(
         (data['latitude'] as num).toDouble(),
         (data['longitude'] as num).toDouble(),
@@ -67,59 +164,53 @@ class TowingTrackingController {
       if (towTruckLocation != null) {
         updateRoute(towTruckLocation!);
       }
+
       if (onUpdate != null) onUpdate!();
     });
 
-    socket.on('tracking_ended', (data) {
+    socket!.on('tracking_ended', (data) {
       isAccepted = false;
       towTruckLocation = null;
       routePoints.clear();
       if (onUpdate != null) onUpdate!();
     });
-
-    socket.onConnectError((err) => print(' Connect Error: $err'));
-    socket.onError((err) => print(' Socket Error: $err'));
   }
 
   Future<void> updateTokenAndReconnect() async {
-    final newToken = await TokenService.getToken() ?? '';
-    if (newToken.isNotEmpty) {
-      socket.auth = {'token': newToken};
+    try {
+      final authController = Get.isRegistered<AuthController>()
+          ? Get.find<AuthController>()
+          : Get.put(AuthController());
 
-      if (socket.connected) {
-        socket.disconnect();
-        socket.connect();
-      } else {
-        socket.connect();
-      }
-    }
-  }
+      await authController.refreshToken();
+      final newToken = await TokenService.getToken() ?? '';
 
-  Future<void> initLocationServices() async {
-    Position position = await Geolocator.getCurrentPosition();
-    userLocation = LatLng(position.latitude, position.longitude);
+      if (newToken.isNotEmpty) {
+        print("🔑 New Token retrieved: $newToken");
 
-    positionStream =
-        Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 10,
-          ),
-        ).listen((Position pos) {
-          userLocation = LatLng(pos.latitude, pos.longitude);
-          if (socket.connected) {
-            final customerId = requestData['customer_id'];
-            final driverId = requestData['driver_id'];
-            socket.emit('update_customer_location', {
-              'customer_id': customerId,
-              'driver_id': driverId,
-              'latitude': userLocation.latitude,
-              'longitude': userLocation.longitude,
-            });
+        if (socket != null) {
+          if (socket!.connected) {
+            socket!.disconnect();
           }
-          if (onUpdate != null) onUpdate!();
-        });
-    if (onUpdate != null) onUpdate!();
+          socket!.dispose();
+        }
+
+        socket = IO.io(
+          ApiConfig.socketServerUrl,
+          IO.OptionBuilder()
+              .setTransports(['websocket'])
+              .disableAutoConnect()
+              .setAuth({'token': newToken})
+              .build(),
+        );
+
+        _setupSocketListeners();
+        socket!.connect();
+        print("✅ Socket recreated and reconnected with the new token.");
+      }
+    } catch (e) {
+      print("❌ Error updating token in socket: $e");
+    }
   }
 
   Future<void> updateRoute(LatLng truckPos) async {
@@ -138,13 +229,18 @@ class TowingTrackingController {
         if (onUpdate != null) onUpdate!();
       }
     } catch (e) {
-      print("Routing Error: $e");
+      print("❌ Routing Error: $e");
     }
   }
 
   void dispose() {
-    socket.disconnect();
-    socket.dispose();
-    positionStream?.cancel();
+    if (socket != null) {
+      socket!.disconnect();
+      socket!.dispose();
+    }
+
+    final stream = positionStream;
+    positionStream = null;
+    stream?.cancel();
   }
 }
