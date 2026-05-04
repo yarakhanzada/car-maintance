@@ -31,7 +31,6 @@ class TowingController extends GetxController {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        // await Geolocator.openLocationSettings();
         isLoading.value = false;
         Get.snackbar(
           "Warning",
@@ -67,6 +66,8 @@ class TowingController extends GetxController {
       print("------- TOWING DEBUG END ---------");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // ── تفريغ الحقول والقائمة المنسدلة بعد نجاح الطلب ──
+        resetForm();
         Get.off(() => RequestTrackingScreen(requestData: data['data']));
       } else {
         String errorMsg = data['message'] ?? "فشل إرسال الطلب";

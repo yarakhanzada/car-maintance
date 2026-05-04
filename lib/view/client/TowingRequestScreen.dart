@@ -160,44 +160,44 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
 
   Widget _buildSearchingSheet() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       decoration: _sheetDecoration(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 45,
-            height: 5,
+            width: 35,
+            height: 4,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 2),
           LoadingAnimationWidget.progressiveDots(
             color: const Color(0xFFE55757),
-            size: 45,
+            size: 40,
           ),
-          const SizedBox(height: 12),
+          //const SizedBox(height: 2),
           const Text(
             "جاري البحث عن سيارة سحب قريبة...",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 15,
               fontFamily: 'Cairo',
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
-            "يرجى الانتظار، سيتم الاتصال بالسائق قريباً.",
-            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            "يرجى الانتظار، سيتم الاتصال بالسائق قريباً",
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             decoration: BoxDecoration(
               color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: Row(
@@ -226,33 +226,37 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
         : 0.0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: _sheetDecoration(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Drag handle
           Container(
-            width: 45,
-            height: 5,
+            width: 35,
+            height: 4,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 10),
+
+          // Arrival notification
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: arrived ? Colors.blue.shade50 : Colors.green.shade50,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
                 Icon(
                   arrived ? Icons.check_circle_outline : Icons.local_shipping,
                   color: arrived ? Colors.blue : Colors.green,
+                  size: 20,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     arrived
@@ -261,51 +265,77 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
                     style: TextStyle(
                       color: arrived ? Colors.blue : Colors.green,
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                      fontSize: 13,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 26),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: CircleAvatar(
-              radius: 24,
-              backgroundColor: const Color(0xFFE55757),
-              child: const Icon(Icons.person, color: Colors.white),
-            ),
-            title: Text(
-              data['driver_name'],
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            subtitle: Text(
-              data['truck_model'],
-              style: TextStyle(color: Colors.grey[600], fontSize: 13),
-            ),
-            trailing: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.phone, color: Colors.green, size: 22),
+
+          const SizedBox(height: 10), // Driver Details
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: const Color(0xFFE55757),
+                child: const Icon(Icons.person, color: Colors.white, size: 20),
               ),
-              onPressed: () {
-                //  تنفيذ الاتصال
-              },
-            ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data['driver_name'] ?? 'سائق السحب',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      data['truck_model'] ?? 'Tow Truck',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.phone, color: Colors.green, size: 18),
+                ),
+                onPressed: () {
+                  // تنفيذ الاتصال
+                },
+              ),
+            ],
           ),
+
+          const Divider(height: 16, thickness: 1),
+
+          // Info Tiles for price, distance, and time
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _infoTile("الوقت", _estimatedDuration, const Color(0xFFE55757)),
+              _infoTile("المسافة", _estimatedDistance, Colors.green),
+              _infoTile("التكلفة", _estimatedFee, Colors.blue),
+            ],
+          ),
+
           if (arrived) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             const Text(
               "السائق الآن عند نقطة الالتقاء، يرجى الاستعداد.",
               style: TextStyle(
                 color: Colors.orange,
                 fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontSize: 12,
               ),
             ),
           ],
@@ -329,14 +359,14 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
 
   Widget _infoTile(String title, String value, Color color) => Column(
     children: [
-      Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-      const SizedBox(height: 3),
+      Text(title, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+      const SizedBox(height: 2),
       Text(
         value,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: color,
-          fontSize: 15,
+          fontSize: 13,
         ),
       ),
     ],

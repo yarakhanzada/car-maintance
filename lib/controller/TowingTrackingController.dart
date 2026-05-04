@@ -194,7 +194,7 @@ class TowingTrackingController {
           }
           socket!.dispose();
         }
-
+        print("🚀 Sending Token to Socket: $newToken");
         socket = IO.io(
           ApiConfig.socketServerUrl,
           IO.OptionBuilder()
