@@ -9,6 +9,7 @@ import 'ServiceHistoryScreen.dart';
 import 'ComplaintsScreen.dart';
 import 'FAQScreen.dart';
 import '../../widgets/logout_widget.dart';
+import 'package:intl/intl.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
@@ -181,7 +182,19 @@ Widget _buildSubscriptionCard(BuildContext context, double width) {
 
     final String planName = (planDetails['name'] ?? "Plan").toString();
     final String discount = (planDetails['discount_percentage'] ?? "0").toString();
-    final String inspections = (planDetails['periodic_inspections_count'] ?? "0").toString();
+    String rawDate = (mySub['end_date'] ?? "").toString();
+String formattedDate = "N/A";
+
+if (rawDate.isNotEmpty) {
+  try {
+    DateTime dateTime = DateTime.parse(rawDate);
+    formattedDate = DateFormat('yyyy-MM-dd').format(dateTime); 
+  } catch (e) {
+    formattedDate = "Invalid Date";
+  }
+}
+
+final String inspections = formattedDate;
 
     return Container(
       width: width,
@@ -267,9 +280,9 @@ Widget _buildSubscriptionCard(BuildContext context, double width) {
                     children: [
                       _buildInfoItem(Icons.percent, "$discount% Off"),
                       const VerticalDivider(color: Colors.white24, indent: 5, endIndent: 5),
-                      _buildInfoItem(Icons.build_circle_outlined, "$inspections Left"),
-                      const Spacer(),
-                      _buildStatusIndicator(isActive),
+Expanded(
+      child: _buildInfoItem(Icons.calendar_today, "Ends: $formattedDate"),
+    ),
                     ],
                   ),
                 ),

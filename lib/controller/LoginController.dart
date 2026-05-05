@@ -86,6 +86,7 @@ class LoginController extends GetxController {
     print("ROLE: $role");
 
     await TokenService.saveRole(role);
+    await TokenService.saveID(result.data.user.id.toString());
 
     _navigateByRole(role);
   }

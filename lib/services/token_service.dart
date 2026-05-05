@@ -6,6 +6,15 @@ class TokenService {
     await prefs.setString("token", token);
   }
 
+  static Future<String?> getID() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("id");
+  }
+    static Future<void> saveID(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("id", token);
+  }
+
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString("token");
