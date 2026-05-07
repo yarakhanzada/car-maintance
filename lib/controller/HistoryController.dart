@@ -29,13 +29,7 @@ class HistoryController extends GetxController {
         if (model.data != null) {
           requestsList.assignAll(model.data!);
         }
-        Get.snackbar("Success", model.message ?? "History loaded");
-      } else {
-        Get.snackbar(
-          "Error",
-          model.message ?? "Something went wrong",
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        
       }
     } catch (e) {
       print("Error fetching history: $e");

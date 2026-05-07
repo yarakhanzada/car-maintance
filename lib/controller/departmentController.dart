@@ -27,13 +27,7 @@ class DepartmentController extends GetxController {
         departments.assignAll(
           departmentsData.map((e) => Department.fromJson(e)).toList()
         );
-      } else {
-        _showSnackBar(
-          "Error",
-          "Failed to load departments",
-          Colors.grey[850]!,
-        );
-      }
+      } 
     } catch (e) {
       _showSnackBar(
         "Error",

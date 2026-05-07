@@ -48,7 +48,7 @@ class LogoutWidget extends StatelessWidget {
       icon: const Icon(
         Icons.logout_rounded,
         color: Color(0xFFE55757),
-        size: 28,
+        size: 22,
       ),
       tooltip: "Logout",
     );
@@ -111,7 +111,7 @@ class LogoutWidget extends StatelessWidget {
             const SizedBox(width: 10),
             ElevatedButton(
               onPressed: () {
-                Get.back();
+               Get.back();
                 controller.logout();
               },
               style: ElevatedButton.styleFrom(

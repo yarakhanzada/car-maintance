@@ -36,14 +36,7 @@ class EditProfileController extends GetxController {
 
       if (response.statusCode == 200 && data["status"] == 1) {
         Get.back(result: true);
-        _showSnackBar("Success", data["message"], Colors.grey[850]!);
-      } else {
-        _showSnackBar(
-          "Error",
-          data["message"] ?? "Update failed",
-          Colors.grey[850]!,
-        );
-      }
+      } 
     } catch (e) {
       _showSnackBar("Error", "Something went wrong", Colors.grey[850]!);
     } finally {

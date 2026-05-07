@@ -57,20 +57,9 @@ class OTPController extends GetxController {
       var jsonData = jsonDecode(response.body);
 
       if (jsonData['status'] == 1) {
-        Get.snackbar(
-          "Success",
-          jsonData['message'],
-          backgroundColor: Colors.grey.withOpacity(0.5),
-          colorText: Colors.white,
-        );
+       
         startTimer();
-      } else {
-        Get.snackbar(
-          "Error",
-          jsonData['message'],
-          backgroundColor: Colors.redAccent.withOpacity(0.5),
-        );
-      }
+      } 
     } catch (e) {
       Get.snackbar("Error", "Check your connection");
     } finally {

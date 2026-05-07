@@ -9,11 +9,12 @@ class Midlecontroller extends GetxController {
     final role = await TokenService.getRole();
     print("tttttttttttttttttt");
     print(token);
+    print(role);
 
     if (token != null) {
       if (role == "customer") {
         Get.offAllNamed("/client");
-      } else if (role == "driver") {
+      } else if (role == "towtruck") {
         Get.offAllNamed("/driver");
       } else if (role == "technician") {
         Get.offAllNamed("/tech");

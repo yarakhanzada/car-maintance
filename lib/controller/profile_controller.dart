@@ -34,12 +34,8 @@ class ProfileController extends GetxController {
 
         if (data['status'] == 1) {
           profile.value = ProfileModel.fromJson(data['data']);
-        } else {
-          Get.snackbar("Error", data['message']);
-        }
-      } else {
-        Get.snackbar("Error", "Server error: ${response.statusCode}");
-      }
+        } 
+      } 
     } catch (e) {
       Get.snackbar("Error", "Failed to load profile");
       print(e);

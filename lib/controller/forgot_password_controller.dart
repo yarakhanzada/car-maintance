@@ -35,12 +35,7 @@ class ForgotPasswordController extends GetxController {
       print(jsonData);
 
       if (response.statusCode == 200 && jsonData['status'] == 1) {
-        Get.snackbar(
-          "Success",
-          jsonData['message'],
-          backgroundColor: Colors.grey.withOpacity(0.7),
-          colorText: Colors.white,
-        );
+      
         return true;
       } else {
         emailError.value = jsonData['message'] ?? "Something went wrong";

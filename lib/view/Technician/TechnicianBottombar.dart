@@ -18,7 +18,7 @@ class TechnicianBottombar extends StatelessWidget {
   );
 
   final List<Widget> screens = [
-    const NewTasksScreen(),
+    NewTasksScreen(),
     const InProgressTaskScreen(),
     const TaskHistoryScreen(),
     const TechnicianProfileScreen(),
