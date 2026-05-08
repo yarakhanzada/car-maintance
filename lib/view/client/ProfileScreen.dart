@@ -141,7 +141,7 @@ class ProfileScreen extends StatelessWidget {
       if (subscriptionController.mySubscriptions.isEmpty) return _buildEmptySubscription(width);
 
       final mySub = subscriptionController.mySubscriptions.first;
-      final planDetails = mySub['subscription'];
+      final planDetails = mySub?['subscription'];
       if (planDetails == null) return _buildEmptySubscription(width);
 
       final String planName = (planDetails['name'] ?? "Plan").toString();
@@ -343,13 +343,48 @@ return Container(
       width: width,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
-      child: Row(
-        children: [
-          const Icon(Icons.stars_rounded, color: Color(0xFFE55757), size: 30),
-          const SizedBox(width: 15),
-          Text("No active plan", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade400)),
-        ],
-      ),
+    child: Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEEAEA), // نفس درجة الأحمر الخفيف بالصورة
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.account_balance_wallet_rounded,
+            color: Color(0xFFE55757),
+            size: 24,
+          ),
+        ),
+        const SizedBox(width: 15),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "No Active Plan",
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                  color: Color(0xFF1A1D26),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "Subscribe to one of our available plans to unlock premium features",
+                style: TextStyle(
+                  color: const Color(0xFF2D3243).withOpacity(0.5),
+                  fontSize: 12,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
     );
   }
 
