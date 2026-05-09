@@ -29,7 +29,7 @@ class DriverOrdersController extends GetxController {
      print(response.body);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
-        List rawData = responseData['data']['data']; 
+        List rawData = responseData['data']; 
         ordersList.assignAll(rawData.map((e) => TowRequest.fromJson(e)).toList());
       }
     } catch (e) {
@@ -69,7 +69,7 @@ class DriverOrdersController extends GetxController {
      print(response.body);
       if (response.statusCode == 200) {
         Get.snackbar("Success", "Order accepted successfully", snackPosition: SnackPosition.BOTTOM);
-        fetchOrders(); 
+       fetchOrders(); 
       }
     } catch (e) {
       print("Error accepting order: $e");
@@ -79,7 +79,7 @@ class DriverOrdersController extends GetxController {
   Future<void> rejectOrder(int id) async {
     try {
       final response = await ApiHelper.post("${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/reject",{});
-       print("lllllllllllllllllllllllllllllllllllllllll");
+       print("لللللللللللللللللللللللل");
      print(response.body);
       if (response.statusCode == 200) {
         Get.snackbar("Ignored", "Request has been skipped", snackPosition: SnackPosition.BOTTOM);
