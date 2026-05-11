@@ -1,213 +1,249 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart'; // تأكدي من استيراد الباقة
-import 'package:latlong2/latlong.dart'; // ضروري للإحداثيات
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
+import 'package:senior_project/controller/DriverTowingController.dart';
+import 'package:senior_project/controller/DriverNavigationController.dart';
+import 'package:senior_project/widgets/CustomGoogleMapWidget.dart';
 
 class DriverMapScreen extends StatefulWidget {
-  const DriverMapScreen({super.key});
-
   @override
   State<DriverMapScreen> createState() => _DriverMapScreenState();
 }
 
-class _DriverMapScreenState extends State<DriverMapScreen> {
+class _DriverMapScreenState extends State<DriverMapScreen>
+    with TickerProviderStateMixin {
+  GoogleMapController? _mapController;
+  late AnimationController _pulseController;
+  bool isJobStarted = false;
 
-  final List<Map<String, dynamic>> taskStatuses = [
-    {"title": "في الطريق", "icon": Icons.directions_car},
-    {"title": "تم الوصول", "icon": Icons.location_on},
-    {"title": "جاري سحب المركبة", "icon": Icons.car_repair},
-    {"title": "اكتملت المهمة", "icon": Icons.check_circle},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+  }
 
-  int currentStatusIndex = 0;
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    final navCtrl = Get.find<DriverNavigationController>();
 
-    return Scaffold(
-      body: Stack(
-        children: [
-       
-          FlutterMap(
-            options: MapOptions(
-              initialCenter: LatLng(33.5104, 36.2783), 
-              initialZoom: 15.0,
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.senior_project.app',
-              ),
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: LatLng(33.5104, 36.2783),
-                    width: 50,
-                    height: 50,
-                    child: Icon(Icons.location_on, color: Colors.red, size: 40),
+    return Obx(() {
+      final requestData = navCtrl.activeOrderData.value;
+
+      if (requestData == null) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFFBFBFB),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ScaleTransition(
+                  scale: Tween(begin: 1.0, end: 1.2).animate(_pulseController),
+                  child: Container(
+                    padding: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.notifications_active,
+                      size: 80,
+                      color: Colors.red[300],
+                    ),
                   ),
-                ],
-              ),
-            ],
-          ),
-
-     
-          Positioned(
-            top: 50,
-            left: 20,
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () => Get.back(),
-              ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "بانتظار استقبال طلبات جديدة...",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
+        );
+      }
 
-        
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: _buildBottomPanel(width),
-          ),
-        ],
+      final String requestTag =
+          (requestData['id'] ?? requestData['data']?['id'] ?? "0").toString();
+
+      return GetBuilder<DriverTowingController>(
+        init: DriverTowingController(requestData: requestData),
+        tag: requestTag,
+        builder: (s) {
+          LatLng driverLatLng = LatLng(
+            s.driverLocation.latitude,
+            s.driverLocation.longitude,
+          );
+
+          return Scaffold(
+            body: Stack(
+              children: [
+                CustomGoogleMapWidget(
+                  driverLocation: driverLatLng,
+                  customerLocation: s.customerLocation != null
+                      ? LatLng(
+                          s.customerLocation!.latitude,
+                          s.customerLocation!.longitude,
+                        )
+                      : null,
+                  routePoints: s.routePoints,
+                  isJobStarted: isJobStarted,
+                  onMapCreated: (ctrl) {
+                    _mapController = ctrl;
+                    _mapController!.animateCamera(
+                      CameraUpdate.newLatLngZoom(driverLatLng, 15),
+                    );
+                  },
+                ),
+                Positioned(
+                  top: 50,
+                  left: 20,
+                  right: 20,
+                  child: _buildStatusStepper(s),
+                ),
+                Positioned(
+                  bottom: 110,
+                  left: 15,
+                  right: 15,
+                  child: _buildFancyInfoCard(s),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  Widget _buildStatusStepper(DriverTowingController s) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(s.statusSequence.length, (index) {
+          bool isCurrent = s.currentStatusIndex == index;
+          bool isPast = s.currentStatusIndex > index;
+          return Icon(
+            s.statusSequence[index]['icon'],
+            color: isCurrent
+                ? const Color(0xFFE55757)
+                : (isPast ? Colors.green : Colors.grey[300]),
+            size: 28,
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildBottomPanel(double width) {
+  Widget _buildFancyInfoCard(DriverTowingController s) {
     return Container(
-      width: width,
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 15)],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-       
-          Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.red.shade50,
-                child: const Icon(Icons.person, color: Colors.red),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "سامر علي",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      "هيونداي النترا - المزة",
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.phone, color: Colors.green),
-              ),
-            ],
-          ),
-          const Divider(height: 30),
-
-         
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _infoItem(Icons.route, "2.4 كم", "المسافة"),
-              _infoItem(Icons.access_time, "12 دقيقة", "الزمن"),
+              _buildStatItem(
+                Icons.social_distance,
+                "${s.distanceToCustomer ?? '--'} كم",
+                "المسافة",
+              ),
+              Container(height: 40, width: 1, color: Colors.grey[200]),
+              _buildStatItem(
+                Icons.timelapse,
+                "${s.estimatedTime ?? '--'} د",
+                "الوقت المتوقع",
+              ),
             ],
           ),
           const SizedBox(height: 20),
-
-        
-          _buildStatusStepper(),
-
-          const SizedBox(height: 20),
-
-    
-          _buildMainActionBtn(width),
+          _buildActionButton(s),
         ],
       ),
     );
   }
 
-  Widget _infoItem(IconData icon, String val, String label) {
+  Widget _buildStatItem(IconData icon, String val, String label) {
     return Column(
       children: [
-        Row(
-          children: [
-            Icon(icon, size: 16, color: Colors.red),
-            const SizedBox(width: 5),
-            Text(val, style: const TextStyle(fontWeight: FontWeight.bold)),
-          ],
+        Icon(icon, color: const Color(0xFFE55757), size: 22),
+        const SizedBox(height: 4),
+        Text(
+          val,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10)),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }
 
-  Widget _buildStatusStepper() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(taskStatuses.length, (index) {
-        bool isCurrent = index == currentStatusIndex;
-        bool isDone = index < currentStatusIndex;
-        return Column(
-          children: [
-            Icon(
-              taskStatuses[index]['icon'],
-              color: isCurrent
-                  ? Colors.red
-                  : (isDone ? Colors.green : Colors.grey.shade300),
-              size: 20,
-            ),
-            Text(
-              taskStatuses[index]['title'],
-              style: TextStyle(
-                fontSize: 8,
-                color: isCurrent ? Colors.black : Colors.grey,
-              ),
-            ),
-          ],
-        );
-      }),
-    );
-  }
+  Widget _buildActionButton(DriverTowingController s) {
+    bool isLastStep = s.currentStatusIndex == s.statusSequence.length - 1;
 
-  Widget _buildMainActionBtn(double width) {
-    bool isLast = currentStatusIndex == taskStatuses.length - 1;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: isLast ? Colors.green : const Color(0xFFE55757),
-        minimumSize: Size(width, 55),
+        backgroundColor: isLastStep
+            ? Colors.green[600]
+            : const Color(0xFFE55757),
+        minimumSize: const Size(double.infinity, 55),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
-      onPressed: () {
-        if (currentStatusIndex < taskStatuses.length - 1) {
-          setState(() => currentStatusIndex++);
+      onPressed: () async {
+        if (!isJobStarted) {
+          bool success = await s.startTowing();
+          if (success) {
+            setState(() => isJobStarted = true);
+            s.currentStatusIndex = 0;
+            s.update();
+            Get.snackbar("نجاح", "بدأت المهمة");
+          }
+        } else if (!isLastStep) {
+          String nextStatusKey =
+              s.statusSequence[s.currentStatusIndex + 1]['key'];
+          bool apiSuccess = await s.updateTowStatusAPI(nextStatusKey);
+
+          if (apiSuccess) {
+            s.currentStatusIndex++;
+            s.update();
+          } else {
+            Get.snackbar("تنبيه", "فشل تحديث الحالة");
+          }
         } else {
-          Get.back();
-          Get.snackbar("نجاح", "تمت المهمة بنجاح");
+          s.completeTowingViaSocket();
         }
       },
       child: Text(
-        isLast
-            ? "إنهاء المهمة"
-            : "تحديث إلى: ${taskStatuses[currentStatusIndex + 1]['title']}",
+        !isJobStarted
+            ? "بدء المهمة"
+            : (isLastStep
+                  ? "إنهاء المهمة"
+                  : "تحديث: ${s.statusSequence[s.currentStatusIndex + 1]['title']}"),
         style: const TextStyle(
           color: Colors.white,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
       ),

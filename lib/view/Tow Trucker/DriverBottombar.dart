@@ -14,11 +14,10 @@ class DriverBottombar extends StatelessWidget {
   );
 
   final List<Widget> screens = [
-   DriverOrdersScreen(), // DriverOrdersScreen
-    const DriverMapScreen(),
-    // DriverMapScreen
-    const DriverHistoryScreen(), // DriverHistoryScreen
-   DriverProfileScreen(), // DriverProfileScreen
+    DriverOrdersScreen(),
+    DriverMapScreen(),
+    const DriverHistoryScreen(),
+    DriverProfileScreen(),
   ];
 
   @override

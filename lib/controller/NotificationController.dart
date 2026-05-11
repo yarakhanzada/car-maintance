@@ -29,9 +29,9 @@ class NotificationController extends GetxController {
       var jsonData = response.body is String
           ? json.decode(response.body)
           : response.body;
-
+      print("Debug JSON: $jsonData");
       if (response.statusCode == 200 && jsonData['status'] == 1) {
-        var list = jsonData['data']['data'] as List;
+        var list = jsonData['data'] as List;
         notifications.assignAll(list);
         print(
           "NotificationController: Successfully fetched ${list.length} notifications",

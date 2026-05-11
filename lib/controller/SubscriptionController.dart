@@ -33,12 +33,12 @@ class SubscriptionController extends GetxController {
             ? json.decode(response.body)
             : response.body;
 
-       if (jsonData['status'] == 1 || jsonData['status'] == "1") {
-  var singleSubscription = jsonData['data']; 
-  mySubscriptions.assignAll([singleSubscription]); 
-  
-  print("Subscription loaded successfully as a list");
-} else {
+        if (jsonData['status'] == 1 || jsonData['status'] == "1") {
+          var singleSubscription = jsonData['data'];
+          mySubscriptions.assignAll([singleSubscription]);
+
+          print("Subscription loaded successfully as a list");
+        } else {
           Get.snackbar(
             "Alert",
             jsonData['message'] ?? "No active subscriptions found",
@@ -77,8 +77,6 @@ class SubscriptionController extends GetxController {
           subscriptions.assignAll(
             list.map((e) => SubscriptionModel.fromJson(e)).toList(),
           );
-
-          Get.snackbar("Success", jsonData['message'] ?? "Loaded successfully");
         } else {
           Get.snackbar("Alert", jsonData['message'] ?? "Failed to load data");
         }
@@ -120,7 +118,7 @@ class SubscriptionController extends GetxController {
             backgroundColor: Colors.grey.withOpacity(0.1),
           );
           await Get.find<SubscriptionController>().getMySubscriptions();
-  
+
           Get.back();
         }
       } else {
@@ -133,8 +131,6 @@ class SubscriptionController extends GetxController {
       isSubscribing(false);
     }
   }
-
-  
 
   void _showSuccessSnackBar(String message) {
     Get.snackbar(
