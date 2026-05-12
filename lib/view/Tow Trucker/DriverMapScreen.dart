@@ -14,7 +14,6 @@ class _DriverMapScreenState extends State<DriverMapScreen>
     with TickerProviderStateMixin {
   GoogleMapController? _mapController;
   late AnimationController _pulseController;
-  bool isJobStarted = false;
 
   @override
   void initState() {
@@ -39,47 +38,18 @@ class _DriverMapScreenState extends State<DriverMapScreen>
       final requestData = navCtrl.activeOrderData.value;
 
       if (requestData == null) {
-        return Scaffold(
-          backgroundColor: const Color(0xFFFBFBFB),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ScaleTransition(
-                  scale: Tween(begin: 1.0, end: 1.2).animate(_pulseController),
-                  child: Container(
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.notifications_active,
-                      size: 80,
-                      color: Colors.red[300],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "بانتظار استقبال طلبات جديدة...",
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+        return _buildEmptyState();
       }
 
       final String requestTag =
           (requestData['id'] ?? requestData['data']?['id'] ?? "0").toString();
+      final s = Get.put(
+        DriverTowingController(requestData: requestData),
+        tag: requestTag,
+        permanent: false,
+      );
 
       return GetBuilder<DriverTowingController>(
-        init: DriverTowingController(requestData: requestData),
         tag: requestTag,
         builder: (s) {
           LatLng driverLatLng = LatLng(
@@ -92,14 +62,9 @@ class _DriverMapScreenState extends State<DriverMapScreen>
               children: [
                 CustomGoogleMapWidget(
                   driverLocation: driverLatLng,
-                  customerLocation: s.customerLocation != null
-                      ? LatLng(
-                          s.customerLocation!.latitude,
-                          s.customerLocation!.longitude,
-                        )
-                      : null,
+                  customerLocation: s.customerLocation,
                   routePoints: s.routePoints,
-                  isJobStarted: isJobStarted,
+                  isJobStarted: s.isJobStarted,
                   onMapCreated: (ctrl) {
                     _mapController = ctrl;
                     _mapController!.animateCamera(
@@ -127,13 +92,51 @@ class _DriverMapScreenState extends State<DriverMapScreen>
     });
   }
 
+  // دالة الشاشة الفارغة
+  Widget _buildEmptyState() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFBFBFB),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ScaleTransition(
+              scale: Tween(begin: 1.0, end: 1.2).animate(_pulseController),
+              child: Container(
+                padding: const EdgeInsets.all(30),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.notifications_active,
+                  size: 80,
+                  color: Colors.red[300],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "بانتظار استقبال طلبات جديدة...",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildStatusStepper(DriverTowingController s) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -158,7 +161,7 @@ class _DriverMapScreenState extends State<DriverMapScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 15)],
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 15)],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -212,23 +215,16 @@ class _DriverMapScreenState extends State<DriverMapScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
       onPressed: () async {
-        if (!isJobStarted) {
+        if (!s.isJobStarted) {
           bool success = await s.startTowing();
           if (success) {
-            setState(() => isJobStarted = true);
-            s.currentStatusIndex = 0;
-            s.update();
             Get.snackbar("نجاح", "بدأت المهمة");
           }
         } else if (!isLastStep) {
           String nextStatusKey =
               s.statusSequence[s.currentStatusIndex + 1]['key'];
           bool apiSuccess = await s.updateTowStatusAPI(nextStatusKey);
-
-          if (apiSuccess) {
-            s.currentStatusIndex++;
-            s.update();
-          } else {
+          if (!apiSuccess) {
             Get.snackbar("تنبيه", "فشل تحديث الحالة");
           }
         } else {
@@ -236,7 +232,7 @@ class _DriverMapScreenState extends State<DriverMapScreen>
         }
       },
       child: Text(
-        !isJobStarted
+        !s.isJobStarted
             ? "بدء المهمة"
             : (isLastStep
                   ? "إنهاء المهمة"

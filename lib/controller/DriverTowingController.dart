@@ -1,16 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:senior_project/controller/DriverNavigationController.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/api_helper.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../services/token_service.dart';
+import '../utils/map_helper.dart';
 
 class DriverTowingController extends GetxController {
   final Map<String, dynamic> requestData;
@@ -26,6 +24,7 @@ class DriverTowingController extends GetxController {
   late String driverId;
   late String requestId;
   bool isConnected = false;
+  bool isJobStarted = false;
   String? distanceToCustomer;
   String? estimatedTime;
 
@@ -52,6 +51,7 @@ class DriverTowingController extends GetxController {
       "icon": Icons.home_repair_service,
     },
   ];
+
   DriverTowingController({required this.requestData});
 
   @override
@@ -62,31 +62,10 @@ class DriverTowingController extends GetxController {
     initSocket();
   }
 
-  double _calculateAirDistance(LatLng pos1, LatLng pos2) {
-    const double R = 6371000; // نصف قطر الأرض بالأمتار
-
-    double lat1 = pos1.latitude * math.pi / 180;
-    double lat2 = pos2.latitude * math.pi / 180;
-    double dLat = (pos2.latitude - pos1.latitude) * math.pi / 180;
-    double dLng = (pos2.longitude - pos1.longitude) * math.pi / 180;
-
-    double a =
-        math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(lat1) *
-            math.cos(lat2) *
-            math.sin(dLng / 2) *
-            math.sin(dLng / 2);
-
-    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-
-    return R * c; // المسافة بالأمتار
-  }
-
   void _extractIds() {
     final data = requestData.containsKey('data')
         ? requestData['data']
         : requestData;
-
     requestId = (data['id'] ?? data['towing_request']?['id'] ?? "0").toString();
     customerId =
         (data['user_id'] ??
@@ -95,31 +74,30 @@ class DriverTowingController extends GetxController {
             .toString();
     driverId = (data['towing_request']?['tow_truck_id'] ?? "0").toString();
 
+    String currentStatus = data['status'] ?? "";
+
+    if (currentStatus == "tow_assigned") {
+      isJobStarted = false;
+      currentStatusIndex = 0;
+    } else {
+      isJobStarted = true;
+      currentStatusIndex = statusSequence.indexWhere(
+        (element) => element['key'] == currentStatus,
+      );
+
+      if (currentStatusIndex == -1) currentStatusIndex = 0;
+    }
     if (data['towing_request']?['location'] != null) {
       customerLocation = LatLng(
         (data['towing_request']['location']['latitude'] as num).toDouble(),
         (data['towing_request']['location']['longitude'] as num).toDouble(),
       );
-      print(
-        "📍 Customer Location Loaded: ${customerLocation!.latitude}, ${customerLocation!.longitude}",
-      );
     }
-
-    // 3. ضبط موقع السائق  على موقع الشركة (Workshop)
-    driverLocation = const LatLng(33.5138, 36.2765);
-
     update();
   }
 
   Future<void> initLocationServices() async {
-    if (socket != null && socket!.connected) {
-      socket!.emit('towtrucklocationupdate', {
-        'customer_id': customerId,
-        'driver_id': driverId,
-        'latitude': driverLocation.latitude,
-        'longitude': driverLocation.longitude,
-      });
-    }
+    _sendLocationToSocket();
 
     positionStream =
         Geolocator.getPositionStream(
@@ -129,20 +107,40 @@ class DriverTowingController extends GetxController {
           ),
         ).listen((Position pos) {
           driverLocation = LatLng(pos.latitude, pos.longitude);
-
-          if (socket != null && socket!.connected) {
-            socket!.emit('towtrucklocationupdate', {
-              'customer_id': customerId,
-              'driver_id': driverId,
-              'latitude': driverLocation.latitude,
-              'longitude': driverLocation.longitude,
-            });
-          }
-
-          _calculateRoute();
-          calculateRouteData();
-          update();
+          _sendLocationToSocket();
+          _updateMapData();
         });
+  }
+
+  void _sendLocationToSocket() {
+    if (socket != null && socket!.connected) {
+      socket!.emit('towtrucklocationupdate', {
+        'customer_id': customerId,
+        'driver_id': driverId,
+        'latitude': driverLocation.latitude,
+        'longitude': driverLocation.longitude,
+      });
+    }
+  }
+
+  Future<void> _updateMapData() async {
+    if (customerLocation == null) return;
+
+    final data = await MapHelper.getRouteData(
+      driverLocation,
+      customerLocation!,
+    );
+    if (data != null) {
+      distanceToCustomer = data['distance'];
+      estimatedTime = data['duration'];
+    }
+
+    routePoints = await MapHelper.getPolylinePoints(
+      driverLocation,
+      customerLocation!,
+    );
+
+    update();
   }
 
   Future<void> initSocket() async {
@@ -155,7 +153,6 @@ class DriverTowingController extends GetxController {
           .setAuth({'token': 'Bearer $token'})
           .build(),
     );
-
     _setupSocketListeners();
     socket!.connect();
   }
@@ -175,59 +172,52 @@ class DriverTowingController extends GetxController {
         (data['latitude'] as num).toDouble(),
         (data['longitude'] as num).toDouble(),
       );
-      calculateRouteData();
-      _calculateRoute();
-      update();
+      _updateMapData();
     });
 
     socket!.on('tracking_ended', (data) async {
       await completeTowingAPI();
-
       Get.find<DriverNavigationController>().activeOrderData.value = null;
       Get.snackbar("نجاح", "تم إنهاء المهمة وإغلاق التتبع");
       update();
     });
 
-    socket!.on('tow_complete_rejected', (data) {
-      // جلب المسافة الحالية والمسموحة من البيانات القادمة من السيرفر
-      int currentDist = data['current_distance_meters'] ?? 0;
-      int maxDist = data['max_allowed_meters'] ?? 200;
-      String serverMessage = data['message'] ?? "أنت بعيد جداً عن موقع الزبون";
-
-      Get.defaultDialog(
-        title: "تعذر إنهاء المهمة",
-        titleStyle: const TextStyle(
-          color: Color(0xFFE55757),
-          fontWeight: FontWeight.bold,
-        ),
-        content: Column(
-          children: [
-            const Icon(Icons.location_off, size: 50, color: Color(0xFFE55757)),
-            const SizedBox(height: 15),
-            Text(
-              serverMessage,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const Divider(),
-            // عرض المسافات بشكل توضيحي للسائق
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildDistanceInfo("المسافة الحالية", "$currentDist م"),
-                _buildDistanceInfo("النطاق المسموح", "$maxDist م"),
-              ],
-            ),
-          ],
-        ),
-        textConfirm: "حسناً",
-        confirmTextColor: Colors.white,
-        buttonColor: const Color(0xFFE55757),
-        onConfirm: () => Get.back(),
-      );
-    });
-
+    socket!.on('tow_complete_rejected', (data) => _showRejectDialog(data));
     socket!.onDisconnect((_) => isConnected = false);
+  }
+
+  void _showRejectDialog(dynamic data) {
+    int currentDist = data['current_distance_meters'] ?? 0;
+    int maxDist = data['max_allowed_meters'] ?? 200;
+    Get.defaultDialog(
+      title: "تعذر إنهاء المهمة",
+      titleStyle: const TextStyle(
+        color: Color(0xFFE55757),
+        fontWeight: FontWeight.bold,
+      ),
+      content: Column(
+        children: [
+          const Icon(Icons.location_off, size: 50, color: Color(0xFFE55757)),
+          const SizedBox(height: 15),
+          Text(
+            data['message'] ?? "أنت بعيد جداً عن موقع الزبون",
+            textAlign: TextAlign.center,
+          ),
+          const Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildDistanceInfo("المسافة الحالية", "$currentDist م"),
+              _buildDistanceInfo("النطاق المسموح", "$maxDist م"),
+            ],
+          ),
+        ],
+      ),
+      textConfirm: "حسناً",
+      confirmTextColor: Colors.white,
+      buttonColor: const Color(0xFFE55757),
+      onConfirm: () => Get.back(),
+    );
   }
 
   Widget _buildDistanceInfo(String label, String value) {
@@ -241,46 +231,6 @@ class DriverTowingController extends GetxController {
       ],
     );
   }
-  // --- خدمات  والمسار ---
-
-  Future<void> _calculateRoute() async {
-    if (customerLocation == null) return;
-    final url =
-        'https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ApiConfig.openRouteApiKey}&start=${driverLocation.longitude},${driverLocation.latitude}&end=${customerLocation!.longitude},${customerLocation!.latitude}';
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List coords = data['features'][0]['geometry']['coordinates'];
-        routePoints = coords
-            .map((c) => LatLng(c[1] as double, c[0] as double))
-            .toList();
-        update();
-      }
-    } catch (e) {
-      print("Error route: $e");
-    }
-  }
-
-  Future<void> calculateRouteData() async {
-    if (customerLocation == null) return;
-    final url =
-        'https://router.project-osrm.org/route/v1/driving/${driverLocation.longitude},${driverLocation.latitude};${customerLocation!.longitude},${customerLocation!.latitude}?overview=false';
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['routes'].isNotEmpty) {
-          distanceToCustomer = (data['routes'][0]['distance'] / 1000)
-              .toStringAsFixed(1);
-          estimatedTime = (data['routes'][0]['duration'] / 60).toStringAsFixed(
-            0,
-          );
-          update();
-        }
-      }
-    } catch (e) {}
-  }
 
   // --- APIS ---
 
@@ -288,31 +238,43 @@ class DriverTowingController extends GetxController {
     final id =
         (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
             .toString();
+
     final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/start";
 
     try {
       final response = await ApiHelper.post(url, {
         "latitude": driverLocation.latitude,
+
         "longitude": driverLocation.longitude,
       });
 
       print(" [RESPONSE StartTowing] Status: ${response.statusCode}");
+
       print(" [BODY StartTowing]: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        isJobStarted = true;
+        currentStatusIndex = 0;
+        update();
         return true;
       }
     } catch (e) {
       print(" [EXCEPTION START]: $e");
     }
+
     return false;
   }
 
   Future<bool> updateTowStatusAPI(String status) async {
+    print(
+      "📍 My Actual Location: ${driverLocation.latitude}, ${driverLocation.longitude}",
+    );
     final id =
         (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
             .toString();
+
     final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/status";
+
     print(" Sending to API -> ID: $id, Status: $status");
 
     print(" [ UPDATE STATUS] URL: $url | New Status: $status");
@@ -320,19 +282,30 @@ class DriverTowingController extends GetxController {
     try {
       final response = await ApiHelper.post(url, {
         "status": status,
+
         "latitude": driverLocation.latitude,
+
         "longitude": driverLocation.longitude,
       });
 
       print(" [RESPONSE UpdateTowStatus] Status: ${response.statusCode}");
+
       print(" [BODY UpdateTowStatus]: ${response.body}");
 
       if (response.statusCode == 200) {
+        int nextIndex = statusSequence.indexWhere(
+          (element) => element['key'] == status,
+        );
+        if (nextIndex != -1) {
+          currentStatusIndex = nextIndex;
+          update();
+        }
         return true;
       }
     } catch (e) {
       print(" [EXCEPTION STATUS]: $e");
     }
+
     return false;
   }
 
@@ -340,15 +313,18 @@ class DriverTowingController extends GetxController {
     final id =
         (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
             .toString();
+
     final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/complete";
 
     try {
       final response = await ApiHelper.post(url, {
         "latitude": driverLocation.latitude,
+
         "longitude": driverLocation.longitude,
       });
 
       print(" [RESPONSE CompleteTowingAPI] Status: ${response.statusCode}");
+
       print(" [BODY CompleteTowingAPI]: ${response.body}");
 
       if (response.statusCode == 200) {
@@ -357,10 +333,10 @@ class DriverTowingController extends GetxController {
     } catch (e) {
       print(" [EXCEPTION COMPLETE]: $e");
     }
+
     return false;
   }
 
-  // ---  الإنهاء عبر السوكيت ---
   void completeTowingViaSocket() {
     if (socket != null && socket!.connected) {
       socket!.emit('tow_completed', {
