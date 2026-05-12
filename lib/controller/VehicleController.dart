@@ -71,19 +71,14 @@ class VehicleController extends GetxController {
     required String brand,
     required String model,
     required String year,
-    required String chassis,
+    required String plate,
   }) async {
     try {
       isLoading(true);
 
       final response = await ApiHelper.post(
         "${ApiConfig.baseUrl}/customer/vehicles",
-        {
-          "brand": brand,
-          "model": model,
-          "year": year,
-          "chassis_number": chassis,
-        },
+        {"brand": brand, "model": model, "year": year, "plate_number": plate},
       );
 
       final jsonData = jsonDecode(response.body);

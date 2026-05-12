@@ -19,7 +19,7 @@ class _MyGarageScreenState extends State<MyGarageScreen> {
   final TextEditingController brandController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController yearController = TextEditingController();
-  final TextEditingController chassisController = TextEditingController();
+  final TextEditingController plateController = TextEditingController();
 
   int? openedVehicleId;
 
@@ -27,7 +27,7 @@ class _MyGarageScreenState extends State<MyGarageScreen> {
     brandController.clear();
     modelController.clear();
     yearController.clear();
-    chassisController.clear();
+    plateController.clear();
   }
 
   @override
@@ -129,7 +129,7 @@ class _MyGarageScreenState extends State<MyGarageScreen> {
                                 brand: vehicle.brand,
                                 model: vehicle.model,
                                 year: vehicle.year.toString(),
-                                chassis: vehicle.chassisNumber,
+                                chassis: vehicle.plate_number,
                                 isOpened: openedVehicleId == vehicle.id,
                                 isSelected:
                                     controller.selectedVehicleId.value ==
@@ -265,8 +265,8 @@ class _MyGarageScreenState extends State<MyGarageScreen> {
                       ),
                       const SizedBox(height: 12),
                       GarageInputField(
-                        controller: chassisController,
-                        hint: "Chassis Number / Plate",
+                        controller: plateController,
+                        hint: "Plate Number ",
                         icon: Icons.tag_rounded,
                       ),
                     ],
@@ -295,7 +295,7 @@ class _MyGarageScreenState extends State<MyGarageScreen> {
                                 brand: brandController.text,
                                 model: modelController.text,
                                 year: yearController.text,
-                                chassis: chassisController.text,
+                                plate: plateController.text,
                               );
                               Navigator.pop(context);
                             } else {

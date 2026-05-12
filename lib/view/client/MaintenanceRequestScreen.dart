@@ -111,7 +111,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
             return DropdownMenuItem<int>(
               value: vehicle.id,
               child: Text(
-                "${vehicle.brand} ${vehicle.model} (${vehicle.chassisNumber})",
+                "${vehicle.brand} ${vehicle.model} (${vehicle.plate_number})",
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,

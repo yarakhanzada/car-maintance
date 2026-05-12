@@ -3,14 +3,14 @@ class VehicleModel {
   final String brand;
   final String model;
   final String year;
-  final String chassisNumber;
+  final String plate_number;
 
   VehicleModel({
     required this.id,
     required this.brand,
     required this.model,
     required this.year,
-    required this.chassisNumber,
+    required this.plate_number,
   });
 
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
@@ -19,7 +19,7 @@ class VehicleModel {
       brand: json['brand'],
       model: json['model'],
       year: json['year'].toString(),
-      chassisNumber: json['chassis_number'] ?? '',
+      plate_number: json['plate_number'] ?? '',
     );
   }
 }
