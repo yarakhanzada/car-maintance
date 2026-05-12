@@ -7,8 +7,8 @@ class TowRequest {
   final String carBrand;
   final String carModel;
   final String carYear;
-  final String chassisNumber;
-  final double lat; 
+  final String plateNumber;
+  final double lat;
   final double lng;
 
   TowRequest({
@@ -20,7 +20,7 @@ class TowRequest {
     required this.carBrand,
     required this.carModel,
     required this.carYear,
-    required this.chassisNumber,
+    required this.plateNumber,
     required this.lat,
     required this.lng,
   });
@@ -39,7 +39,7 @@ class TowRequest {
       carBrand: vehicle?['brand'] ?? "",
       carModel: vehicle?['model'] ?? "",
       carYear: vehicle?['year'] ?? "",
-      chassisNumber: vehicle?['chassis_number'] ?? "",
+      plateNumber: vehicle?['plate_number'] ?? "",
       lat: (location?['latitude'] as num?)?.toDouble() ?? 0.0,
       lng: (location?['longitude'] as num?)?.toDouble() ?? 0.0,
     );

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -59,6 +60,26 @@ class DriverTowingController extends GetxController {
     _extractIds();
     initLocationServices();
     initSocket();
+  }
+
+  double _calculateAirDistance(LatLng pos1, LatLng pos2) {
+    const double R = 6371000; // نصف قطر الأرض بالأمتار
+
+    double lat1 = pos1.latitude * math.pi / 180;
+    double lat2 = pos2.latitude * math.pi / 180;
+    double dLat = (pos2.latitude - pos1.latitude) * math.pi / 180;
+    double dLng = (pos2.longitude - pos1.longitude) * math.pi / 180;
+
+    double a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1) *
+            math.cos(lat2) *
+            math.sin(dLng / 2) *
+            math.sin(dLng / 2);
+
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    return R * c; // المسافة بالأمتار
   }
 
   void _extractIds() {
@@ -168,10 +189,39 @@ class DriverTowingController extends GetxController {
     });
 
     socket!.on('tow_complete_rejected', (data) {
+      // جلب المسافة الحالية والمسموحة من البيانات القادمة من السيرفر
+      int currentDist = data['current_distance_meters'] ?? 0;
+      int maxDist = data['max_allowed_meters'] ?? 200;
+      String serverMessage = data['message'] ?? "أنت بعيد جداً عن موقع الزبون";
+
       Get.defaultDialog(
-        title: "تنبيه",
-        middleText: data['message'] ?? "أنت بعيد جداً عن موقع الزبون للإنهاء",
+        title: "تعذر إنهاء المهمة",
+        titleStyle: const TextStyle(
+          color: Color(0xFFE55757),
+          fontWeight: FontWeight.bold,
+        ),
+        content: Column(
+          children: [
+            const Icon(Icons.location_off, size: 50, color: Color(0xFFE55757)),
+            const SizedBox(height: 15),
+            Text(
+              serverMessage,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const Divider(),
+            // عرض المسافات بشكل توضيحي للسائق
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildDistanceInfo("المسافة الحالية", "$currentDist م"),
+                _buildDistanceInfo("النطاق المسموح", "$maxDist م"),
+              ],
+            ),
+          ],
+        ),
         textConfirm: "حسناً",
+        confirmTextColor: Colors.white,
         buttonColor: const Color(0xFFE55757),
         onConfirm: () => Get.back(),
       );
@@ -180,6 +230,17 @@ class DriverTowingController extends GetxController {
     socket!.onDisconnect((_) => isConnected = false);
   }
 
+  Widget _buildDistanceInfo(String label, String value) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
   // --- خدمات  والمسار ---
 
   Future<void> _calculateRoute() async {
