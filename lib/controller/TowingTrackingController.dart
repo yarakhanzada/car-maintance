@@ -18,8 +18,9 @@ class TowingTrackingController {
   List<LatLng> routePoints = [];
   LatLng userLocation = const LatLng(33.5138, 36.2765);
 
-  String liveDistance = "-- كم";
-  String liveDuration = "-- دقيقة";
+  // تم تعديلهم ليتم تهيئتهم في الـ Constructor
+  late String liveDistance;
+  late String liveDuration;
 
   StreamSubscription<Position>? positionStream;
   Function? onUpdate;
@@ -27,7 +28,27 @@ class TowingTrackingController {
   late String customerId;
   late String driverId;
 
-  TowingTrackingController({required this.requestData, this.onUpdate});
+  TowingTrackingController({required this.requestData, this.onUpdate}) {
+    // استخراج المسافة والوقت المقدر من بيانات الطلب فوراً
+    _initializeEstimatedStats();
+  }
+
+  // دالة لاستخراج البيانات المقدرة قبل قبول السائق للطلب
+  void _initializeEstimatedStats() {
+    final data = requestData.containsKey('data')
+        ? requestData['data']
+        : requestData;
+
+    // سحب المسافة والوقت المقدر من الـ API Response الأصلي
+    final double initialDist = (data['distance_km'] as num?)?.toDouble() ?? 0.0;
+    final int initialTime =
+        (data['estimated_time_minutes'] as num?)?.toInt() ?? 0;
+
+    liveDistance = initialDist > 0
+        ? "${initialDist.toStringAsFixed(1)} كم"
+        : "-- كم";
+    liveDuration = initialTime > 0 ? "$initialTime دقيقة" : "-- دقيقة";
+  }
 
   Future<void> initLocationServices() async {
     try {
@@ -71,7 +92,7 @@ class TowingTrackingController {
 
       final token = await TokenService.getToken() ?? '';
       if (token.isEmpty) {
-        print(" Token is empty. Cannot connect.");
+        print("⚠️ Token is empty. Cannot connect.");
         return;
       }
 
@@ -86,6 +107,7 @@ class TowingTrackingController {
                   requestData['user_id'] ??
                   "0")
               .toString();
+
       driverId =
           (serviceRequest?['tow_truck_id'] ??
                   data['assigned_tow_truck_id'] ??
@@ -110,7 +132,7 @@ class TowingTrackingController {
       _setupSocketListeners();
       socket!.connect();
     } catch (e) {
-      print(" Error in initSocket: $e");
+      print("❌ Error in initSocket: $e");
     }
   }
 
@@ -118,7 +140,7 @@ class TowingTrackingController {
     if (socket == null) return;
 
     socket!.onConnect((_) {
-      print(' Connected to Socket server');
+      print('🚀 Connected to Socket server');
       socket!.emit('subscribe_to_driver', {
         'customer_id': customerId,
         'driver_id': driverId,
@@ -139,6 +161,7 @@ class TowingTrackingController {
       );
 
       if (towTruckLocation != null) {
+        // تحديث البيانات من "مقـدرة" إلى "لحظيـة" بناءً على موقع السائق
         await updateRouteData(towTruckLocation!);
       }
 
@@ -165,6 +188,7 @@ class TowingTrackingController {
         liveDistance = "${routeData['distance']} كم";
         liveDuration = "${routeData['duration']} دقيقة";
       } else {
+        // حساب المسافة الهوائية كخيار احتياطي (Air Distance)
         double airDist =
             MapHelper.calculateAirDistance(truckPos, userLocation) / 1000;
         liveDistance = "${airDist.toStringAsFixed(1)} كم";
@@ -172,7 +196,7 @@ class TowingTrackingController {
 
       if (onUpdate != null) onUpdate!();
     } catch (e) {
-      print(" Error updating route data: $e");
+      print("❌ Error updating route data: $e");
     }
   }
 
@@ -187,7 +211,7 @@ class TowingTrackingController {
         socket!.disconnect().connect();
       }
     } catch (e) {
-      print(" Error reconnecting: $e");
+      print("❌ Error reconnecting: $e");
     }
   }
 
