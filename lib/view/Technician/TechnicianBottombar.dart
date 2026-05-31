@@ -7,7 +7,6 @@ import 'package:senior_project/view/Technician/NewTasksScreen.dart';
 import 'package:senior_project/view/Technician/TaskHistoryScreen.dart';
 import 'package:senior_project/view/Technician/TechnicianProfileScreen.dart';
 
-
 class TechNavigationController extends GetxController {
   var selectedIndex = 0.obs;
 }
@@ -19,9 +18,9 @@ class TechnicianBottombar extends StatelessWidget {
 
   final List<Widget> screens = [
     NewTasksScreen(),
-    const InProgressTaskScreen(),
-    const TaskHistoryScreen(),
-    const TechnicianProfileScreen(),
+    InProgressTaskScreen(),
+    TaskHistoryScreen(),
+    TechnicianProfileScreen(),
   ];
 
   @override
@@ -31,7 +30,6 @@ class TechnicianBottombar extends StatelessWidget {
       body: Obx(() => screens[controller.selectedIndex.value]),
 
       bottomNavigationBar: Container(
-        // نفس التصميم السابق تماماً: انحناء 25 وشفافية 0.6
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.6),
           borderRadius: const BorderRadius.only(
@@ -48,12 +46,7 @@ class TechnicianBottombar extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                15,
-                6,
-                15,
-                12,
-              ), 
+              padding: const EdgeInsets.fromLTRB(15, 6, 15, 12),
               child: Obx(
                 () => GNav(
                   gap: 6,
@@ -69,24 +62,15 @@ class TechnicianBottombar extends StatelessWidget {
                   selectedIndex: controller.selectedIndex.value,
                   onTabChange: (index) =>
                       controller.selectedIndex.value = index,
-            
+
                   tabs: [
-                    const GButton(
-                      icon: Icons.bolt_rounded,
-                      text: 'New Tasks',
-                    ), 
+                    const GButton(icon: Icons.bolt_rounded, text: 'New Tasks'),
                     const GButton(
                       icon: Icons.build_circle_rounded,
                       text: 'In Progress',
-                    ), 
-                    const GButton(
-                      icon: Icons.history_rounded,
-                      text: 'History',
-                    ), 
-                    const GButton(
-                      icon: Icons.person_rounded,
-                      text: 'Profile',
-                    ), 
+                    ),
+                    const GButton(icon: Icons.history_rounded, text: 'History'),
+                    const GButton(icon: Icons.person_rounded, text: 'Profile'),
                   ],
                 ),
               ),
