@@ -5,8 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:senior_project/model/tow_history_model.dart';
 import 'package:senior_project/services/api_config.dart';
 
-import '../services/api_helper.dart';
-
+import '../../services/api_helper.dart';
 
 class DriverHistoryController extends GetxController {
   var historyList = <TowRequest>[].obs;
@@ -22,17 +21,19 @@ class DriverHistoryController extends GetxController {
   Future<void> fetchHistory() async {
     isLoading.value = true;
     try {
-      final response = await ApiHelper.get("${ApiConfig.baseUrl}/v1/driver/tow-requests/history");
+      final response = await ApiHelper.get(
+        "${ApiConfig.baseUrl}/v1/driver/tow-requests/history",
+      );
 
-     final dataa= jsonDecode(response.body);
+      final dataa = jsonDecode(response.body);
 
       if (response.statusCode == 200 && dataa["status"] == 1) {
         List<dynamic> data = dataa['data'];
-        
+
         var list = data.map((e) => TowRequest.fromJson(e)).toList();
-        
+
         historyList.assignAll(list);
-        
+
         for (var trip in list) {
           _fetchDetailedAddress(trip);
         }
@@ -55,8 +56,10 @@ class DriverHistoryController extends GetxController {
         Placemark p = placemarks[0];
         String city = p.locality ?? "Damascus";
         String area = p.subLocality ?? "";
-        
-        addressCache[trip.towingRequestId] = area.isNotEmpty ? "$city, $area" : city;
+
+        addressCache[trip.towingRequestId] = area.isNotEmpty
+            ? "$city, $area"
+            : city;
       }
     } catch (e) {
       addressCache[trip.towingRequestId] = "Location Identified";

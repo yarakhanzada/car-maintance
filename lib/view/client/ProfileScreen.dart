@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/SubscriptionController.dart';
-import '../../controller/profile_controller.dart';
+import 'package:senior_project/controller/client%20controller/SubscriptionController.dart';
+import 'package:senior_project/controller/client%20controller/profile_controller.dart';
 import '../../controller/logout_controller.dart';
 import 'EditProfileScreen.dart';
 import 'ServiceHistoryScreen.dart';
@@ -14,7 +14,9 @@ class ProfileScreen extends StatelessWidget {
 
   final ProfileController controller = Get.put(ProfileController());
   final LogoutController logoutController = Get.put(LogoutController());
-  final SubscriptionController subscriptionController = Get.put(SubscriptionController());
+  final SubscriptionController subscriptionController = Get.put(
+    SubscriptionController(),
+  );
 
   List<Color> _getPlanColors(String planName) {
     String name = planName.toLowerCase();
@@ -121,7 +123,11 @@ class ProfileScreen extends StatelessWidget {
           children: [
             Text(
               user.name ?? "",
-              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+              style: const TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A1A1A),
+              ),
             ),
             Text(
               user.email ?? "",
@@ -135,17 +141,20 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildSubscriptionCard(BuildContext context, double width) {
     return Obx(() {
-      if (subscriptionController.isLoading.value && subscriptionController.mySubscriptions.isEmpty) {
+      if (subscriptionController.isLoading.value &&
+          subscriptionController.mySubscriptions.isEmpty) {
         return const Center(child: CircularProgressIndicator());
       }
-      if (subscriptionController.mySubscriptions.isEmpty) return _buildEmptySubscription(width);
+      if (subscriptionController.mySubscriptions.isEmpty)
+        return _buildEmptySubscription(width);
 
       final mySub = subscriptionController.mySubscriptions.first;
       final planDetails = mySub?['subscription'];
       if (planDetails == null) return _buildEmptySubscription(width);
 
       final String planName = (planDetails['name'] ?? "Plan").toString();
-      final String discount = (planDetails['discount_percentage'] ?? "0").toString();
+      final String discount = (planDetails['discount_percentage'] ?? "0")
+          .toString();
       String rawDate = (mySub['end_date'] ?? "").toString();
       String formattedDate = "N/A";
 
@@ -206,7 +215,11 @@ class ProfileScreen extends StatelessWidget {
                           fontSize: 14,
                         ),
                       ),
-                      const Icon(Icons.auto_awesome, color: Colors.white70, size: 28),
+                      const Icon(
+                        Icons.auto_awesome,
+                        color: Colors.white70,
+                        size: 28,
+                      ),
                     ],
                   ),
                   const Spacer(),
@@ -221,7 +234,12 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         _buildInfoItem(Icons.percent, "$discount% Off"),
                         const VerticalDivider(color: Colors.white24, width: 20),
-                        Expanded(child: _buildInfoItem(Icons.calendar_today, "Ends: $formattedDate")),
+                        Expanded(
+                          child: _buildInfoItem(
+                            Icons.calendar_today,
+                            "Ends: $formattedDate",
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -243,7 +261,11 @@ class ProfileScreen extends StatelessWidget {
         Flexible(
           child: Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -252,81 +274,100 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildLogoutTile() {
-return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(16), 
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(22),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.02),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        )
-      ],
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 42,   
-          height: 42, 
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA),
-            borderRadius: BorderRadius.circular(12),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: const Center(
-            child: LogoutWidget(), 
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FA),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Center(child: LogoutWidget()),
           ),
-        ),
-        const SizedBox(width: 15),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Logout",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Color(0xFF1A1A1A),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Logout",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xFF1A1A1A),
+                  ),
                 ),
-              ),
-              Text(
-                "Sign out of your account",
-                style: TextStyle(
-                  color: Colors.grey.shade500,
-                  fontSize: 12,
+                Text(
+                  "Sign out of your account",
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
   }
 
-  Widget _buildMenuTile({required IconData icon, required String title, required String subtitle, required VoidCallback onTap}) {
+  Widget _buildMenuTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ListTile(
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 2),
         leading: Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: const Color(0xFFF5F5F7), borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5F7),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Icon(icon, color: Colors.red, size: 22),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 11.5, color: Colors.grey)),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.black12),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(fontSize: 11.5, color: Colors.grey),
+        ),
+        trailing: const Icon(
+          Icons.arrow_forward_ios_rounded,
+          size: 12,
+          color: Colors.black12,
+        ),
       ),
     );
   }
@@ -334,7 +375,15 @@ return Container(
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-      child: Text(title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black38, letterSpacing: 1.2)),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: Colors.black38,
+          letterSpacing: 1.2,
+        ),
+      ),
     );
   }
 
@@ -342,49 +391,52 @@ return Container(
     return Container(
       width: width,
       padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
-    child: Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: const BoxDecoration(
-            color: Color(0xFFFEEAEA), // نفس درجة الأحمر الخفيف بالصورة
-            shape: BoxShape.circle,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFEEAEA), // نفس درجة الأحمر الخفيف بالصورة
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.account_balance_wallet_rounded,
+              color: Color(0xFFE55757),
+              size: 24,
+            ),
           ),
-          child: const Icon(
-            Icons.account_balance_wallet_rounded,
-            color: Color(0xFFE55757),
-            size: 24,
-          ),
-        ),
-        const SizedBox(width: 15),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "No Active Plan",
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  color: Color(0xFF1A1D26),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "No Active Plan",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    color: Color(0xFF1A1D26),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "Subscribe to one of our available plans to unlock premium features",
-                style: TextStyle(
-                  color: const Color(0xFF2D3243).withOpacity(0.5),
-                  fontSize: 12,
-                  height: 1.4,
+                const SizedBox(height: 4),
+                Text(
+                  "Subscribe to one of our available plans to unlock premium features",
+                  style: TextStyle(
+                    color: const Color(0xFF2D3243).withOpacity(0.5),
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
+        ],
+      ),
     );
   }
 
@@ -395,7 +447,10 @@ return Container(
       child: Container(
         width: 250,
         height: 250,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFFE55757).withOpacity(0.04)),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFFE55757).withOpacity(0.04),
+        ),
       ),
     );
   }

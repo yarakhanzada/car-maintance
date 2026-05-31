@@ -1,8 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controller/edit_profile_controller.dart';
+import '../../controller/client controller/edit_profile_controller.dart';
 
 class EditProfileScreen extends StatelessWidget {
   EditProfileScreen({super.key});
@@ -27,8 +25,7 @@ class EditProfileScreen extends StatelessWidget {
                     _buildModernHeader(context, width),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: width * 0.06),
+                        padding: EdgeInsets.symmetric(horizontal: width * 0.06),
                         child: Column(
                           children: [
                             const SizedBox(height: 10),
@@ -111,10 +108,7 @@ class EditProfileScreen extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           gradient: const LinearGradient(
-            colors: [
-              Color(0xFFE55757),
-              Color(0xFFEF8E8E),
-            ],
+            colors: [Color(0xFFE55757), Color(0xFFEF8E8E)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -130,8 +124,7 @@ class EditProfileScreen extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(24),
-            onTap:
-                controller.isLoading.value ? null : controller.updateProfile,
+            onTap: controller.isLoading.value ? null : controller.updateProfile,
             child: Center(
               child: controller.isLoading.value
                   ? const CircularProgressIndicator(color: Colors.white)
@@ -190,10 +183,7 @@ class EditProfileScreen extends StatelessWidget {
                 ),
                 Text(
                   "Update your info",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),

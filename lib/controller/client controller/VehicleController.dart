@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import '../../services/api_helper.dart';
-import '../../services/api_config.dart';
-import '../../model/VehicleModel.dart';
+import '../../../services/api_helper.dart';
+import '../../../services/api_config.dart';
+import '../../../model/VehicleModel.dart';
 
 class VehicleController extends GetxController {
   var isLoading = true.obs;

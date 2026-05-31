@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../../services/api_helper.dart';
-import '../../services/api_config.dart';
+import '../../../services/api_helper.dart';
+import '../../../services/api_config.dart';
 
 class NotificationController extends GetxController {
   var notifications = <dynamic>[].obs;

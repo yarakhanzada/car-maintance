@@ -6,7 +6,7 @@ import 'package:senior_project/model/profile_model.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/token_service.dart';
 
-import '../services/api_helper.dart';
+import '../../services/api_helper.dart';
 
 class ProfileController extends GetxController {
   var isLoading = true.obs;
@@ -19,23 +19,18 @@ class ProfileController extends GetxController {
   }
 
   Future<void> getProfile() async {
-    
     try {
       isLoading.value = true;
       String? token = await TokenService.getToken();
-     final response = await ApiHelper.get(
-  "${ApiConfig.baseUrl}/me",
-);
-        final data = jsonDecode(response.body);
-        print("??????????????????????");
-        print(data);
+      final response = await ApiHelper.get("${ApiConfig.baseUrl}/me");
+      final data = jsonDecode(response.body);
+      print("??????????????????????");
+      print(data);
       if (response.statusCode == 200) {
-       
-
         if (data['status'] == 1) {
           profile.value = ProfileModel.fromJson(data['data']);
-        } 
-      } 
+        }
+      }
     } catch (e) {
       Get.snackbar("Error", "Failed to load profile");
       print(e);

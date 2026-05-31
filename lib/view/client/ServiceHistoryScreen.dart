@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/HistoryController.dart';
+import 'package:senior_project/controller/client%20controller/HistoryController.dart';
 import 'package:senior_project/model/ServiceHistoryModel.dart';
 
 class ServiceHistoryScreen extends StatelessWidget {

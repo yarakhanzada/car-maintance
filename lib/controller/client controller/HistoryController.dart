@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:senior_project/model/ServiceHistoryModel.dart';
-import '../services/api_config.dart';
-import '../services/api_helper.dart';
+import '../../services/api_config.dart';
+import '../../services/api_helper.dart';
 
 class HistoryController extends GetxController {
   var isLoading = true.obs;
@@ -29,7 +29,6 @@ class HistoryController extends GetxController {
         if (model.data != null) {
           requestsList.assignAll(model.data!);
         }
-        
       }
     } catch (e) {
       print("Error fetching history: $e");

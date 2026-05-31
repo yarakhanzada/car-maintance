@@ -6,7 +6,7 @@ import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/utils/map_helper.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import '../services/token_service.dart';
+import '../../services/token_service.dart';
 
 class TowingTrackingController {
   final Map<String, dynamic> requestData;
@@ -18,7 +18,6 @@ class TowingTrackingController {
   List<LatLng> routePoints = [];
   LatLng userLocation = const LatLng(33.5138, 36.2765);
 
-  // تم تعديلهم ليتم تهيئتهم في الـ Constructor
   late String liveDistance;
   late String liveDuration;
 
@@ -29,17 +28,13 @@ class TowingTrackingController {
   late String driverId;
 
   TowingTrackingController({required this.requestData, this.onUpdate}) {
-    // استخراج المسافة والوقت المقدر من بيانات الطلب فوراً
     _initializeEstimatedStats();
   }
 
-  // دالة لاستخراج البيانات المقدرة قبل قبول السائق للطلب
   void _initializeEstimatedStats() {
     final data = requestData.containsKey('data')
         ? requestData['data']
         : requestData;
-
-    // سحب المسافة والوقت المقدر من الـ API Response الأصلي
     final double initialDist = (data['distance_km'] as num?)?.toDouble() ?? 0.0;
     final int initialTime =
         (data['estimated_time_minutes'] as num?)?.toInt() ?? 0;
@@ -161,7 +156,6 @@ class TowingTrackingController {
       );
 
       if (towTruckLocation != null) {
-        // تحديث البيانات من "مقـدرة" إلى "لحظيـة" بناءً على موقع السائق
         await updateRouteData(towTruckLocation!);
       }
 
@@ -188,7 +182,6 @@ class TowingTrackingController {
         liveDistance = "${routeData['distance']} كم";
         liveDuration = "${routeData['duration']} دقيقة";
       } else {
-        // حساب المسافة الهوائية كخيار احتياطي (Air Distance)
         double airDist =
             MapHelper.calculateAirDistance(truckPos, userLocation) / 1000;
         liveDistance = "${airDist.toStringAsFixed(1)} كم";

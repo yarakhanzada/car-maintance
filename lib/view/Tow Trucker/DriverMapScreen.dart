@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/DriverTowingController.dart';
-import 'package:senior_project/controller/DriverNavigationController.dart';
+import 'package:senior_project/controller/towtrucker%20controller/DriverTowingController.dart';
+import 'package:senior_project/controller/towtrucker%20controller/DriverNavigationController.dart';
 import 'package:senior_project/widgets/CustomGoogleMapWidget.dart';
 
 class DriverMapScreen extends StatefulWidget {

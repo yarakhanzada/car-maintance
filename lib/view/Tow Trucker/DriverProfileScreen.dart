@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/widgets/logout_widget.dart';
-import '../../controller/profile_controller.dart';
+import '../../controller/client controller/profile_controller.dart';
 import '../../controller/logout_controller.dart';
 
 class DriverProfileScreen extends StatelessWidget {
@@ -14,10 +14,12 @@ class DriverProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5), 
+      backgroundColor: const Color(0xFFF5F5F5),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: Color(0xFFE55757)));
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFFE55757)),
+          );
         }
 
         final user = controller.profile.value;
@@ -32,11 +34,10 @@ class DriverProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 30),
                 _buildModernHeader(),
-                  const SizedBox(height: 30),
-                
-                
+                const SizedBox(height: 30),
+
                 _buildUserHeader(user),
-                
+
                 const SizedBox(height: 40),
 
                 _buildSectionTitle("ACCOUNT SETTINGS"),
@@ -50,13 +51,12 @@ class DriverProfileScreen extends StatelessWidget {
                   title: "Phone Number",
                   subtitle: user.phone ?? "Not set",
                 ),
-               
 
                 const SizedBox(height: 30),
 
                 _buildSectionTitle("ACTIONS"),
                 _buildLogoutTile(),
-                
+
                 const SizedBox(height: 30),
               ],
             ),
@@ -65,6 +65,7 @@ class DriverProfileScreen extends StatelessWidget {
       }),
     );
   }
+
   Widget _buildModernHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -92,11 +93,10 @@ class DriverProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-       
       ],
     );
   }
- 
+
   Widget _buildUserHeader(user) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -145,7 +145,8 @@ class DriverProfileScreen extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(user.name ?? "User Name",
+              Text(
+                user.name ?? "User Name",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -183,7 +184,11 @@ class DriverProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileTile({required IconData icon, required String title, required String subtitle}) {
+  Widget _buildProfileTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
@@ -215,7 +220,10 @@ class DriverProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
                 Text(
                   subtitle,
@@ -224,65 +232,60 @@ class DriverProfileScreen extends StatelessWidget {
               ],
             ),
           ),
-        
         ],
       ),
     );
   }
-Widget _buildLogoutTile() {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(16), 
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(22),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.02),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        )
-      ],
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 42,   
-          height: 42, 
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA),
-            borderRadius: BorderRadius.circular(12),
+
+  Widget _buildLogoutTile() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: const Center(
-            child: LogoutWidget(), 
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FA),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Center(child: LogoutWidget()),
           ),
-        ),
-        const SizedBox(width: 15),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Logout",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Color(0xFF1A1A1A),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Logout",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xFF1A1A1A),
+                  ),
                 ),
-              ),
-              Text(
-                "Sign out of your account",
-                style: TextStyle(
-                  color: Colors.grey.shade500,
-                  fontSize: 12,
+                Text(
+                  "Sign out of your account",
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }

@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/widgets/garage_widgets.dart';
 import 'package:senior_project/widgets/vehicle_card.dart';
-import '../../controller/VehicleController.dart';
+import '../../controller/client controller/VehicleController.dart';
 
 class MyGarageScreen extends StatefulWidget {
   const MyGarageScreen({super.key});

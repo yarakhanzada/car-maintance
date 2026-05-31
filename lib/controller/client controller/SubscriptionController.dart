@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/model/subscriptionModel.dart';
 import 'package:senior_project/services/api_config.dart';
-import '../services/api_helper.dart';
+import '../../services/api_helper.dart';
 
 class SubscriptionController extends GetxController {
   var isLoading = true.obs;

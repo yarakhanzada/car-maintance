@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/NotificationController.dart';
+import 'package:senior_project/controller/client%20controller/NotificationController.dart';
 
 class ClientNotificationsScreen extends StatelessWidget {
   ClientNotificationsScreen({super.key});
