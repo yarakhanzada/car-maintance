@@ -2,10 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:senior_project/controller/technician  controller/technician_tasks_controller.dart';
 import 'package:senior_project/controller/technician%20%20controller/task_action_controller.dart';
-import '../../controller/technician  controller/task_details_controller.dart'; // تأكد من مسار كنترولر التفاصيل الجديد
-import '../../model/technician model/maintenance_task_model.dart';
+import 'package:senior_project/controller/technician%20%20controller/task_details_controller.dart';
+import 'package:senior_project/controller/technician%20%20controller/technician_tasks_controller.dart';
+import 'package:senior_project/model/technician%20model/maintenance_task_model.dart';
 
 class NewTasksScreen extends StatelessWidget {
   const NewTasksScreen({super.key});
@@ -82,7 +82,6 @@ class NewTasksScreen extends StatelessWidget {
                       );
                     }
 
-                    // 2. حالة عدم وجود مهام صيانة
                     if (controller.taskList.isEmpty) {
                       return RefreshIndicator(
                         onRefresh: () => controller.fetchTechnicianTasks(),
@@ -118,7 +117,6 @@ class NewTasksScreen extends StatelessWidget {
                       );
                     }
 
-                    // 3. عرض قائمة المهام الرئيسية
                     return RefreshIndicator(
                       onRefresh: () => controller.fetchTechnicianTasks(),
                       color: const Color(0xFFE55757),
@@ -250,7 +248,11 @@ class NewTasksScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              _buildQuickAcceptButton(() {}),
+              // 🔴 هنا تم ربط زر الصح السريع بتابع بدء المهمة مباشرة من الكارد الأساسي
+              _buildQuickAcceptButton(() {
+                final actionController = Get.put(TaskActionController());
+                actionController.startTask(task.id);
+              }),
             ],
           ),
         ],
@@ -283,7 +285,6 @@ class NewTasksScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // 1. نوع المشكلة الأساسية
               _buildDetailInfoBox(
                 "The Reported Issue",
                 serviceReq?.problemType ?? "No description provided.",
@@ -291,7 +292,6 @@ class NewTasksScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 2. رقم لوحة السيارة ومعلومات الاتصال بالزبون
               _buildDetailInfoBox(
                 "Vehicle & Contact Info",
                 "Plate Number: ${serviceReq?.vehicle?.plateNumber ?? 'N/A'}\nCustomer Phone: ${serviceReq?.user?.phone ?? 'N/A'}",
@@ -299,7 +299,6 @@ class NewTasksScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 3. عرض قائمة الأعطال والقطع المطلوبة والخدمات بالتفصيل الكامل
               if (faults.isNotEmpty) ...[
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -380,8 +379,6 @@ class NewTasksScreen extends StatelessWidget {
                               ),
                           ],
                         ),
-
-                        // عرض قطع الغيار المطلوبة لهذا العطل والـ Pivot الخاص بالسعر والكمية
                         if (fault.spareParts != null &&
                             fault.spareParts.isNotEmpty) ...[
                           const Divider(height: 25),
@@ -430,8 +427,6 @@ class NewTasksScreen extends StatelessWidget {
                             ),
                           ),
                         ],
-
-                        // عرض خدمات اليد العاملة وأجورها المطلوبة للصيانة
                         if (fault.laborServices != null &&
                             fault.laborServices.isNotEmpty) ...[
                           const Divider(height: 25),
@@ -487,7 +482,6 @@ class NewTasksScreen extends StatelessWidget {
                 const SizedBox(height: 20),
               ],
 
-              // 4. ملاحظات المهندس (إن وجدت)
               if (task.inspection?.notes != null &&
                   task.inspection!.notes!.isNotEmpty) ...[
                 _buildDetailInfoBox(
@@ -661,7 +655,6 @@ class NewTasksScreen extends StatelessWidget {
     );
   }
 
-  //  ديالوغ الرفض
   void _showRejectDialog(BuildContext context, int taskId) {
     final actionController = Get.put(TaskActionController());
     final textController = TextEditingController();

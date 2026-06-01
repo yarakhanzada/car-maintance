@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:senior_project/controller/logout_controller.dart';
+import 'package:senior_project/controller/technician%20%20controller/technician_profile_controller.dart';
 import 'package:senior_project/widgets/logout_widget.dart';
 
 class TechnicianProfileScreen extends StatelessWidget {
@@ -9,38 +11,59 @@ class TechnicianProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LogoutController controller = Get.put(LogoutController());
+    final TechnicianProfileController profileController = Get.put(
+      TechnicianProfileController(),
+    );
+    final LogoutController logoutController = Get.put(LogoutController());
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       body: Stack(
         children: [
           _buildTopRedBackground(),
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  _buildProfileHeader(),
-                  const SizedBox(height: 30),
+            child: Obx(() {
+              if (profileController.isLoading.value) {
+                return Center(
+                  child: LoadingAnimationWidget.staggeredDotsWave(
+                    color: const Color(0xFFE55757),
+                    size: 50,
+                  ),
+                );
+              }
 
-                  _buildExpertiseBento(),
+              final data = profileController.profileData.value;
+              if (data == null) {
+                return const Center(child: Text("No profile data available."));
+              }
 
-                  const SizedBox(height: 25),
-
-                  _buildActionList(),
-
-                  const SizedBox(height: 100),
-                ],
-              ),
-            ),
+              return RefreshIndicator(
+                onRefresh: () => profileController.fetchProfile(),
+                color: const Color(0xFFE55757),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      _buildProfileHeader(data),
+                      const SizedBox(height: 25),
+                      _buildExpertiseBento(data),
+                      const SizedBox(height: 20),
+                      _buildActionList(),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(dynamic data) {
     return Column(
       children: [
         Stack(
@@ -77,44 +100,83 @@ class TechnicianProfileScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 15),
-        const Text(
-          "Ahmad Al-Mansour",
-          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
+        Text(
+          data.name,
+          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
         ),
-        const Text(
-          "Expert Automotive Technician",
-          style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+        Text(
+          "Department: ${data.department?.name ?? 'General'}",
+          style: const TextStyle(
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildExpertiseBento() {
+  Widget _buildExpertiseBento(dynamic data) {
+    Color statusColor = data.availabilityStatus == "busy"
+        ? Colors.orange
+        : Colors.green;
+
     return Column(
       children: [
         Row(
           children: [
             _buildBentoBox(
-              "Experience",
-              "8 Years",
-              Icons.history_edu_rounded,
+              "Total Tasks",
+              "${data.tasksSummary?.total ?? 0}",
+              Icons.assignment_rounded,
               const Color(0xFFE55757),
             ),
             const SizedBox(width: 15),
             _buildBentoBox(
-              "Level",
-              "Senior",
-              Icons.trending_up_rounded,
-              Colors.blueAccent,
+              "Completed",
+              "${data.tasksSummary?.completed ?? 0}",
+              Icons.task_alt_rounded,
+              Colors.green,
             ),
           ],
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            _buildBentoBox(
+              "Active Tasks",
+              "${data.tasksSummary?.active ?? 0}",
+              Icons.bolt_rounded,
+              Colors.blueAccent,
+            ),
+            const SizedBox(width: 15),
+            _buildBentoBox(
+              "Status",
+              "${data.availabilityStatus}".toUpperCase(),
+              Icons.hourglass_empty_rounded,
+              statusColor,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
         _buildBentoBoxFull(
-          "Main Workshop",
-          "Damascuse - Mazzah",
-          Icons.location_on_rounded,
+          "Email Address",
+          data.email,
+          Icons.email_rounded,
           const Color(0xFF1A1A1A),
+        ),
+        const SizedBox(height: 12),
+        _buildBentoBoxFull(
+          "Phone Number",
+          data.phone,
+          Icons.phone_android_rounded,
+          Colors.blueGrey,
+        ),
+        const SizedBox(height: 12),
+        _buildBentoBoxFull(
+          "Member Since",
+          "${data.memberSince.split('T')[0]}",
+          Icons.calendar_month_rounded,
+          Colors.deepPurple,
         ),
       ],
     );
@@ -122,24 +184,15 @@ class TechnicianProfileScreen extends StatelessWidget {
 
   Widget _buildActionList() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20),
         ],
       ),
-      child: Column(
-        children: [
-          _buildActionItem("Specialization & Skills", Icons.handyman_outlined),
-          _buildActionItem("Working Hours", Icons.access_time_rounded),
-          _buildActionItem("App Language", Icons.translate_rounded),
-          _buildActionItem("Support & Help", Icons.help_outline_rounded),
-          const Divider(indent: 20, endIndent: 20),
-          const LogoutWidget(isListTile: true),
-        ],
-      ),
+      child: const Column(children: [LogoutWidget(isListTile: true)]),
     );
   }
 
@@ -151,10 +204,10 @@ class TechnicianProfileScreen extends StatelessWidget {
   ) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10),
           ],
@@ -162,17 +215,19 @@ class TechnicianProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 15),
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 10),
             Text(
               value,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             Text(
               label,
               style: const TextStyle(
                 color: Colors.grey,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -190,10 +245,10 @@ class TechnicianProfileScreen extends StatelessWidget {
   ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10),
         ],
@@ -201,12 +256,12 @@ class TechnicianProfileScreen extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color),
+            child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -216,7 +271,7 @@ class TechnicianProfileScreen extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -224,7 +279,7 @@ class TechnicianProfileScreen extends StatelessWidget {
                   label,
                   style: const TextStyle(
                     color: Colors.grey,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -233,37 +288,6 @@ class TechnicianProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildActionItem(String title, IconData icon, {bool isExit = false}) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isExit ? Colors.red.withOpacity(0.1) : const Color(0xFFF1F2F6),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(
-          icon,
-          color: isExit ? Colors.red : Colors.black87,
-          size: 20,
-        ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: isExit ? Colors.red : Colors.black87,
-          fontSize: 15,
-        ),
-      ),
-      trailing: const Icon(
-        Icons.arrow_forward_ios_rounded,
-        size: 14,
-        color: Colors.black26,
-      ),
-      onTap: () {},
     );
   }
 

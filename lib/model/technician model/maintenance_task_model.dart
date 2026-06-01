@@ -77,6 +77,7 @@ class MaintenanceRequest {
   final String scheduledDate;
   final String scheduledTime;
   final String startedAt;
+  final String finalTotalCost;
   final ServiceRequest? serviceRequest;
 
   MaintenanceRequest({
@@ -84,6 +85,7 @@ class MaintenanceRequest {
     required this.scheduledDate,
     required this.scheduledTime,
     required this.startedAt,
+    required this.finalTotalCost,
     this.serviceRequest,
   });
 
@@ -93,6 +95,7 @@ class MaintenanceRequest {
       scheduledDate: json['scheduled_date'] ?? '',
       scheduledTime: json['scheduled_time'] ?? '',
       startedAt: json['started_at'] ?? '',
+      finalTotalCost: json['final_total_cost'] ?? '0.00',
       serviceRequest: json['service_request'] != null
           ? ServiceRequest.fromJson(json['service_request'])
           : null,

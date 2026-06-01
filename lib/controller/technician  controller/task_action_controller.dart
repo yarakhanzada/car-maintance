@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:senior_project/controller/technician%20%20controller/TaskController.dart';
+import 'package:senior_project/view/Technician/TechnicianBottombar.dart';
 import '../../services/api_config.dart';
 import '../../services/api_helper.dart';
 import 'technician_tasks_controller.dart';
@@ -21,6 +23,11 @@ class TaskActionController extends GetxController {
         {},
       );
 
+      print("============== START TASK RESPONSE ==============");
+      print("Status Code: ${response?.statusCode}");
+      print("Response Body: ${response?.body}");
+      print("=================================================");
+
       Get.back();
 
       if (response != null &&
@@ -28,6 +35,11 @@ class TaskActionController extends GetxController {
         if (Get.isRegistered<TechnicianTasksController>()) {
           Get.find<TechnicianTasksController>().fetchTechnicianTasks();
         }
+        final taskController = Get.put(TaskController(), permanent: true);
+        taskController.taskId.value = taskId.toString();
+
+        final bottomBarController = Get.find<TechNavigationController>();
+        bottomBarController.selectedIndex.value = 1;
 
         Get.back();
 
@@ -42,6 +54,7 @@ class TaskActionController extends GetxController {
       }
     } catch (e) {
       Get.back();
+      print(" Error in startTask Catch: $e");
       Get.snackbar(
         "Error",
         "Something went wrong: $e",
@@ -56,12 +69,7 @@ class TaskActionController extends GetxController {
   // 2. (Reject Task)
   Future<void> rejectTask(int taskId, String reason) async {
     if (reason.trim().isEmpty) {
-      Get.snackbar(
-        "Warning",
-        "Please provide a reason for rejection.",
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-      );
+      Get.snackbar("Warning", "Please provide a reason for rejection.");
       return;
     }
 
@@ -73,6 +81,11 @@ class TaskActionController extends GetxController {
         "${ApiConfig.baseUrl}/v1/technician/maintenance-tasks/$taskId/reject",
         {"reason": reason},
       );
+
+      print("============== REJECT TASK RESPONSE ==============");
+      print("Status Code: ${response?.statusCode}");
+      print("Response Body: ${response?.body}");
+      print("==================================================");
 
       Get.back();
 
@@ -95,6 +108,7 @@ class TaskActionController extends GetxController {
       }
     } catch (e) {
       Get.back();
+      print(" Error in rejectTask Catch: $e");
       Get.snackbar(
         "Error",
         "Failed to reject task: $e",

@@ -24,7 +24,7 @@ class TechnicianTasksController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> decodedData = jsonDecode(response.body);
-        print(response.body);
+        print(decodedData);
 
         if (decodedData['status'] == 1) {
           final taskResponse = MaintenanceTaskResponse.fromJson(decodedData);

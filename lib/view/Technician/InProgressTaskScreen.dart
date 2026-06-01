@@ -3,24 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:senior_project/controller/technician%20%20controller/TaskController.dart';
 
-class TaskController extends GetxController {
-  var status = "Working".obs; 
-  var beforeImage = Rxn<File>();
-  var afterImage = Rxn<File>();
-  final ImagePicker _picker = ImagePicker();
-
-  Future<void> pickImage(ImageSource source, String type) async {
-    final XFile? selected = await _picker.pickImage(source: source);
-    if (selected != null) {
-      if (type == "Before") {
-        beforeImage.value = File(selected.path);
-      } else {
-        afterImage.value = File(selected.path);
-      }
-    }
-  }
-}
+final TaskController controller = Get.find<TaskController>();
 
 class InProgressTaskScreen extends StatelessWidget {
   const InProgressTaskScreen({super.key});
@@ -54,7 +39,6 @@ class InProgressTaskScreen extends StatelessWidget {
                   _buildSectionLabel("STEP 1: DOCUMENTATION"),
                   const SizedBox(height: 15),
 
-         
                   Row(
                     children: [
                       Expanded(
@@ -91,7 +75,6 @@ class InProgressTaskScreen extends StatelessWidget {
                   _buildSectionLabel("STEP 2: MISSION STATUS"),
                   const SizedBox(height: 15),
 
-              
                   _buildStatusSwitcher(controller),
 
                   const SizedBox(height: 40),
@@ -106,7 +89,6 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
- 
   void _showReportSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -211,7 +193,6 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
- 
   Widget _buildUploadBox(String label, File? imageFile, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -262,7 +243,6 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
- 
   Widget _buildStatusSwitcher(TaskController controller) {
     return Obx(
       () => Container(
@@ -322,7 +302,6 @@ class InProgressTaskScreen extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildHeader() {
     return const Column(
@@ -421,7 +400,14 @@ class InProgressTaskScreen extends StatelessWidget {
         ],
       ),
       child: ElevatedButton(
-        onPressed: () => _showConfirmationDialog(controller),
+        onPressed: () async {
+          if (controller.beforeImage.value != null)
+            await controller.uploadImages("Before");
+          if (controller.afterImage.value != null)
+            await controller.uploadImages("After");
+
+          await controller.finishTask();
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFE55757),
           shape: RoundedRectangleBorder(
@@ -441,7 +427,6 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
-  
   void _showConfirmationDialog(TaskController controller) {
     Get.dialog(
       BackdropFilter(
@@ -512,7 +497,6 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
-  
   void _showSuccessFlash() {
     Get.snackbar(
       "Success!",
