@@ -12,54 +12,60 @@ class OTPScreen extends StatelessWidget {
   final OTPController controller = Get.put(OTPController());
   final String email = Get.arguments['email'];
   final String type = Get.arguments['type'];
+  
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return GlassScaffold(
-      child: Column(
-        children: [
-          const AuthHeaderIcon(icon: Icons.vibration_rounded),
-          const SizedBox(height: 30),
-          const Text(
-            "Verification Code",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: [
+            const AuthHeaderIcon(icon: Icons.vibration_rounded),
+            SizedBox(height: screenHeight * 0.03),
+            const Text(
+              "رمز التحقق",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 15),
-          Text(
-            "Sent to $email",
-            style: TextStyle(color: Colors.white.withOpacity(0.6)),
-          ),
+            const SizedBox(height: 15),
+            Text(
+              "تم إرسال الرمز إلى $email",
+              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+              textDirection: TextDirection.ltr, ),
 
-          const SizedBox(height: 50),
+            SizedBox(height: screenHeight * 0.05),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(6, (index) {
-              return OTPSquare(
-                onChanged: (value) {
-                  controller.otpCodes[index] = value;
-                },
-              );
-            }),
-          ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(6, (index) {
+                return OTPSquare(
+                  onChanged: (value) {
+                    controller.otpCodes[index] = value;
+                  },
+                );
+              }),
+            ),
 
-          const SizedBox(height: 40),
+            SizedBox(height: screenHeight * 0.04),
 
-          Obx(
-            () => controller.isLoading.value
-                ? const CircularProgressIndicator(color: Colors.redAccent)
-                : CustomButton(
-                    text: "Verify & Proceed",
-                    onTap: () => controller.verifyOTP(email, type),
-                  ),
-          ),
+            Obx(
+              () => controller.isLoading.value
+                  ? const CircularProgressIndicator(color: Colors.redAccent)
+                  : CustomButton(
+                      text: "التحقق والمتابعة",
+                      onTap: () => controller.verifyOTP(email, type),
+                    ),
+            ),
 
-          const SizedBox(height: 30),
-          _buildResendSection(),
-        ],
+            SizedBox(height: screenHeight * 0.03),
+            _buildResendSection(),
+          ],
+        ),
       ),
     );
   }
@@ -70,7 +76,7 @@ class OTPScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Didn't receive code? ",
+            "لم تصلك الرسالة؟ ",
             style: TextStyle(color: Colors.white.withOpacity(0.5)),
           ),
           controller.isResending.value
@@ -88,8 +94,8 @@ class OTPScreen extends StatelessWidget {
                       : null,
                   child: Text(
                     controller.enableResend.value
-                        ? "Resend Now"
-                        : "Resend (${controller.formattedTime})",
+                        ? "أعد الإرسال الآن"
+                        : "إعادة الإرسال خلال (${controller.formattedTime})",
                     style: TextStyle(
                       color: controller.enableResend.value
                           ? const Color(0xFFE55757)

@@ -9,24 +9,25 @@ class ComplaintsScreen extends StatefulWidget {
 }
 
 class _ComplaintsScreenState extends State<ComplaintsScreen> {
-  String selectedType = "Delay";
+  String selectedType = "تأخير";
   final List<String> issueTypes = [
-    "Driver",
-    "Pricing",
-    "Delay",
-    "Technical",
-    "Other",
+    "السائق",
+    "التسعير",
+    "تأخير",
+    "تقني",
+    "آخر",
   ];
 
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
+    final double height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F7),
       body: Stack(
         children: [
-          _buildTopGradient(),
+          _buildTopGradient(width, height),
           SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -37,19 +38,14 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                   const SizedBox(height: 20),
                   _buildHeader(context),
                   const SizedBox(height: 40),
-
-                  _buildSectionTitle("What went wrong?"),
+                  _buildSectionTitle("ما الخطأ الذي حدث؟"),
                   const SizedBox(height: 15),
-                  _buildIssueSelector(),
-
+                  _buildIssueSelector(width),
                   const SizedBox(height: 35),
-
-                  _buildSectionTitle("Describe your issue"),
+                  _buildSectionTitle("صف مشكلتك بالتفصيل"),
                   const SizedBox(height: 15),
                   _buildMessageInput(),
-
                   const SizedBox(height: 40),
-
                   _buildSubmitButton(width, context),
                   const SizedBox(height: 30),
                 ],
@@ -88,22 +84,20 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
         ),
         const SizedBox(height: 30),
         const Text(
-          "Help &",
+          "المساعدة و",
           style: TextStyle(
             fontSize: 40,
             fontWeight: FontWeight.w900,
             color: Color(0xFF1A1A1A),
-            letterSpacing: -1.5,
             height: 1,
           ),
         ),
         const Text(
-          "Support",
+          "الدعم الفني",
           style: TextStyle(
             fontSize: 40,
             fontWeight: FontWeight.w300,
             color: Color(0xFFE55757),
-            letterSpacing: -1.5,
           ),
         ),
       ],
@@ -121,36 +115,27 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
     );
   }
 
-  Widget _buildIssueSelector() {
+  Widget _buildIssueSelector(double width) {
     return Wrap(
       spacing: 10,
       runSpacing: 10,
       children: issueTypes.map((type) {
-        bool isSelected = selectedType == type;
-        return GestureDetector(
-          onTap: () => setState(() => selectedType = type),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF1A1A1A) : Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                if (isSelected)
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-              ],
-            ),
-            child: Text(
-              type,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey[600],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              ),
-            ),
+        final bool isSelected = selectedType == type;
+        return ChoiceChip(
+          label: Text(type),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) {
+              setState(() {
+                selectedType = type;
+              });
+            }
+          },
+          selectedColor: const Color(0xFFE55757),
+          backgroundColor: Colors.white,
+          labelStyle: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
           ),
         );
       }).toList(),
@@ -159,24 +144,16 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
   Widget _buildMessageInput() {
     return Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: TextField(
-        maxLines: 6,
+      child: const TextField(
+        maxLines: 5,
         decoration: InputDecoration(
-          hintText: "Tell us more about what happened...",
-          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+          hintText: "يرجى كتابة تفاصيل المشكلة هنا...",
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(20),
         ),
       ),
     );
@@ -185,69 +162,57 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
   Widget _buildSubmitButton(double width, BuildContext context) {
     return Container(
       width: width,
-      height: 65,
+      height: 55,
       decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFE55757), Color(0xFFEF8E8E)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFE55757).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("We've received your feedback!"),
-                backgroundColor: Color(0xFF1A1A1A),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
-          child: const Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.send_rounded, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Text(
-                  "Submit Feedback",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("تم استلام ملاحظاتك بنجاح!"),
+              backgroundColor: Color(0xFF1A1A1A),
+              behavior: SnackBarBehavior.floating,
             ),
+          );
+        },
+        child: const Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.send_rounded, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Text(
+                "إرسال الملاحظات",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTopGradient() {
+  Widget _buildTopGradient(double width, double height) {
     return Positioned(
-      top: -100,
-      right: -100,
+      top: -height * 0.1,
+      right: -width * 0.2,
       child: Container(
-        width: 300,
-        height: 300,
+        width: width * 0.7,
+        height: width * 0.7,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: const Color(0xFFE55757).withOpacity(0.05),
         ),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
-          child: Container(color: Colors.transparent),
+          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+          child: const SizedBox(),
         ),
       ),
     );

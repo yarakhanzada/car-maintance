@@ -8,17 +8,19 @@ class TowingSetupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      backgroundColor: Colors.black, 
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-     
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('lib/images/towtrucker.jpg'), 
+                image: AssetImage('lib/images/towtrucker.jpg'),
                 fit: BoxFit.cover,
-                opacity: 0.6, 
+                opacity: 0.6,
               ),
             ),
             child: BackdropFilter(
@@ -28,33 +30,22 @@ class TowingSetupScreen extends StatelessWidget {
               ),
               child: Container(
                 color: Colors.black.withOpacity(0.3),
-              ), // طبقة تعتيم إضافية
+              ),
             ),
           ),
-
-       
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 80),
-
-                
-                  _buildPremiumHeader(),
-
-                  const SizedBox(height: 50),
-
-                 
-                  _buildPremiumDataCard(),
-
-                  const SizedBox(height: 60),
-
-            
-                  _buildGlowButton(),
-
-                  const SizedBox(height: 30),
+                  SizedBox(height: screenHeight * 0.08),
+                  _buildPremiumHeader(screenWidth),
+                  SizedBox(height: screenHeight * 0.05),
+                  _buildPremiumDataCard(screenWidth),
+                  SizedBox(height: screenHeight * 0.06),
+                  _buildGlowButton(screenWidth),
+                  SizedBox(height: screenHeight * 0.04),
                 ],
               ),
             ),
@@ -64,45 +55,48 @@ class TowingSetupScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPremiumHeader() {
-    return const Column(
+  Widget _buildPremiumHeader(double screenWidth) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "FLEET REGISTRATION,",
+          "تسجيل الأسطول",
           style: TextStyle(
-            fontSize: 12,
+            fontSize: screenWidth * 0.035,
             fontWeight: FontWeight.w900,
-            color: Color(0xFFE55757),
-            letterSpacing: 3,
+            color: const Color(0xFFE55757),
+            letterSpacing: 1.5,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
-          "Vehicle ID Card",
+          "بطاقة تعريف المركبة",
           style: TextStyle(
-            fontSize: 40,
+            fontSize: screenWidth * 0.085,
             fontWeight: FontWeight.w900,
             color: Colors.white,
-            height: 1.1,
+            height: 1.2,
           ),
         ),
+        const SizedBox(height: 5),
         Text(
-          "These details will be shown to your customer.",
-          style: TextStyle(color: Colors.white60, fontSize: 14),
+          "هذه التفاصيل ستظهر للعميل الخاص بك.",
+          style: TextStyle(
+            color: Colors.white60, 
+            fontSize: screenWidth * 0.038
+          ),
         ),
       ],
     );
   }
 
-
-  Widget _buildPremiumDataCard() {
+  Widget _buildPremiumDataCard(double screenWidth) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(35),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
-          padding: const EdgeInsets.all(30),
+          padding: EdgeInsets.all(screenWidth * 0.07),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.05),
             borderRadius: BorderRadius.circular(35),
@@ -110,26 +104,26 @@ class TowingSetupScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-        
               _buildInputFieldRow(
                 Icons.pin_rounded,
-                "PLATE NUMBER",
-                "A-99102",
+                "رقم اللوحة",
+                "أ - 99102",
+                screenWidth,
                 isPlate: true,
               ),
               const Divider(color: Colors.white10, height: 40),
-
               _buildInputFieldRow(
                 Icons.local_shipping_rounded,
-                "TRUCK MODEL",
-                "GMC Savana / Isuzu",
+                "موديل الشاحنة",
+                "جي إم سي سافانا / إيسوزو",
+                screenWidth,
               ),
               const Divider(color: Colors.white10, height: 40),
-
               _buildInputFieldRow(
                 Icons.color_lens_rounded,
-                "VEHICLE COLOR",
-                "Bright Yellow",
+                "لون المركبة",
+                "أصفر فاقع",
+                screenWidth,
               ),
             ],
           ),
@@ -138,16 +132,16 @@ class TowingSetupScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildInputFieldRow(
     IconData icon,
     String label,
-    String hint, {
+    String hint,
+    double screenWidth, {
     bool isPlate = false,
   }) {
     return Row(
       children: [
-        Icon(icon, color: const Color(0xFFE55757), size: 24),
+        Icon(icon, color: const Color(0xFFE55757), size: screenWidth * 0.06),
         const SizedBox(width: 20),
         Expanded(
           child: Column(
@@ -155,21 +149,19 @@ class TowingSetupScreen extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 10,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.028,
                   fontWeight: FontWeight.w900,
                   color: Colors.white60,
-                  letterSpacing: 1.5,
+                  letterSpacing: 1,
                 ),
               ),
               TextField(
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  letterSpacing: isPlate
-                      ? 3
-                      : 0,
+                  fontSize: screenWidth * 0.04,
+                  letterSpacing: isPlate ? 3 : 0,
                 ),
                 decoration: InputDecoration(
                   hintText: hint,
@@ -186,14 +178,13 @@ class TowingSetupScreen extends StatelessWidget {
     );
   }
 
-
-  Widget _buildGlowButton() {
+  Widget _buildGlowButton(double screenWidth) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFE55757).withOpacity(0.3), 
+            color: const Color(0xFFE55757).withOpacity(0.3),
             blurRadius: 20,
             spreadRadius: 2,
             offset: const Offset(0, 5),
@@ -204,8 +195,7 @@ class TowingSetupScreen extends StatelessWidget {
         width: double.infinity,
         height: 60,
         child: ElevatedButton(
-          onPressed: () =>
-              Get.offAll(() => DriverBottombar()), 
+          onPressed: () => Get.offAll(() => DriverBottombar()),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFE55757),
             shape: RoundedRectangleBorder(
@@ -213,13 +203,12 @@ class TowingSetupScreen extends StatelessWidget {
             ),
             elevation: 0,
           ),
-          child: const Text(
-            "SAVE & GO ONLINE",
+          child: Text(
+            "حفظ والدخول أونلاين",
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w900,
-              fontSize: 16,
-              letterSpacing: 1.5,
+              fontSize: screenWidth * 0.042,
             ),
           ),
         ),

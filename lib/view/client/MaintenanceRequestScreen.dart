@@ -21,72 +21,76 @@ class MaintenanceRequestScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
-      body: Stack(
-        children: [
-          _buildBackgroundBlurEffect(),
-          SafeArea(
-            child: Obx(
-              () => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildAnimatedHeader(),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 25,
-                        vertical: 10,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildGlassToggle(),
-                          const SizedBox(height: 30),
-                          _buildSectionHeader(
-                            "Select Your Vehicle",
-                            Icons.directions_car_filled_rounded,
-                          ),
-                          _buildVehicleDropdown(),
-                          const SizedBox(height: 30),
-                          _buildSectionHeader(
-                            "Service Details",
-                            Icons.calendar_today_rounded,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildDateTimeSelectors(context),
-                          const SizedBox(height: 30),
-                          _buildSectionHeader(
-                            "The Issue",
-                            Icons.report_problem_rounded,
-                          ),
-                          _buildModernInput(
-                            "Describe the problem...",
-                            Icons.notes_rounded,
-                            controller.problemController,
-                            maxLines: 3,
-                          ),
-                          const SizedBox(height: 30),
-                          _buildSectionHeader(
-                            "Photos",
-                            Icons.camera_enhance_rounded,
-                          ),
-                          const SizedBox(height: 15),
-                          _buildImageUploader(),
-                          const SizedBox(height: 30),
+    final double screenWidth = MediaQuery.of(context).size.width;
 
-                          _buildSubmitButton(),
-                          const SizedBox(height: 40),
-                        ],
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F7),
+        body: Stack(
+          children: [
+            _buildBackgroundBlurEffect(screenWidth),
+            SafeArea(
+              child: Obx(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildAnimatedHeader(),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.06,
+                          vertical: 10,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildGlassToggle(),
+                            const SizedBox(height: 30),
+                            _buildSectionHeader(
+                              "اختر مركبتك",
+                              Icons.directions_car_filled_rounded,
+                            ),
+                            _buildVehicleDropdown(),
+                            const SizedBox(height: 30),
+                            _buildSectionHeader(
+                              "تفاصيل الخدمة",
+                              Icons.calendar_today_rounded,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildDateTimeSelectors(context),
+                            const SizedBox(height: 30),
+                            _buildSectionHeader(
+                              "المشكلة",
+                              Icons.report_problem_rounded,
+                            ),
+                            _buildModernInput(
+                              "صف المشكلة التي تواجهها...",
+                              Icons.notes_rounded,
+                              controller.problemController,
+                              maxLines: 3,
+                            ),
+                            const SizedBox(height: 30),
+                            _buildSectionHeader(
+                              "الصور",
+                              Icons.camera_enhance_rounded,
+                            ),
+                            const SizedBox(height: 15),
+                            _buildImageUploader(),
+                            const SizedBox(height: 30),
+                            _buildSubmitButton(),
+                            const SizedBox(height: 40),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -105,7 +109,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           isExpanded: true,
-          hint: const Text("Choose vehicle", style: TextStyle(fontSize: 14)),
+          hint: const Text("اختر المركبة", style: TextStyle(fontSize: 14)),
           value: controller.selectedVehicleId.value,
           items: controller.userVehicles.map((vehicle) {
             return DropdownMenuItem<int>(
@@ -134,7 +138,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
             child: GestureDetector(
               onTap: isUrgent ? null : () => controller.pickDate(context),
               child: _buildInfoCard(
-                "Date",
+                "التاريخ",
                 controller.selectedDate.value.toString().split(' ')[0],
                 Icons.event,
                 isEditable: !isUrgent,
@@ -146,7 +150,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
             child: GestureDetector(
               onTap: isUrgent ? null : () => controller.pickTime(context),
               child: _buildInfoCard(
-                "Time",
+                "الوقت",
                 controller.selectedTime.value.format(context),
                 Icons.access_time_rounded,
                 isEditable: !isUrgent,
@@ -189,7 +193,6 @@ class MaintenanceRequestScreen extends StatelessWidget {
                 style: const TextStyle(fontSize: 11, color: Colors.grey),
               ),
               const Spacer(),
-              // نضيف أيقونة قفل إذا كان غير قابل للتعديل
               if (!isEditable)
                 Icon(Icons.lock_outline, size: 12, color: Colors.grey[400]),
             ],
@@ -273,7 +276,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
               Container(
                 width: 85,
                 height: 85,
-                margin: const EdgeInsets.only(right: 12),
+                margin: const EdgeInsets.only(left: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
                   image: DecorationImage(
@@ -283,7 +286,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
                 ),
               ),
               Positioned(
-                right: 15,
+                left: 15,
                 top: 5,
                 child: GestureDetector(
                   onTap: () => controller.images.removeAt(index),
@@ -313,7 +316,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Processing your request...",
+                    "جاري معالجة طلبك...",
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 12,
@@ -324,7 +327,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
               ),
             )
           : CustomButton(
-              text: "CONFIRM REQUEST",
+              text: "تأكيد الطلب",
               onTap: () => controller.submitRequest(categoryId ?? null),
             ),
     );
@@ -340,12 +343,12 @@ class MaintenanceRequestScreen extends StatelessWidget {
       child: Row(
         children: [
           _toggleElement(
-            "IMMEDIATE",
+            "فوري",
             controller.isimmediate.value,
             () => controller.updateMaintenanceType(true),
           ),
           _toggleElement(
-            "SCHEDULE",
+            "جدولة",
             !controller.isimmediate.value,
             () => controller.updateMaintenanceType(false),
           ),
@@ -399,11 +402,11 @@ class MaintenanceRequestScreen extends StatelessWidget {
 
   Widget _buildAnimatedHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 20, 25, 15),
+      padding: const EdgeInsets.fromLTRB(25, 20, 10, 15),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 22),
+            icon: const Icon(Icons.arrow_back_ios, size: 22),
             onPressed: () => Get.back(),
           ),
           const SizedBox(width: 5),
@@ -411,7 +414,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Service Intake",
+                "استلام الخدمة",
                 style: TextStyle(
                   color: const Color(0xFFE55757).withOpacity(0.7),
                   fontSize: 13,
@@ -441,13 +444,13 @@ class MaintenanceRequestScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBackgroundBlurEffect() {
+  Widget _buildBackgroundBlurEffect(double screenWidth) {
     return Positioned(
       top: -50,
-      left: -50,
+      right: -50,
       child: Container(
-        width: 250,
-        height: 250,
+        width: screenWidth * 0.6,
+        height: screenWidth * 0.6,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: const Color(0xFFE55757).withOpacity(0.08),

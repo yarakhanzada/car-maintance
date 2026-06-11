@@ -4,9 +4,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/main.dart';
 import 'package:senior_project/view/shared/LoginScreen.dart';
-
 import 'package:senior_project/services/api_config.dart';
-
 import '../services/api_helper.dart';
 
 class ResetPasswordController extends GetxController {
@@ -22,53 +20,48 @@ class ResetPasswordController extends GetxController {
   }) async {
     if (password != confirmPassword) {
       Get.snackbar(
-        "Error",
-        "Passwords do not match",
+        "خطأ",
+        "كلمات المرور غير متطابقة",
         backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
       );
       return;
     }
 
     try {
       isLoading.value = true;
-      print("--- [DEBUG: Reset Password Request] ---");
-      print("Email: '$email'");
-      print("Code: '$code'");
-      print("Password: '$password'");
-      print("Confirm: '$confirmPassword'");
-      print(
-        "Payload JSON: ${jsonEncode({"email": email.trim(), "code": code.trim(), "password": password, "password_confirmation": confirmPassword})}",
-      );
-      print("---------------------------------------");
+      
       var response = await ApiHelper.post(
-  "${ApiConfig.baseUrl}/reset-password",
-  {
-    "email": email.trim(),
-    "code": code.trim(),
-    "password": password,
-    "password_confirmation": confirmPassword,
-  },
-  skipAuth: true,
-);
+        "${ApiConfig.baseUrl}/reset-password",
+        {
+          "email": email.trim(),
+          "code": code.trim(),
+          "password": password,
+          "password_confirmation": confirmPassword,
+        },
+        skipAuth: true,
+      );
 
       var jsonData = jsonDecode(response.body);
 
       if (jsonData['status'] == 1) {
         Get.snackbar(
-          "Success",
+          "نجاح",
           jsonData['message'],
-          backgroundColor: Colors.grey,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
         );
         Get.offAll(() => LoginScreen());
       } else {
         Get.snackbar(
-          "Error",
-          jsonData['message'] ?? "Reset failed",
+          "خطأ",
+          jsonData['message'] ?? "فشلت عملية إعادة التعيين",
           backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
         );
       }
     } catch (e) {
-      Get.snackbar("Error", "Connection failed");
+      Get.snackbar("خطأ", "فشل الاتصال بالخادم");
     } finally {
       isLoading.value = false;
     }

@@ -11,59 +11,62 @@ class EditProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
-      body: Stack(
-        children: [
-          _buildTopGradient(),
-          SafeArea(
-            child: GetBuilder<EditProfileController>(
-              builder: (_) {
-                return CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    _buildModernHeader(context, width),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: width * 0.06),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 10),
-                            _buildEnhancedProfileImage(),
-                            const SizedBox(height: 40),
-                            _buildSectionTitle("Personal Information"),
-                            const SizedBox(height: 15),
-                            _buildModernTextField(
-                              "Full Name",
-                              controller.nameController,
-                              Icons.person_outline_rounded,
-                              readOnly: false,
-                            ),
-                            _buildModernTextField(
-                              "Email Address",
-                              controller.emailController,
-                              Icons.alternate_email_rounded,
-                              readOnly: true,
-                            ),
-                            _buildModernTextField(
-                              "Phone Number",
-                              controller.phoneController,
-                              Icons.phone_android_rounded,
-                              readOnly: false,
-                            ),
-                            const SizedBox(height: 40),
-                            _buildSaveButton(width),
-                            const SizedBox(height: 20),
-                          ],
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F7),
+        body: Stack(
+          children: [
+            _buildTopGradient(),
+            SafeArea(
+              child: GetBuilder<EditProfileController>(
+                builder: (_) {
+                  return CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      _buildModernHeader(context, width),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: width * 0.06),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 10),
+                              _buildEnhancedProfileImage(),
+                              const SizedBox(height: 40),
+                              _buildSectionTitle("المعلومات الشخصية"),
+                              const SizedBox(height: 15),
+                              _buildModernTextField(
+                                "الاسم الكامل",
+                                controller.nameController,
+                                Icons.person_outline_rounded,
+                                readOnly: false,
+                              ),
+                              _buildModernTextField(
+                                "البريد الإلكتروني",
+                                controller.emailController,
+                                Icons.alternate_email_rounded,
+                                readOnly: true,
+                              ),
+                              _buildModernTextField(
+                                "رقم الهاتف",
+                                controller.phoneController,
+                                Icons.phone_android_rounded,
+                                readOnly: false,
+                              ),
+                              const SizedBox(height: 40),
+                              _buildSaveButton(width),
+                              const SizedBox(height: 20),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -129,7 +132,7 @@ class EditProfileScreen extends StatelessWidget {
               child: controller.isLoading.value
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text(
-                      "Confirm Changes",
+                      "تأكيد التغييرات",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -165,7 +168,7 @@ class EditProfileScreen extends StatelessWidget {
                   ],
                 ),
                 child: const Icon(
-                  Icons.arrow_back_ios_new,
+                  Icons.arrow_forward_ios,
                   size: 18,
                   color: Color(0xFF1A1A1A),
                 ),
@@ -174,7 +177,7 @@ class EditProfileScreen extends StatelessWidget {
             const Column(
               children: [
                 Text(
-                  "Profile Settings",
+                  "إعدادات الملف",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
@@ -182,7 +185,7 @@ class EditProfileScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "Update your info",
+                  "حدث معلوماتك",
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],

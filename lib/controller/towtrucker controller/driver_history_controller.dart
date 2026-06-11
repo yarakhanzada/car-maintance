@@ -39,7 +39,7 @@ class DriverHistoryController extends GetxController {
         }
       }
     } catch (e) {
-      print("Error fetching history: $e");
+      throw Exception("خطأ في جلب سجل الرحلات: $e");
     } finally {
       isLoading.value = false;
     }
@@ -54,15 +54,17 @@ class DriverHistoryController extends GetxController {
 
       if (placemarks.isNotEmpty) {
         Placemark p = placemarks[0];
-        String city = p.locality ?? "Damascus";
+        // ترجمة القيم الافتراضية إذا لزم الأمر
+        String city = p.locality ?? "دمشق"; 
         String area = p.subLocality ?? "";
 
         addressCache[trip.towingRequestId] = area.isNotEmpty
-            ? "$city, $area"
+            ? "$city، $area"
             : city;
       }
     } catch (e) {
-      addressCache[trip.towingRequestId] = "Location Identified";
+      // نص بديل في حال تعذر تحديد الموقع
+      addressCache[trip.towingRequestId] = "تم تحديد الموقع";
     }
   }
 }

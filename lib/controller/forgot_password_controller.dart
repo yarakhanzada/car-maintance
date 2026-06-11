@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/main.dart';
-
 import 'package:senior_project/services/api_config.dart';
-
 import '../services/api_helper.dart';
 
 class ForgotPasswordController extends GetxController {
@@ -14,7 +12,7 @@ class ForgotPasswordController extends GetxController {
 
   Future<bool> sendResetCode(String email) async {
     if (email.isEmpty || !GetUtils.isEmail(email)) {
-      emailError.value = "Please enter a valid email address";
+      emailError.value = "يرجى إدخال عنوان بريد إلكتروني صالح";
       return false;
     }
 
@@ -22,27 +20,29 @@ class ForgotPasswordController extends GetxController {
     isLoading.value = true;
 
     try {
-  var response = await ApiHelper.post(
-  "${ApiConfig.baseUrl}/forgot-password",
-  {
-    "email": email,
-  },
-  skipAuth: true,
-);
+      var response = await ApiHelper.post(
+        "${ApiConfig.baseUrl}/forgot-password",
+        {
+          "email": email,
+        },
+        skipAuth: true,
+      );
 
       var jsonData = jsonDecode(response.body);
-      print("????????????????????");
-      print(jsonData);
 
       if (response.statusCode == 200 && jsonData['status'] == 1) {
-      
         return true;
       } else {
-        emailError.value = jsonData['message'] ?? "Something went wrong";
+        emailError.value = jsonData['message'] ?? "حدث خطأ ما";
         return false;
       }
     } catch (e) {
-      Get.snackbar("Error", "Connection failed: $e");
+      Get.snackbar(
+        "خطأ", 
+        "فشل الاتصال: $e",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return false;
     } finally {
       isLoading.value = false;

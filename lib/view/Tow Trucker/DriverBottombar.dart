@@ -22,6 +22,8 @@ class DriverBottombar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       extendBody: true,
       body: Stack(
@@ -44,7 +46,7 @@ class DriverBottombar extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(15, 6, 15, 12),
+              padding: EdgeInsets.fromLTRB(width * 0.04, 6, width * 0.04, 12),
               child: Obx(
                 () => GNav(
                   gap: 6,
@@ -61,10 +63,10 @@ class DriverBottombar extends StatelessWidget {
                   onTabChange: (index) =>
                       controller.selectedIndex.value = index,
                   tabs: const [
-                    GButton(icon: Icons.assignment_rounded, text: 'Orders'),
-                    GButton(icon: Icons.map_rounded, text: 'Track'),
-                    GButton(icon: Icons.history_rounded, text: 'History'),
-                    GButton(icon: Icons.person_rounded, text: 'Account'),
+                    GButton(icon: Icons.assignment_rounded, text: 'الطلبات'),
+                    GButton(icon: Icons.map_rounded, text: 'التتبع'),
+                    GButton(icon: Icons.history_rounded, text: 'السجل'),
+                    GButton(icon: Icons.person_rounded, text: 'الحساب'),
                   ],
                 ),
               ),

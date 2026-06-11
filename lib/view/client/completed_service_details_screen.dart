@@ -10,6 +10,8 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const Color scaffoldBg = Color(0xFFF4F7FA);
+    final mediaQuery = MediaQuery.of(context);
+    final double screenWidth = mediaQuery.size.width;
 
     return Scaffold(
       backgroundColor: scaffoldBg,
@@ -27,72 +29,70 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Service Report",
+        title: Text(
+          "تقرير الخدمة",
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: const Color(0xFF1A1A1A),
             fontWeight: FontWeight.w900,
-            fontSize: 18,
+            fontSize: screenWidth * 0.045,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            _buildVehicleHero(),
-            const SizedBox(height: 25),
-
-            _buildSectionTitle("General Information"),
-            _buildInfoGrid(),
-            const SizedBox(height: 25),
-
-            _buildSectionTitle("Service Timeline"),
-            _buildTimelineCard(),
-            const SizedBox(height: 25),
-
-            if (service.isRated || service.isComplained) ...[
-              _buildSectionTitle("Feedback & Support"),
-              _buildFeedbackCard(),
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              _buildVehicleHero(screenWidth),
               const SizedBox(height: 25),
+              _buildSectionTitle("معلومات عامة", screenWidth),
+              _buildInfoGrid(screenWidth),
+              const SizedBox(height: 25),
+              _buildSectionTitle("الجدول الزمني للخدمة", screenWidth),
+              _buildTimelineCard(screenWidth),
+              const SizedBox(height: 25),
+              if (service.isRated || service.isComplained) ...[
+                _buildSectionTitle("الآراء والدعم", screenWidth),
+                _buildFeedbackCard(screenWidth),
+                const SizedBox(height: 25),
+              ],
+              _buildSectionTitle("المهام الفنية", screenWidth),
+              ...service.billItems
+                  .map((item) => _buildMaintenanceTaskCard(item, screenWidth))
+                  .toList(),
+              const SizedBox(height: 25),
+              _buildSectionTitle("ملخص الفاتورة", screenWidth),
+              _buildDetailedInvoice(screenWidth),
+              const SizedBox(height: 40),
             ],
-
-            _buildSectionTitle("Technical Tasks"),
-            ...service.billItems
-                .map((item) => _buildMaintenanceTaskCard(item))
-                .toList(),
-            const SizedBox(height: 25),
-
-            _buildSectionTitle("Billing Summary"),
-            _buildDetailedInvoice(),
-            const SizedBox(height: 40),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, double screenWidth) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      padding: const EdgeInsets.only(bottom: 12, right: 4),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 15,
+        style: TextStyle(
+          fontSize: screenWidth * 0.038,
           fontWeight: FontWeight.w900,
-          color: Color(0xFF2D3748),
+          color: const Color(0xFF2D3748),
         ),
       ),
     );
   }
 
-  Widget _buildVehicleHero() {
+  Widget _buildVehicleHero(double screenWidth) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(screenWidth * 0.06),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF1A1A1A), Color(0xFF333333)],
@@ -118,15 +118,15 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             "${service.brand} ${service.model}",
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 22,
+              fontSize: screenWidth * 0.055,
               fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            "PLATE NUMBER: ${service.platenumber}",
+            "رقم اللوحة: ${service.platenumber}",
             style: TextStyle(
               color: Colors.white.withOpacity(0.5),
               fontSize: 10,
@@ -141,7 +141,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              service.status.toUpperCase(),
+              service.status == "completed" ? "مكتمل" : service.status.toUpperCase(),
               style: const TextStyle(
                 color: Color(0xFF4CAF50),
                 fontSize: 10,
@@ -154,9 +154,9 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoGrid() {
+  Widget _buildInfoGrid(double screenWidth) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(screenWidth * 0.05),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -165,17 +165,23 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
         children: [
           _buildInfoItem(
             Icons.settings_suggest,
-            "Category",
+            "الفئة",
             service.problemType.replaceAll('_', ' '),
+            screenWidth,
           ),
           Container(width: 1, height: 40, color: Colors.grey[200]),
-          _buildInfoItem(Icons.calendar_today, "Model Year", service.year),
+          _buildInfoItem(
+            Icons.calendar_today,
+            "سنة الصنع",
+            service.year,
+            screenWidth,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String label, String value) {
+  Widget _buildInfoItem(IconData icon, String label, String value, double screenWidth) {
     return Expanded(
       child: Column(
         children: [
@@ -185,16 +191,16 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
           Text(
             value.toUpperCase(),
             textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: screenWidth * 0.03),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTimelineCard() {
+  Widget _buildTimelineCard(double screenWidth) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(screenWidth * 0.06),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -203,21 +209,24 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
         children: [
           _buildTimelineRow(
             Icons.radio_button_checked,
-            "Request Received",
-            service.receivedAt ?? "N/A",
+            "تم استلام الطلب",
+            service.receivedAt ?? "غير متوفر",
             isLast: false,
+            screenWidth: screenWidth,
           ),
           _buildTimelineRow(
             Icons.check_circle_rounded,
-            "Maintenance Done",
+            "اكتملت الصيانة",
             service.completedAt,
             isLast: false,
+            screenWidth: screenWidth,
           ),
           _buildTimelineRow(
             Icons.account_balance_wallet,
-            "Payment Verified",
-            service.paidAt ?? "N/A",
+            "تم تأكيد الدفع",
+            service.paidAt ?? "غير متوفر",
             isLast: true,
+            screenWidth: screenWidth,
           ),
         ],
       ),
@@ -229,6 +238,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
     String label,
     String time, {
     required bool isLast,
+    required double screenWidth,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,9 +261,9 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  fontSize: screenWidth * 0.032,
                 ),
               ),
               Text(
@@ -268,10 +278,10 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeedbackCard() {
+  Widget _buildFeedbackCard(double screenWidth) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(screenWidth * 0.05),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -287,9 +297,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
                     5,
                     (i) => Icon(
                       Icons.star_rounded,
-                      color: i < (service.score)
-                          ? Colors.amber
-                          : Colors.grey[200],
+                      color: i < (service.score) ? Colors.amber : Colors.grey[200],
                       size: 20,
                     ),
                   ),
@@ -306,7 +314,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "\"${service.ratingComment ?? 'No comment provided'}\"",
+              "\"${service.ratingComment ?? 'لا يوجد تعليق مضاف'}\"",
               style: const TextStyle(
                 color: Color(0xFF4A5568),
                 fontSize: 13,
@@ -314,8 +322,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
               ),
             ),
           ],
-          if (service.isRated && service.isComplained)
-            const Divider(height: 30),
+          if (service.isRated && service.isComplained) const Divider(height: 30),
           if (service.isComplained) ...[
             Row(
               children: [
@@ -325,11 +332,11 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
                   size: 18,
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  "Complaint Note",
+                Text(
+                  "ملاحظة الشكوى",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    fontSize: screenWidth * 0.032,
                     color: Colors.redAccent,
                   ),
                 ),
@@ -344,7 +351,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
-                    "PENDING",
+                    "قيد الانتظار",
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w900,
@@ -356,7 +363,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              service.complaintDescription ?? "No description available.",
+              service.complaintDescription ?? "لا يوجد وصف متاح.",
               style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],
@@ -365,13 +372,13 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMaintenanceTaskCard(dynamic item) {
+  Widget _buildMaintenanceTaskCard(dynamic item, double screenWidth) {
     List spareParts = item['spare_parts'] ?? [];
     List laborServices = item['labor_services'] ?? [];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(screenWidth * 0.05),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -384,20 +391,20 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  item['fault_name'] ?? "Repair Task",
-                  style: const TextStyle(
+                  item['fault_name'] ?? "مهمة إصلاح",
+                  style: TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 15,
-                    color: Color(0xFF1A1A1A),
+                    fontSize: screenWidth * 0.038,
+                    color: const Color(0xFF1A1A1A),
                   ),
                 ),
               ),
               Text(
                 "\$${_formatPrice(item['cost'])}",
-                style: const TextStyle(
-                  color: Color(0xFFE55757),
+                style: TextStyle(
+                  color: const Color(0xFFE55757),
                   fontWeight: FontWeight.w900,
-                  fontSize: 15,
+                  fontSize: screenWidth * 0.038,
                 ),
               ),
             ],
@@ -405,9 +412,9 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
           const SizedBox(height: 12),
           if (spareParts.isNotEmpty) ...[
             const Text(
-              "SPARE PARTS",
+              "قطع الغيار",
               style: TextStyle(
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.w900,
                 color: Colors.blueGrey,
                 letterSpacing: 1,
@@ -427,9 +434,9 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
           ],
           if (laborServices.isNotEmpty) ...[
             const Text(
-              "LABOR SERVICES",
+              "أجور العمالة",
               style: TextStyle(
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.w900,
                 color: Colors.blueGrey,
                 letterSpacing: 1,
@@ -458,7 +465,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            qty != null ? "• $name (x$qty)" : "• $name",
+            qty != null ? "• $name (عدد $qty)" : "• $name",
             style: const TextStyle(fontSize: 12, color: Color(0xFF718096)),
           ),
           Text(
@@ -470,9 +477,9 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailedInvoice() {
+  Widget _buildDetailedInvoice(double screenWidth) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(screenWidth * 0.06),
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(30),
@@ -487,48 +494,47 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
       child: Column(
         children: [
           _buildInvoiceRow(
-            "Subtotal",
+            "المجموع الفرعي",
             "\$${_formatPrice(service.subtotal)}",
             Colors.white.withOpacity(0.6),
+            screenWidth,
           ),
           const SizedBox(height: 10),
-
           if (double.tryParse(service.immediatePremium.toString()) != 0) ...[
             _buildInvoiceRow(
-              "Immediate Premium",
+              "رسوم الخدمة الفورية",
               "+\$${_formatPrice(service.immediatePremium)}",
               Colors.orangeAccent,
+              screenWidth,
             ),
             const SizedBox(height: 10),
           ],
-
           _buildInvoiceRow(
-            "${service.subscription} (${_formatPrice(service.discountPercentage)}%)",
+            "${service.subscription == "Free" ? "اشتراك مجاني" : service.subscription} (${_formatPrice(service.discountPercentage)}%)",
             "-\$${_formatPrice(service.discountAmount)}",
             const Color(0xFF4CAF50),
+            screenWidth,
           ),
-
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
             child: Divider(color: Colors.white12, thickness: 1),
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Total Paid",
+              Text(
+                "إجمالي المدفوع",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: screenWidth * 0.04,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 "\$${_formatPrice(service.finalCost)}",
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 26,
+                  fontSize: screenWidth * 0.065,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -539,16 +545,16 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInvoiceRow(String label, String value, Color color) {
+  Widget _buildInvoiceRow(String label, String value, Color color, double screenWidth) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(color: color, fontSize: 13)),
+        Text(label, style: TextStyle(color: color, fontSize: screenWidth * 0.032)),
         Text(
           value,
           style: TextStyle(
             color: color,
-            fontSize: 13,
+            fontSize: screenWidth * 0.032,
             fontWeight: FontWeight.bold,
           ),
         ),

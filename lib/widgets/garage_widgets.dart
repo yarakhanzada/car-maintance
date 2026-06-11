@@ -27,7 +27,6 @@ class GarageBackground extends StatelessWidget {
 
 class GarageHeader extends StatelessWidget {
   final double width;
-
   const GarageHeader({super.key, required this.width});
 
   @override
@@ -41,7 +40,7 @@ class GarageHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "My Garage",
+                "مرأبي",
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
@@ -51,7 +50,7 @@ class GarageHeader extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                "Welcome to your personal vehicle hub",
+                "مرحباً بك في مركز مركباتك الشخصي",
                 style: TextStyle(color: Colors.grey[500], fontSize: 15),
               ),
             ],
@@ -65,7 +64,6 @@ class GarageHeader extends StatelessWidget {
 class AddVehicleCard extends StatelessWidget {
   final double width;
   final VoidCallback onTap;
-
   const AddVehicleCard({super.key, required this.width, required this.onTap});
 
   @override
@@ -78,19 +76,12 @@ class AddVehicleCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
           gradient: LinearGradient(
-            colors: [
-              const Color(0xFFE55757),
-              const Color(0xFFEF8E8E).withOpacity(0.8),
-            ],
+            colors: [const Color(0xFFE55757), const Color(0xFFEF8E8E).withOpacity(0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFE55757).withOpacity(0.25),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
+            BoxShadow(color: const Color(0xFFE55757).withOpacity(0.25), blurRadius: 20, offset: const Offset(0, 10)),
           ],
         ),
         child: ClipRRect(
@@ -100,11 +91,7 @@ class AddVehicleCard extends StatelessWidget {
               Positioned(
                 top: -20,
                 right: -20,
-                child: Icon(
-                  Icons.add_circle_outline_rounded,
-                  size: 150,
-                  color: Colors.white.withOpacity(0.15),
-                ),
+                child: Icon(Icons.add_circle_outline_rounded, size: 150, color: Colors.white.withOpacity(0.15)),
               ),
               Padding(
                 padding: const EdgeInsets.all(25),
@@ -115,39 +102,16 @@ class AddVehicleCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Add New Vehicle",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          const Text("إضافة مركبة جديدة", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 5),
-                          Text(
-                            "Tap to register a new car to your garage",
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 13,
-                            ),
-                          ),
+                          Text("اضغط لتسجيل سيارة جديدة في كراجك", style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13)),
                         ],
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.5),
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle, border: Border.all(color: Colors.white.withOpacity(0.5))),
+                      child: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 20),
                     ),
                   ],
                 ),
@@ -165,14 +129,7 @@ class GarageInputField extends StatelessWidget {
   final String hint;
   final IconData icon;
   final TextInputType keyboardType;
-
-  const GarageInputField({
-    super.key,
-    required this.controller,
-    required this.hint,
-    required this.icon,
-    this.keyboardType = TextInputType.text,
-  });
+  const GarageInputField({super.key, required this.controller, required this.hint, required this.icon, this.keyboardType = TextInputType.text});
 
   @override
   Widget build(BuildContext context) {
@@ -182,25 +139,13 @@ class GarageInputField extends StatelessWidget {
       style: const TextStyle(fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(
-          color: Colors.grey[400],
-          fontWeight: FontWeight.w400,
-        ),
+        hintStyle: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.w400),
         prefixIcon: Icon(icon, color: const Color(0xFFE55757), size: 22),
         filled: true,
         fillColor: Colors.grey[100]?.withOpacity(0.7),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: Colors.grey[200]!, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Color(0xFFE55757), width: 1.5),
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Colors.grey[200]!, width: 1)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Color(0xFFE55757), width: 1.5)),
       ),
     );
   }

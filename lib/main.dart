@@ -34,15 +34,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: "/splash",
-      getPages: [
-        GetPage(name: "/splash", page: () => SplashScreen()),
-        GetPage(name: "/client", page: () => ClientBottombar()),
-        GetPage(name: "/driver", page: () => DriverBottombar()),
-        GetPage(name: "/tech", page: () => TechnicianBottombar()),
-        GetPage(name: "/ww", page: () => ServiceStationScreen()),
-      ],
-    );
-  }
+  debugShowCheckedModeBanner: false,
+
+
+
+  initialRoute: "/splash",
+  getPages: [
+    GetPage(name: "/splash", page: () => SplashScreen()),
+    GetPage(name: "/client", page: () => ClientBottombar()),
+    GetPage(name: "/driver", page: () => DriverBottombar()),
+    GetPage(name: "/tech", page: () => TechnicianBottombar()),
+    GetPage(name: "/ww", page: () => ServiceStationScreen()),
+  ],
+);
+}
 }

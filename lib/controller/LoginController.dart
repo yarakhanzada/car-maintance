@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/notification_service.dart';
 import 'package:senior_project/view/client/ClientBottombar.dart';
@@ -32,23 +31,15 @@ class LoginController extends GetxController {
     clearErrors();
 
     try {
-      print("LOGIN START");
-
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/login"),
         body: {"email": email, "password": password},
         headers: {"Accept": "application/json"},
       );
 
-      print("STATUS: ${response.statusCode}");
-      print("BODY: ${response.body}");
-
       final jsonData = jsonDecode(response.body);
 
-      print("PARSED: $jsonData");
-
       if (response.statusCode == 200 && jsonData["status"] == 1) {
-        print("LOGIN SUCCESS");
         return LoginModel.fromJson(jsonData);
       }
 
@@ -56,12 +47,10 @@ class LoginController extends GetxController {
 
       return null;
     } catch (e) {
-      print("ERROR: $e");
-      _setGeneralError("Server error");
+      _setGeneralError("خطأ في الاتصال بالخادم");
       return null;
     } finally {
       isLoading.value = false;
-      print("DONE");
     }
   }
 
@@ -73,17 +62,12 @@ class LoginController extends GetxController {
 
     if (result == null) return;
 
-    print("SUCCESS LOGIN");
-
     await saveSession(result);
-
     await NotificationService.getDeviceToken();
 
     final role = result.data.user.roles.isNotEmpty
         ? result.data.user.roles.first
         : "";
-
-    print("ROLE: $role");
 
     await TokenService.saveRole(role);
     await TokenService.saveID(result.data.user.id.toString());
@@ -92,9 +76,7 @@ class LoginController extends GetxController {
   }
 
   void _handleErrors(Map<String, dynamic> jsonData) {
-    print("LOGIN FAILED");
-
-    String message = jsonData["message"] ?? "Invalid credentials";
+    String message = jsonData["message"] ?? "بيانات الاعتماد غير صحيحة";
 
     if (jsonData["data"] == null) {
       _setGeneralError(message);
@@ -123,7 +105,7 @@ class LoginController extends GetxController {
         Get.offAllNamed("/tech");
         break;
       default:
-        Get.snackbar("Error", "Unknown role");
+        Get.snackbar("خطأ", "دور مستخدم غير معروف");
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart'; // تمت الإضافة لدعم Colors
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/controller/towtrucker%20controller/DriverNavigationController.dart';
@@ -25,8 +26,7 @@ class DriverOrdersController extends GetxController {
       final response = await ApiHelper.get(
         "${ApiConfig.baseUrl}/v1/driver/tow-requests",
       );
-      print("lllllllllllllllllllllllllllllllllllllllll");
-      print(response.body);
+      
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         List rawData = responseData['data'];
@@ -35,7 +35,7 @@ class DriverOrdersController extends GetxController {
         );
       }
     } catch (e) {
-      print("Error fetching orders: $e");
+      debugPrint("خطأ في جلب الطلبات: $e");
     } finally {
       isLoading(false);
     }
@@ -57,8 +57,12 @@ class DriverOrdersController extends GetxController {
         }
       }
     } catch (e) {
-      print("Error fetching details: $e");
-      Get.snackbar("Error", "Could not load details: $e");
+      Get.snackbar(
+        "خطأ", 
+        "تعذر تحميل التفاصيل: $e",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading(false);
     }
@@ -70,14 +74,15 @@ class DriverOrdersController extends GetxController {
         "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/accept",
         {},
       );
-      print("lllllllllllllllllllllllllllllllllllllllll");
-      print(response.body);
+      
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         Get.snackbar(
-          "Success",
-          "Order accepted successfully",
+          "نجاح",
+          "تم قبول الطلب بنجاح",
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
         );
         final navRepo = Get.find<DriverNavigationController>();
 
@@ -85,7 +90,7 @@ class DriverOrdersController extends GetxController {
         fetchOrders();
       }
     } catch (e) {
-      print("Error accepting order: $e");
+      debugPrint("خطأ في قبول الطلب: $e");
     }
   }
 
@@ -95,18 +100,19 @@ class DriverOrdersController extends GetxController {
         "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/reject",
         {},
       );
-      print("لللللللللللللللللللللللل");
-      print(response.body);
+      
       if (response.statusCode == 200) {
         Get.snackbar(
-          "Ignored",
-          "Request has been skipped",
+          "تم التجاهل",
+          "تم تخطي الطلب",
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
         );
         fetchOrders();
       }
     } catch (e) {
-      print("Error rejecting order: $e");
+      debugPrint("خطأ في رفض الطلب: $e");
     }
   }
 }

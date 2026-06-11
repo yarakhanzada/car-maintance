@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:senior_project/controller/client%20controller/NotificationController.dart';
+import 'package:senior_project/controller/client controller/NotificationController.dart';
 
 class ClientNotificationsScreen extends StatelessWidget {
   ClientNotificationsScreen({super.key});
@@ -10,11 +10,14 @@ class ClientNotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+    final double height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FA),
       body: Stack(
         children: [
-          _buildArtisticBackground(),
+          _buildArtisticBackground(width, height),
           SafeArea(
             child: Column(
               children: [
@@ -42,8 +45,7 @@ class ClientNotificationsScreen extends StatelessWidget {
                       itemCount: controller.notifications.length,
                       itemBuilder: (context, index) {
                         final item = controller.notifications[index];
-                        final bool isReadValue =
-                            item['is_read'] == true || item['is_read'] == 1;
+                        final bool isReadValue = item['is_read'] == true || item['is_read'] == 1;
 
                         return _buildModernNotificationCard(
                           id: item['id'],
@@ -51,6 +53,7 @@ class ClientNotificationsScreen extends StatelessWidget {
                           msg: item['message'] ?? "",
                           time: _formatDate(item['created_at']),
                           isUnread: !isReadValue,
+                          width: width,
                         );
                       },
                     );
@@ -74,12 +77,11 @@ class ClientNotificationsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "Notifications",
+                "الإشعارات",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF1A1A1A),
-                  letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 8),
@@ -94,7 +96,7 @@ class ClientNotificationsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
-                    "${controller.unreadCount.value} New Messages",
+                    "${controller.unreadCount.value} رسائل جديدة",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -124,153 +126,71 @@ class ClientNotificationsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildCircleActionButton(IconData icon, VoidCallback onTap, {Color color = const Color(0xFF1A1A1A)}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
+
   Widget _buildModernNotificationCard({
     required int id,
     required String title,
     required String msg,
     required String time,
     required bool isUnread,
+    required double width,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8, bottom: 8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: isUnread
-                  ? Colors.blue.withOpacity(0.1)
-                  : Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              time,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: isUnread ? Colors.blue : Colors.grey.shade600,
-              ),
-            ),
+    return Container(
+      width: width,
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
           ),
-        ),
-        Container(
-          margin: const EdgeInsets.only(bottom: 24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isUnread ? 0.06 : 0.02),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 16,
+                ),
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Stack(
-              children: [
-                if (isUnread)
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: 5,
-                    child: Container(color: Colors.blue),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isUnread
-                              ? Colors.blue.withOpacity(0.1)
-                              : Colors.grey.withOpacity(0.05),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.notifications_active_rounded,
-                          color: isUnread ? Colors.blue : Colors.grey,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: isUnread
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
-                                color: const Color(0xFF1A1A1A),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              msg,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey.shade600,
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (isUnread)
-                        GestureDetector(
-                          onTap: () => controller.markAsRead(id),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF0F4F8),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.check_rounded,
-                              size: 18,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ),
-                    ],
+              if (isUnread)
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCircleActionButton(
-    IconData icon,
-    VoidCallback onTap, {
-    Color? color,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
-          ],
-        ),
-        child: Icon(icon, color: color ?? const Color(0xFF1A1A1A), size: 20),
+          const SizedBox(height: 8),
+          Text(msg, style: const TextStyle(color: Colors.grey)),
+          const SizedBox(height: 8),
+          Text(time, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        ],
       ),
     );
   }
@@ -287,7 +207,7 @@ class ClientNotificationsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            "All caught up!",
+            "لا توجد إشعارات!",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -296,7 +216,7 @@ class ClientNotificationsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "No new notifications at the moment",
+            "ليس لديك أي إشعارات جديدة في الوقت الحالي",
             style: TextStyle(color: Colors.grey.shade500),
           ),
         ],
@@ -314,15 +234,20 @@ class ClientNotificationsScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildArtisticBackground() {
-    return Positioned.fill(
+  Widget _buildArtisticBackground(double width, double height) {
+    return Positioned(
+      top: -height * 0.1,
+      right: -width * 0.2,
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFF4F7FA), Color(0xFFE9EEF5)],
-          ),
+        width: width * 0.7,
+        height: width * 0.7,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFFE55757).withOpacity(0.04),
+        ),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+          child: const SizedBox(),
         ),
       ),
     );

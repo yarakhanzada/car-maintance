@@ -13,73 +13,73 @@ class InProgressTaskScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TaskController controller = Get.put(TaskController());
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       body: Stack(
         children: [
-          _buildBackgroundDecor(),
+          _buildBackgroundDecor(screenWidth),
           SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
-                  _buildHeader(),
-                  const SizedBox(height: 30),
-
+                  SizedBox(height: screenHeight * 0.02),
+                  _buildHeader(screenWidth),
+                  SizedBox(height: screenHeight * 0.03),
                   GestureDetector(
-                    onTap: () => _showReportSheet(context),
-                    child: _buildCurrentJobCard(controller),
+                    onTap: () => _showReportSheet(context, screenWidth),
+                    child: _buildCurrentJobCard(controller, screenWidth),
                   ),
-
-                  const SizedBox(height: 30),
-                  _buildSectionLabel("STEP 1: DOCUMENTATION"),
-                  const SizedBox(height: 15),
-
+                  SizedBox(height: screenHeight * 0.03),
+                  _buildSectionLabel("الخطوة 1: التوثيق", screenWidth),
+                  SizedBox(height: screenHeight * 0.015),
                   Row(
                     children: [
                       Expanded(
                         child: Obx(
                           () => _buildUploadBox(
-                            "Before Repair",
+                            "قبل الإصلاح",
                             controller.beforeImage.value,
+                            screenWidth,
                             () => _showImageSourceDialog(
                               context,
                               "Before",
                               controller,
+                              screenWidth,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 15),
+                      SizedBox(width: screenWidth * 0.04),
                       Expanded(
                         child: Obx(
                           () => _buildUploadBox(
-                            "After Repair",
+                            "بعد الإصلاح",
                             controller.afterImage.value,
+                            screenWidth,
                             () => _showImageSourceDialog(
                               context,
                               "After",
                               controller,
+                              screenWidth,
                             ),
                           ),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 35),
-                  _buildSectionLabel("STEP 2: MISSION STATUS"),
-                  const SizedBox(height: 15),
-
-                  _buildStatusSwitcher(controller),
-
-                  const SizedBox(height: 40),
-                  _buildFinishButton(controller),
-                  const SizedBox(height: 120),
+                  SizedBox(height: screenHeight * 0.04),
+                  _buildSectionLabel("الخطوة 2: حالة المهمة", screenWidth),
+                  SizedBox(height: screenHeight * 0.015),
+                  _buildStatusSwitcher(controller, screenWidth),
+                  SizedBox(height: screenHeight * 0.05),
+                  _buildFinishButton(controller, screenWidth, screenHeight),
+                  SizedBox(height: screenHeight * 0.15),
                 ],
               ),
             ),
@@ -89,7 +89,7 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
-  void _showReportSheet(BuildContext context) {
+  void _showReportSheet(BuildContext context, double screenWidth) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -97,7 +97,7 @@ class InProgressTaskScreen extends StatelessWidget {
       builder: (context) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.all(30),
+          padding: EdgeInsets.all(screenWidth * 0.075),
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
@@ -117,20 +117,22 @@ class InProgressTaskScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 25),
-              const Text(
-                "Technical Report",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+              Text(
+                "التقرير الفني",
+                style: TextStyle(fontSize: screenWidth * 0.06, fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 20),
               _buildReportItem(
-                "Issue Identified",
-                "Faulty spark plugs and ignition coil wear.",
+                "المشكلة التي تم تحديدها",
+                "تلف في شمعات الإشعال وتآكل ملف الإشعال.",
+                screenWidth,
               ),
               _buildReportItem(
-                "Parts Required",
-                "4x Spark Plugs, 1x Ignition Coil (OEM)",
+                "قطع الغيار المطلوبة",
+                "عدد 4 شمعات إشعال، ملف إشعال عدد 1 (أصلي)",
+                screenWidth,
               ),
-              _buildReportItem("Estimated Time", "2 Hours"),
+              _buildReportItem("الوقت المقدر", "ساعتين", screenWidth),
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
@@ -141,9 +143,9 @@ class InProgressTaskScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
-                child: const Text(
-                  "Close Report",
-                  style: TextStyle(color: Colors.white),
+                child: Text(
+                  "إغلاق التقرير",
+                  style: TextStyle(color: Colors.white, fontSize: screenWidth * 0.04),
                 ),
               ),
             ],
@@ -157,10 +159,11 @@ class InProgressTaskScreen extends StatelessWidget {
     BuildContext context,
     String type,
     TaskController controller,
+    double screenWidth,
   ) {
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(screenWidth * 0.05),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
@@ -170,18 +173,15 @@ class InProgressTaskScreen extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt, color: Color(0xFFE55757)),
-              title: const Text("Take a Photo"),
+              title: const Text("التقاط صورة بالكاميرا"),
               onTap: () {
                 controller.pickImage(ImageSource.camera, type);
                 Get.back();
               },
             ),
             ListTile(
-              leading: const Icon(
-                Icons.photo_library,
-                color: Color(0xFFE55757),
-              ),
-              title: const Text("Choose from Gallery"),
+              leading: const Icon(Icons.photo_library, color: Color(0xFFE55757)),
+              title: const Text("اختيار من المعرض"),
               onTap: () {
                 controller.pickImage(ImageSource.gallery, type);
                 Get.back();
@@ -193,7 +193,7 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUploadBox(String label, File? imageFile, VoidCallback onTap) {
+  Widget _buildUploadBox(String label, File? imageFile, double screenWidth, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -213,17 +213,17 @@ class InProgressTaskScreen extends StatelessWidget {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.add_a_photo_rounded,
-                    color: Color(0xFFE55757),
-                    size: 30,
+                    color: const Color(0xFFE55757),
+                    size: screenWidth * 0.08,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: screenWidth * 0.032,
                     ),
                   ),
                 ],
@@ -239,11 +239,11 @@ class InProgressTaskScreen extends StatelessWidget {
                   size: 40,
                 ),
               ),
-      ),
+    ),
     );
   }
 
-  Widget _buildStatusSwitcher(TaskController controller) {
+  Widget _buildStatusSwitcher(TaskController controller, double screenWidth) {
     return Obx(
       () => Container(
         padding: const EdgeInsets.all(8),
@@ -255,14 +255,14 @@ class InProgressTaskScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildSwitchTab(
-                "Working",
+                "قيد العمل",
                 controller.status.value == "Working",
                 () => controller.status.value = "Working",
               ),
             ),
             Expanded(
               child: _buildSwitchTab(
-                "Completed",
+                "مكتملة",
                 controller.status.value == "Completed",
                 () => controller.status.value = "Completed",
               ),
@@ -303,34 +303,34 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return const Column(
+  Widget _buildHeader(double screenWidth) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "MISSION CONTROL",
+          "إدارة المهمة",
           style: TextStyle(
-            fontSize: 12,
+            fontSize: screenWidth * 0.03,
             fontWeight: FontWeight.w800,
-            color: Color(0xFFE55757),
-            letterSpacing: 2,
+            color: const Color(0xFFE55757),
+            letterSpacing: 1.5,
           ),
         ),
         Text(
-          "In Progress",
+          "قيد التنفيذ",
           style: TextStyle(
-            fontSize: 32,
+            fontSize: screenWidth * 0.08,
             fontWeight: FontWeight.w900,
-            color: Color(0xFF1A1A1A),
+            color: const Color(0xFF1A1A1A),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCurrentJobCard(TaskController controller) {
+  Widget _buildCurrentJobCard(TaskController controller, double screenWidth) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(screenWidth * 0.05),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -340,33 +340,34 @@ class InProgressTaskScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 24,
-            backgroundColor: Color(0xFFF1F2F6),
-            child: Icon(Icons.car_repair_rounded, color: Colors.black87),
+          CircleAvatar(
+            radius: screenWidth * 0.06,
+            backgroundColor: const Color(0xFFF1F2F6),
+            child: const Icon(Icons.car_repair_rounded, color: Colors.black87),
           ),
-          const SizedBox(width: 15),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Audi R8 - Red",
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
-              ),
-              Text(
-                "Customer: Yara Mohammad",
-                style: TextStyle(color: Colors.grey, fontSize: 13),
-              ),
-            ],
+          SizedBox(width: screenWidth * 0.04),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "أودي R8 - حمراء",
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: screenWidth * 0.045),
+                ),
+                Text(
+                  "العميل: يارا محمد",
+                  style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.032),
+                ),
+              ],
+            ),
           ),
-          const Spacer(),
-          Obx(() => _buildStatusBadge(controller.status.value)),
+          Obx(() => _buildStatusBadge(controller.status.value, screenWidth)),
         ],
       ),
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(String status, double screenWidth) {
     bool isDone = status == "Completed";
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -375,18 +376,17 @@ class InProgressTaskScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        status,
+        isDone ? "مكتملة" : "قيد العمل",
         style: TextStyle(
           color: isDone ? Colors.blue : Colors.green,
-          fontSize: 11,
+          fontSize: screenWidth * 0.028,
           fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 
-  // --- زر الإرسال النهائي (المطلب 3) ---
-  Widget _buildFinishButton(TaskController controller) {
+  Widget _buildFinishButton(TaskController controller, double screenWidth, double screenHeight) {
     return Container(
       width: double.infinity,
       height: 65,
@@ -401,11 +401,12 @@ class InProgressTaskScreen extends StatelessWidget {
       ),
       child: ElevatedButton(
         onPressed: () async {
-          if (controller.beforeImage.value != null)
+          if (controller.beforeImage.value != null) {
             await controller.uploadImages("Before");
-          if (controller.afterImage.value != null)
+          }
+          if (controller.afterImage.value != null) {
             await controller.uploadImages("After");
-
+          }
           await controller.finishTask();
         },
         style: ElevatedButton.styleFrom(
@@ -415,19 +416,19 @@ class InProgressTaskScreen extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        child: const Text(
-          "SUBMIT MISSION UPDATES",
+        child: Text(
+          "إرسال تحديثات المهمة",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w900,
-            letterSpacing: 1,
+            fontSize: screenWidth * 0.042,
           ),
         ),
       ),
     );
   }
 
-  void _showConfirmationDialog(TaskController controller) {
+  void _showConfirmationDialog(TaskController controller, double screenWidth) {
     Get.dialog(
       BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -436,31 +437,31 @@ class InProgressTaskScreen extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
-          title: const Column(
+          title: Column(
             children: [
               Icon(
                 Icons.cloud_upload_outlined,
-                size: 50,
-                color: Color(0xFFE55757),
+                size: screenWidth * 0.12,
+                color: const Color(0xFFE55757),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Text(
-                "Final Submission",
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22),
+                "التأكيد النهائي",
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: screenWidth * 0.055),
               ),
             ],
           ),
-          content: const Text(
-            "Are you sure you want to save these photos and update the task status to the system?",
+          content: Text(
+            "هل أنت متأكد من رغبتك في حفظ هذه الصور وتحديث حالة المهمة في النظام؟",
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
+            style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.035, height: 1.5),
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             TextButton(
               onPressed: () => Get.back(),
               child: const Text(
-                "Review",
+                "مراجعة",
                 style: TextStyle(
                   color: Colors.grey,
                   fontWeight: FontWeight.bold,
@@ -484,7 +485,7 @@ class InProgressTaskScreen extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                "Confirm",
+                "تأكيد",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -499,8 +500,8 @@ class InProgressTaskScreen extends StatelessWidget {
 
   void _showSuccessFlash() {
     Get.snackbar(
-      "Success!",
-      "Mission updates have been sent to the system.",
+      "تم بنجاح!",
+      "تم إرسال تحديثات المهمة إلى النظام بنجاح.",
       snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.green,
       colorText: Colors.white,
@@ -515,41 +516,44 @@ class InProgressTaskScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionLabel(String label) => Text(
-    label,
-    style: const TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w800,
-      color: Colors.grey,
-      letterSpacing: 1.5,
-    ),
-  );
-  Widget _buildBackgroundDecor() => Positioned(
-    top: -50,
-    right: -50,
-    child: CircleAvatar(
-      radius: 120,
-      backgroundColor: const Color(0xFFE55757).withOpacity(0.03),
-    ),
-  );
-  Widget _buildReportItem(String t, String v) => Padding(
-    padding: const EdgeInsets.only(bottom: 15),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          t,
-          style: const TextStyle(
-            color: Colors.grey,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
+  Widget _buildSectionLabel(String label, double screenWidth) => Text(
+        label,
+        style: TextStyle(
+          fontSize: screenWidth * 0.03,
+          fontWeight: FontWeight.w800,
+          color: Colors.grey,
+          letterSpacing: 1,
         ),
-        Text(
-          v,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      );
+
+  Widget _buildBackgroundDecor(double screenWidth) => Positioned(
+        top: -50,
+        right: -50,
+        child: CircleAvatar(
+          radius: screenWidth * 0.3,
+          backgroundColor: const Color(0xFFE55757).withOpacity(0.03),
         ),
-      ],
-    ),
-  );
+      );
+
+  Widget _buildReportItem(String title, String value, double screenWidth) => Padding(
+        padding: const EdgeInsets.only(bottom: 15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+                fontSize: screenWidth * 0.03,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenWidth * 0.038),
+            ),
+          ],
+        ),
+      );
 }

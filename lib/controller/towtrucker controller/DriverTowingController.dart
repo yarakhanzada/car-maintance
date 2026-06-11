@@ -63,15 +63,9 @@ class DriverTowingController extends GetxController {
   }
 
   void _extractIds() {
-    final data = requestData.containsKey('data')
-        ? requestData['data']
-        : requestData;
+    final data = requestData.containsKey('data') ? requestData['data'] : requestData;
     requestId = (data['id'] ?? data['towing_request']?['id'] ?? "0").toString();
-    customerId =
-        (data['user_id'] ??
-                data['towing_request']?['service_request']?['user_id'] ??
-                "0")
-            .toString();
+    customerId = (data['user_id'] ?? data['towing_request']?['service_request']?['user_id'] ?? "0").toString();
     driverId = (data['towing_request']?['tow_truck_id'] ?? "0").toString();
 
     String currentStatus = data['status'] ?? "";
@@ -81,10 +75,7 @@ class DriverTowingController extends GetxController {
       currentStatusIndex = 0;
     } else {
       isJobStarted = true;
-      currentStatusIndex = statusSequence.indexWhere(
-        (element) => element['key'] == currentStatus,
-      );
-
+      currentStatusIndex = statusSequence.indexWhere((element) => element['key'] == currentStatus);
       if (currentStatusIndex == -1) currentStatusIndex = 0;
     }
     if (data['towing_request']?['location'] != null) {
@@ -99,17 +90,16 @@ class DriverTowingController extends GetxController {
   Future<void> initLocationServices() async {
     _sendLocationToSocket();
 
-    positionStream =
-        Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 5,
-          ),
-        ).listen((Position pos) {
-          driverLocation = LatLng(pos.latitude, pos.longitude);
-          _sendLocationToSocket();
-          _updateMapData();
-        });
+    positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 5,
+      ),
+    ).listen((Position pos) {
+      driverLocation = LatLng(pos.latitude, pos.longitude);
+      _sendLocationToSocket();
+      _updateMapData();
+    });
   }
 
   void _sendLocationToSocket() {
@@ -126,20 +116,13 @@ class DriverTowingController extends GetxController {
   Future<void> _updateMapData() async {
     if (customerLocation == null) return;
 
-    final data = await MapHelper.getRouteData(
-      driverLocation,
-      customerLocation!,
-    );
+    final data = await MapHelper.getRouteData(driverLocation, customerLocation!);
     if (data != null) {
       distanceToCustomer = data['distance'];
       estimatedTime = data['duration'];
     }
 
-    routePoints = await MapHelper.getPolylinePoints(
-      driverLocation,
-      customerLocation!,
-    );
-
+    routePoints = await MapHelper.getPolylinePoints(driverLocation, customerLocation!);
     update();
   }
 
@@ -235,22 +218,14 @@ class DriverTowingController extends GetxController {
   // --- APIS ---
 
   Future<bool> startTowing() async {
-    final id =
-        (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
-            .toString();
-
+    final id = (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId).toString();
     final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/start";
 
     try {
       final response = await ApiHelper.post(url, {
         "latitude": driverLocation.latitude,
-
         "longitude": driverLocation.longitude,
       });
-
-      print(" [RESPONSE StartTowing] Status: ${response.statusCode}");
-
-      print(" [BODY StartTowing]: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         isJobStarted = true;
@@ -259,43 +234,24 @@ class DriverTowingController extends GetxController {
         return true;
       }
     } catch (e) {
-      print(" [EXCEPTION START]: $e");
+      debugPrint("خطأ في بدء عملية السحب: $e");
     }
-
     return false;
   }
 
   Future<bool> updateTowStatusAPI(String status) async {
-    print(
-      "📍 My Actual Location: ${driverLocation.latitude}, ${driverLocation.longitude}",
-    );
-    final id =
-        (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
-            .toString();
-
+    final id = (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId).toString();
     final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/status";
-
-    print(" Sending to API -> ID: $id, Status: $status");
-
-    print(" [ UPDATE STATUS] URL: $url | New Status: $status");
 
     try {
       final response = await ApiHelper.post(url, {
         "status": status,
-
         "latitude": driverLocation.latitude,
-
         "longitude": driverLocation.longitude,
       });
 
-      print(" [RESPONSE UpdateTowStatus] Status: ${response.statusCode}");
-
-      print(" [BODY UpdateTowStatus]: ${response.body}");
-
       if (response.statusCode == 200) {
-        int nextIndex = statusSequence.indexWhere(
-          (element) => element['key'] == status,
-        );
+        int nextIndex = statusSequence.indexWhere((element) => element['key'] == status);
         if (nextIndex != -1) {
           currentStatusIndex = nextIndex;
           update();
@@ -303,38 +259,26 @@ class DriverTowingController extends GetxController {
         return true;
       }
     } catch (e) {
-      print(" [EXCEPTION STATUS]: $e");
+      debugPrint("خطأ في تحديث الحالة: $e");
     }
-
     return false;
   }
 
   Future<bool> completeTowingAPI() async {
-    final id =
-        (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
-            .toString();
-
+    final id = (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId).toString();
     final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/complete";
 
     try {
       final response = await ApiHelper.post(url, {
         "latitude": driverLocation.latitude,
-
         "longitude": driverLocation.longitude,
       });
 
-      print(" [RESPONSE CompleteTowingAPI] Status: ${response.statusCode}");
-
-      print(" [BODY CompleteTowingAPI]: ${response.body}");
-
-      if (response.statusCode == 200) {
-        return true;
-      }
+      return response.statusCode == 200;
     } catch (e) {
-      print(" [EXCEPTION COMPLETE]: $e");
+      debugPrint("خطأ في إنهاء السحب: $e");
+      return false;
     }
-
-    return false;
   }
 
   void completeTowingViaSocket() {

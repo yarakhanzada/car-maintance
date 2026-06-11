@@ -24,7 +24,7 @@ class DriverHistoryScreen extends StatelessWidget {
                     if (controller.historyList.isEmpty) {
                       return const Center(
                         child: Text(
-                          "No Requests Available",
+                          "لا توجد طلبات متاحة",
                           style: TextStyle(color: Colors.grey),
                         ),
                       );
@@ -58,7 +58,7 @@ class DriverHistoryScreen extends StatelessWidget {
                             child: Stack(
                               children: [
                                 Positioned(
-                                  right: 0,
+                                  left: 0,
                                   top: 0,
                                   bottom: 0,
                                   child: Container(
@@ -69,31 +69,15 @@ class DriverHistoryScreen extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.all(18),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(10),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFFEEAEA),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            child: const Icon(
-                                              Icons.car_crash,
-                                              color: Color(0xFFE55757),
-                                              size: 24,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
                                           Expanded(
                                             child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
                                                 Text(
                                                   "${trip.carBrand} ${trip.carModel}",
@@ -102,47 +86,60 @@ class DriverHistoryScreen extends StatelessWidget {
                                                     fontSize: 16,
                                                     color: Color(0xFF2D3243),
                                                   ),
+                                                  textAlign: TextAlign.right,
                                                 ),
                                                 Text(
-                                                  trip.customerName ?? "Client",
+                                                  trip.customerName ?? "عميل",
                                                   style: const TextStyle(
                                                     color: Colors.grey,
                                                     fontSize: 12,
                                                   ),
+                                                  textAlign: TextAlign.right,
                                                 ),
                                               ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFFEEAEA),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: const Icon(
+                                              Icons.car_crash,
+                                              color: Color(0xFFE55757),
+                                              size: 24,
                                             ),
                                           ),
                                         ],
                                       ),
                                       const SizedBox(height: 12),
                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
-                                          const Icon(
-                                            Icons.location_on,
-                                            size: 14,
-                                            color: Color(0xFF64B5F6),
-                                          ),
-                                          const SizedBox(width: 4),
                                           Expanded(
                                             child: Text(
-                                              controller.addressCache[trip
-                                                      .towingRequestId] ??
-                                                  "Location stored",
+                                              controller.addressCache[trip.towingRequestId] ?? "تم حفظ الموقع",
                                               style: const TextStyle(
                                                 color: Color(0xFF90A4AE),
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w500,
                                               ),
                                               overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.right,
                                             ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          const Icon(
+                                            Icons.location_on,
+                                            size: 14,
+                                            color: Color(0xFF64B5F6),
                                           ),
                                         ],
                                       ),
                                       const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: 12,
-                                        ),
+                                        padding: EdgeInsets.symmetric(vertical: 12),
                                         child: Divider(
                                           color: Color(0xFFF1F3F4),
                                           thickness: 1,
@@ -150,20 +147,19 @@ class DriverHistoryScreen extends StatelessWidget {
                                         ),
                                       ),
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           _buildInfoTag(
-                                            Icons.straighten_rounded,
-                                            "${trip.distanceKm} KM",
+                                            Icons.check_circle_outline,
+                                            "مكتمل",
                                           ),
                                           _buildInfoTag(
                                             Icons.calendar_month_rounded,
                                             trip.carYear,
                                           ),
                                           _buildInfoTag(
-                                            Icons.check_circle_outline,
-                                            "Done",
+                                            Icons.straighten_rounded,
+                                            "${trip.distanceKm} كم",
                                           ),
                                         ],
                                       ),
@@ -189,7 +185,7 @@ class DriverHistoryScreen extends StatelessWidget {
   Widget _buildBackgroundGradient() {
     return Positioned(
       top: -100,
-      right: -100,
+      left: -100,
       child: Container(
         width: 300,
         height: 300,
@@ -210,25 +206,31 @@ class DriverHistoryScreen extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.fromLTRB(24, 30, 24, 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            "History Log",
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF1A1D26),
-              letterSpacing: -0.5,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                "سجل الرحلات",
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF1A1D26),
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 6),
           Text(
-            "View all your completed and past service records",
+            "عرض جميع سجلات الخدمات السابقة والمكتملة",
             style: TextStyle(
               fontSize: 14,
               color: Color(0xFF90A4AE),
               fontWeight: FontWeight.w500,
             ),
+            textAlign: TextAlign.right,
           ),
         ],
       ),
@@ -237,9 +239,8 @@ class DriverHistoryScreen extends StatelessWidget {
 
   Widget _buildInfoTag(IconData icon, String text) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: Colors.grey.shade400),
-        const SizedBox(width: 4),
         Text(
           text,
           style: TextStyle(
@@ -248,6 +249,8 @@ class DriverHistoryScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
+        const SizedBox(width: 4),
+        Icon(icon, size: 14, color: Colors.grey.shade400),
       ],
     );
   }

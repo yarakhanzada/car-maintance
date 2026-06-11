@@ -19,83 +19,88 @@ class ResetPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return GlassScaffold(
-      child: Column(
-        children: [
-          const AuthHeaderIcon(icon: Icons.lock_open_rounded),
-          const SizedBox(height: 30),
-          const Text(
-            "New Password",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            "Resetting password for $email",
-            style: TextStyle(color: Colors.white70),
-          ),
-
-          const SizedBox(height: 40),
-
-          Obx(
-            () => GlassTextField(
-              controller: passwordController,
-              hint: "New Password",
-              prefixIcon: Icons.lock_outline,
-              isPassword: true,
-              obscureText: controller.obscurePassword.value,
-              suffixIcon: IconButton(
-                icon: Icon(
-                  controller.obscurePassword.value
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  color: Colors.white,
-                ),
-                onPressed: () => controller.obscurePassword.toggle(),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: [
+            const AuthHeaderIcon(icon: Icons.lock_open_rounded),
+            SizedBox(height: screenHeight * 0.03),
+            const Text(
+              "كلمة مرور جديدة",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-
-          const SizedBox(height: 20),
-
-          Obx(
-            () => GlassTextField(
-              controller: confirmPasswordController,
-              hint: "Confirm Password",
-              prefixIcon: Icons.lock_reset_outlined,
-              isPassword: true,
-              obscureText: controller.obscureConfirm.value,
-              suffixIcon: IconButton(
-                icon: Icon(
-                  controller.obscureConfirm.value
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  color: Colors.white,
-                ),
-                onPressed: () => controller.obscureConfirm.toggle(),
-              ),
+            const SizedBox(height: 10),
+            Text(
+              "إعادة تعيين كلمة المرور للحساب: $email",
+              style: const TextStyle(color: Colors.white70),
             ),
-          ),
 
-          const SizedBox(height: 40),
+            SizedBox(height: screenHeight * 0.04),
 
-          Obx(
-            () => controller.isLoading.value
-                ? const CircularProgressIndicator(color: Colors.redAccent)
-                : CustomButton(
-                    text: "Update Password",
-                    onTap: () => controller.resetPassword(
-                      email: email,
-                      code: code,
-                      password: passwordController.text,
-                      confirmPassword: confirmPasswordController.text,
-                    ),
+            Obx(
+              () => GlassTextField(
+                controller: passwordController,
+                hint: "كلمة المرور الجديدة",
+                prefixIcon: Icons.lock_outline,
+                isPassword: true,
+                obscureText: controller.obscurePassword.value,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    controller.obscurePassword.value
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: Colors.white,
                   ),
-          ),
-        ],
+                  onPressed: () => controller.obscurePassword.toggle(),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Obx(
+              () => GlassTextField(
+                controller: confirmPasswordController,
+                hint: "تأكيد كلمة المرور",
+                prefixIcon: Icons.lock_reset_outlined,
+                isPassword: true,
+                obscureText: controller.obscureConfirm.value,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    controller.obscureConfirm.value
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => controller.obscureConfirm.toggle(),
+                ),
+              ),
+            ),
+
+            SizedBox(height: screenHeight * 0.04),
+
+            Obx(
+              () => controller.isLoading.value
+                  ? const CircularProgressIndicator(color: Colors.redAccent)
+                  : CustomButton(
+                      text: "تحديث كلمة المرور",
+                      onTap: () => controller.resetPassword(
+                        email: email,
+                        code: code,
+                        password: passwordController.text,
+                        confirmPassword: confirmPasswordController.text,
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -18,91 +18,88 @@ class ClientBottombar extends StatelessWidget {
   final List<Widget> screens = [
     HomeScreen(),
     const CompletedServicesScreen(),
-
     MyGarageScreen(),
     ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      body: Stack(
-        children: [
-          Obx(() => screens[controller.selectedIndex.value]),
-
-          Positioned(
-            bottom: 110,
-            right: 0,
-            child: GestureDetector(
-              onTap: () {
-                Get.to(() => ChatBotScreen());
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE55757),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        extendBody: true,
+        body: Stack(
+          children: [
+            Obx(() => screens[controller.selectedIndex.value]),
+            Positioned(
+              bottom: 110,
+              left: 0,
+              child: GestureDetector(
+                onTap: () {
+                  Get.to(() => ChatBotScreen());
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
                   ),
-                ),
-                child: const Icon(
-                  Icons.support_agent_rounded,
-                  color: Colors.white,
-                  size: 28,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE55757),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.support_agent_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.6),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(25),
-            topRight: Radius.circular(25),
-          ),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          ],
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(25),
-            topRight: Radius.circular(25),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.6),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
+            ),
+            border: Border.all(color: Colors.white.withOpacity(0.08)),
           ),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(15, 6, 15, 12),
-              child: Obx(
-                () => GNav(
-                  gap: 6,
-                  activeColor: Colors.white,
-                  iconSize: 22,
-                  tabBackgroundColor: const Color(0xFFE55757).withOpacity(0.9),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  duration: const Duration(milliseconds: 400),
-                  color: Colors.white54,
-                  selectedIndex: controller.selectedIndex.value,
-                  onTabChange: (index) =>
-                      controller.selectedIndex.value = index,
-                  tabs: const [
-                    GButton(icon: Icons.home_rounded, text: 'Home'),
-                    GButton(
-                      icon: Icons.calendar_today_rounded,
-                      text: 'Completed',
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15, 6, 15, 12),
+                child: Obx(
+                  () => GNav(
+                    gap: 6,
+                    activeColor: Colors.white,
+                    iconSize: 22,
+                    tabBackgroundColor: const Color(0xFFE55757).withOpacity(0.9),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
                     ),
-                    GButton(icon: Icons.directions_car_rounded, text: 'Garage'),
-                    GButton(icon: Icons.person_rounded, text: 'Profile'),
-                  ],
+                    duration: const Duration(milliseconds: 400),
+                    color: Colors.white54,
+                    selectedIndex: controller.selectedIndex.value,
+                    onTabChange: (index) =>
+                        controller.selectedIndex.value = index,
+                    tabs: const [
+                      GButton(icon: Icons.home_rounded, text: 'الرئيسية'),
+                      GButton(icon: Icons.calendar_today_rounded, text: 'المكتملة'),
+                      GButton(icon: Icons.directions_car_rounded, text: 'الكراج'),
+                      GButton(icon: Icons.person_rounded, text: 'الملف'),
+                    ],
+                  ),
                 ),
               ),
             ),

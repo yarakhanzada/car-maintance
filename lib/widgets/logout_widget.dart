@@ -11,6 +11,7 @@ class LogoutWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LogoutController controller = Get.put(LogoutController());
+    final double width = MediaQuery.of(context).size.width;
 
     if (isListTile) {
       return ListTile(
@@ -27,7 +28,7 @@ class LogoutWidget extends StatelessWidget {
           ),
         ),
         title: const Text(
-          "Logout Account",
+          "تسجيل الخروج",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.red,
@@ -39,22 +40,22 @@ class LogoutWidget extends StatelessWidget {
           size: 14,
           color: Colors.black26,
         ),
-        onTap: () => _showLogoutConfirmation(controller),
+        onTap: () => _showLogoutConfirmation(controller, width),
       );
     }
 
     return IconButton(
-      onPressed: () => _showLogoutConfirmation(controller),
+      onPressed: () => _showLogoutConfirmation(controller, width),
       icon: const Icon(
         Icons.logout_rounded,
         color: Color(0xFFE55757),
         size: 22,
       ),
-      tooltip: "Logout",
+      tooltip: "تسجيل الخروج",
     );
   }
 
-  void _showLogoutConfirmation(LogoutController controller) {
+  void _showLogoutConfirmation(LogoutController controller, double width) {
     Get.dialog(
       BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -80,7 +81,7 @@ class LogoutWidget extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               const Text(
-                "Leaving So Soon?",
+                "هل تود المغادرة؟",
                 style: TextStyle(
                   color: Color(0xFF1A1A1A),
                   fontWeight: FontWeight.bold,
@@ -90,28 +91,28 @@ class LogoutWidget extends StatelessWidget {
             ],
           ),
           content: const Text(
-            "Are you sure you want to log out? We'll miss having you here!",
+            "هل أنت متأكد من رغبتك في تسجيل الخروج؟ سنفتقد تواجدك معنا!",
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.black87, fontSize: 16),
           ),
           actionsAlignment: MainAxisAlignment.center,
-          actionsPadding: const EdgeInsets.only(
+          actionsPadding: EdgeInsets.only(
             bottom: 25,
-            left: 20,
-            right: 20,
+            left: width * 0.05,
+            right: width * 0.05,
           ),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
               child: const Text(
-                "Stay",
+                "البقاء",
                 style: TextStyle(color: Colors.black54, fontSize: 16),
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: width * 0.025),
             ElevatedButton(
               onPressed: () {
-               Get.back();
+                Get.back();
                 controller.logout();
               },
               style: ElevatedButton.styleFrom(
@@ -125,7 +126,7 @@ class LogoutWidget extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                "Logout",
+                "خروج",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

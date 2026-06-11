@@ -3,10 +3,9 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/main.dart';
 import '../model/signup_model.dart';
-
 import 'package:senior_project/services/api_config.dart';
-
 import '../services/api_helper.dart';
+
 class SignUpController extends GetxController {
   var isPasswordHidden = true.obs;
   var isConfirmPasswordHidden = true.obs;
@@ -42,29 +41,27 @@ class SignUpController extends GetxController {
       confirmPasswordError.value = "";
 
       if (password != confirmPassword) {
-        confirmPasswordError.value = "Passwords do not match";
+        confirmPasswordError.value = "كلمات المرور غير متطابقة";
         return null;
       }
 
-var response = await ApiHelper.post(
-  "${ApiConfig.baseUrl}/register",
-  {
-    "name": name,
-    "email": email,
-    "phone": phone,
-    "password": password,
-    "password_confirmation": confirmPassword,
-  },
-  skipAuth: true,
-);
-     
+      var response = await ApiHelper.post(
+        "${ApiConfig.baseUrl}/register",
+        {
+          "name": name,
+          "email": email,
+          "phone": phone,
+          "password": password,
+          "password_confirmation": confirmPassword,
+        },
+        skipAuth: true,
+      );
+
       var jsonData = jsonDecode(response.body);
-      print("?????????????????????????????????n");
-      print(jsonData);
-   
-   if (jsonData["status"] == 1) {
-  return SignUpModel.fromJson(jsonData);
-}
+
+      if (jsonData["status"] == 1) {
+        return SignUpModel.fromJson(jsonData);
+      }
 
       if (jsonData["status"] == 0) {
         generalError.value = jsonData["message"];
@@ -106,22 +103,22 @@ var response = await ApiHelper.post(
     }
 
     if (value.length < 8) {
-      errors.add("The password field must be at least 8 characters.");
+      errors.add("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
     }
 
     if (!value.contains(RegExp(r'[A-Z]')) ||
         !value.contains(RegExp(r'[a-z]'))) {
       errors.add(
-        "The password field must contain at least one uppercase and one lowercase letter.",
+        "يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير على الأقل.",
       );
     }
 
     if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
-      errors.add("The password field must contain at least one symbol.");
+      errors.add("يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل.");
     }
 
     if (!value.contains(RegExp(r'[0-9]'))) {
-      errors.add("The password field must contain at least one number.");
+      errors.add("يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.");
     }
 
     passwordErrors.assignAll(errors);

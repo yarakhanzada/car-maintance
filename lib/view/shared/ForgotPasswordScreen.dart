@@ -18,84 +18,89 @@ class ForgotPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return GlassScaffold(
-      child: Column(
-        children: [
-          const AuthHeaderIcon(icon: Icons.lock_reset_rounded),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: [
+            const AuthHeaderIcon(icon: Icons.lock_reset_rounded),
 
-          const SizedBox(height: 40),
+            SizedBox(height: screenHeight * 0.04),
 
-          const Text(
-            "Password Recovery",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            const Text(
+              "استعادة كلمة المرور",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          const Text(
-            "Enter your email to receive a reset link",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white70),
-          ),
-
-          const SizedBox(height: 50),
-
-          // ================= EMAIL FIELD =================
-          Obx(
-            () => GlassTextField(
-              controller: emailController,
-              hint: "Email Address",
-              prefixIcon: Icons.email_rounded,
-              hasError: controller.emailError.value.isNotEmpty,
+            const Text(
+              "أدخل بريدك الإلكتروني لإرسال رمز إعادة التعيين",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70),
             ),
-          ),
 
-          //  error under field
-          Obx(
-            () => controller.emailError.value.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        controller.emailError.value,
-                        style: const TextStyle(color: Colors.red, fontSize: 12),
+            SizedBox(height: screenHeight * 0.05),
+
+            // ================= EMAIL FIELD =================
+            Obx(
+              () => GlassTextField(
+                controller: emailController,
+                hint: "البريد الإلكتروني",
+                prefixIcon: Icons.email_rounded,
+                hasError: controller.emailError.value.isNotEmpty,
+              ),
+            ),
+
+            //  error under field
+            Obx(
+              () => controller.emailError.value.isNotEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          controller.emailError.value,
+                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                        ),
                       ),
-                    ),
-                  )
-                : const SizedBox(),
-          ),
-
-          const SizedBox(height: 35),
-
-          // ================= BUTTON =================
-          Obx(
-            () => CustomButton(
-              text: controller.isLoading.value
-                  ? "Loading..."
-                  : "Send Reset Code",
-              onTap: () async {
-                bool success = await controller.sendResetCode(
-                  emailController.text.trim(),
-                );
-
-                if (success) {
-                  Get.to(
-                    () => OTPScreen(),
-                    arguments: {
-                      "email": emailController.text.trim(),
-                      "type": "reset",
-                    },
-                  );
-                }
-              },
+                    )
+                  : const SizedBox(),
             ),
-          ),
-        ],
+
+            SizedBox(height: screenHeight * 0.04),
+
+            // ================= BUTTON =================
+            Obx(
+              () => CustomButton(
+                text: controller.isLoading.value
+                    ? "جارٍ التحميل..."
+                    : "إرسال رمز إعادة التعيين",
+                onTap: () async {
+                  bool success = await controller.sendResetCode(
+                    emailController.text.trim(),
+                  );
+
+                  if (success) {
+                    Get.to(
+                      () => OTPScreen(),
+                      arguments: {
+                        "email": emailController.text.trim(),
+                        "type": "reset",
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:flutter/material.dart';
-import 'package:senior_project/controller/client%20controller/ChatController.dart';
+import 'package:senior_project/controller/client controller/ChatController.dart';
 import 'package:senior_project/model/chatbot_model.dart';
 
 class ChatBotScreen extends StatefulWidget {
@@ -40,8 +38,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     if (questionId != null) {
       botReply = await _controller.fetchAnswer(questionId);
     } else {
-      botReply =
-          "I'm sorry, I didn't quite catch that. Please use the suggested questions.";
+      botReply = "عذراً، لم أفهم ذلك. يرجى استخدام الأسئلة المقترحة.";
     }
 
     Future.delayed(const Duration(seconds: 1), () async {
@@ -54,43 +51,46 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isTablet = screenWidth > 600;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
-      appBar: _buildAppBar(isTablet),
-      body: Center(
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: isTablet ? 600 : double.infinity,
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: _controller.getMessagesStream(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    final docs = snapshot.data?.docs ?? [];
-                    return ListView.builder(
-                      reverse: true,
-                      padding: const EdgeInsets.all(20),
-                      itemCount: docs.length,
-                      itemBuilder: (context, index) {
-                        final data = docs[index].data() as Map<String, dynamic>;
-                        return _buildChatBubble(
-                          data['text'] ?? '',
-                          data['isMe'] ?? false,
-                          screenWidth,
-                        );
-                      },
-                    );
-                  },
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F7),
+        appBar: _buildAppBar(isTablet),
+        body: Center(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: isTablet ? 600 : double.infinity,
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: _controller.getMessagesStream(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final docs = snapshot.data?.docs ?? [];
+                      return ListView.builder(
+                        reverse: true,
+                        padding: const EdgeInsets.all(20),
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          final data = docs[index].data() as Map<String, dynamic>;
+                          return _buildChatBubble(
+                            data['text'] ?? '',
+                            data['isMe'] ?? false,
+                            screenWidth,
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-              _buildQuickReplies(),
-              _buildInputArea(screenWidth),
-            ],
+                _buildQuickReplies(),
+                _buildInputArea(screenWidth),
+              ],
+            ),
           ),
         ),
       ),
@@ -108,7 +108,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
         itemBuilder: (context, index) {
           final q = _apiQuestions[index];
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(left: 8),
             child: ActionChip(
               label: Text(q.question),
               onPressed: () => _handleSendMessage(q.question, questionId: q.id),
@@ -154,7 +154,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                 controller: _messageController,
                 onSubmitted: (val) => _handleSendMessage(val),
                 decoration: const InputDecoration(
-                  hintText: "Ask me something...",
+                  hintText: "اسألني شيئاً...",
                   border: InputBorder.none,
                 ),
               ),
@@ -180,7 +180,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
       elevation: 0.5,
       leading: IconButton(
         icon: const Icon(
-          Icons.arrow_back_ios_new,
+          Icons.arrow_forward_ios,
           color: Colors.black,
           size: 20,
         ),
@@ -197,7 +197,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Garage Support",
+                "الدعم الفني ",
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: isTablet ? 18 : 16,
@@ -205,7 +205,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                 ),
               ),
               const Text(
-                "Bot Assistant",
+                "المساعد الذكي",
                 style: TextStyle(color: Colors.green, fontSize: 12),
               ),
             ],
@@ -228,10 +228,10 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
         decoration: BoxDecoration(
           color: isMe ? const Color(0xFF1A1A1A) : Colors.white,
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
-            bottomLeft: Radius.circular(isMe ? 20 : 0),
-            bottomRight: Radius.circular(isMe ? 0 : 20),
+            topLeft: const Radius.circular(20),
+            bottomRight: Radius.circular(isMe ? 20 : 0),
+            bottomLeft: Radius.circular(isMe ? 0 : 20),
           ),
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),

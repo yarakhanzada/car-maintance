@@ -8,9 +8,7 @@ import 'package:senior_project/view/client/ClientBottombar.dart';
 import 'package:senior_project/view/shared/LoginScreen.dart';
 import 'package:senior_project/view/shared/ServiceStationScreen.dart';
 import 'package:senior_project/view/shared/reset_password_screen.dart';
-
 import 'package:senior_project/services/api_config.dart';
-
 import '../services/api_helper.dart';
 
 class OTPController extends GetxController {
@@ -20,6 +18,7 @@ class OTPController extends GetxController {
   Timer? _timer;
   var secondsRemaining = 59.obs;
   var enableResend = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -57,11 +56,10 @@ class OTPController extends GetxController {
       var jsonData = jsonDecode(response.body);
 
       if (jsonData['status'] == 1) {
-       
         startTimer();
-      } 
+      }
     } catch (e) {
-      Get.snackbar("Error", "Check your connection");
+      Get.snackbar("خطأ", "تحقق من اتصالك بالإنترنت");
     } finally {
       isResending.value = false;
     }
@@ -72,9 +70,10 @@ class OTPController extends GetxController {
 
     if (fullCode.length < 6) {
       Get.snackbar(
-        "Error",
-        "Please enter full code",
+        "خطأ",
+        "يرجى إدخال الرمز بالكامل",
         backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
       );
       return;
     }
@@ -89,34 +88,35 @@ class OTPController extends GetxController {
 
     try {
       isLoading.value = true;
-     var response = await ApiHelper.post(
-  "${ApiConfig.baseUrl}/verify",
-  {
-    "email": email,
-    "code": fullCode,
-  },
-  skipAuth: true,
-);
+      var response = await ApiHelper.post(
+        "${ApiConfig.baseUrl}/verify",
+        {
+          "email": email,
+          "code": fullCode,
+        },
+        skipAuth: true,
+      );
 
       var jsonData = jsonDecode(response.body);
-      print("????????????????????");
-      print(jsonData);
+      
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         Get.snackbar(
-          "Success",
+          "نجاح",
           jsonData['message'],
           backgroundColor: Colors.grey,
+          colorText: Colors.white,
         );
         Get.offAll(() => LoginScreen());
       } else {
         Get.snackbar(
-          "Failed",
-          jsonData['message'] ?? "Wrong code",
+          "فشل",
+          jsonData['message'] ?? "الرمز غير صحيح",
           backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
         );
       }
     } catch (e) {
-      Get.snackbar("Error", "Connection failed: $e");
+      Get.snackbar("خطأ", "فشل الاتصال: $e");
     } finally {
       isLoading.value = false;
     }

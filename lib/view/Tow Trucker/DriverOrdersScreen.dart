@@ -35,12 +35,12 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: width * 0.07,
-                    vertical: 10,
+                    vertical: height * 0.012,
                   ),
                   child: Row(
                     children: [
                       const Text(
-                        "New Requests",
+                        "الطلبات الجديدة",
                         style: TextStyle(
                           color: Color(0xFF1A1D26),
                           fontSize: 18,
@@ -48,7 +48,6 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-
                       Container(
                         width: 8,
                         height: 8,
@@ -72,23 +71,23 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                     if (ordersCtrl.ordersList.isEmpty) {
                       return const Center(
                         child: Text(
-                          "No Requests Available",
-                          style: TextStyle(color: Colors.grey),
+                          "لا توجد طلبات متاحة حالياً",
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
                         ),
                       );
                     }
 
                     return ListView.builder(
                       itemCount: ordersCtrl.ordersList.length,
-                      padding: const EdgeInsets.only(bottom: 20),
+                      padding: EdgeInsets.only(bottom: height * 0.025),
                       itemBuilder: (context, index) {
                         final order = ordersCtrl.ordersList[index];
                         final isExpanded = expandedIndex == index;
 
                         return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 8,
+                          margin: EdgeInsets.symmetric(
+                            horizontal: width * 0.05,
+                            vertical: height * 0.01,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -117,7 +116,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                 Column(
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.all(18),
+                                      padding: EdgeInsets.all(width * 0.045),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -127,13 +126,9 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Container(
-                                                padding: const EdgeInsets.all(
-                                                  10,
-                                                ),
+                                                padding: EdgeInsets.all(width * 0.025),
                                                 decoration: BoxDecoration(
-                                                  color: const Color(
-                                                    0xFFFEEAEA,
-                                                  ),
+                                                  color: const Color(0xFFFFEEDEA),
                                                   borderRadius:
                                                       BorderRadius.circular(12),
                                                 ),
@@ -150,15 +145,11 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      order.customerName ??
-                                                          "Client",
+                                                      order.customerName ?? "عميل",
                                                       style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
+                                                        fontWeight: FontWeight.bold,
                                                         fontSize: 16,
-                                                        color: Color(
-                                                          0xFF2D3243,
-                                                        ),
+                                                        color: Color(0xFF2D3243),
                                                       ),
                                                     ),
                                                     Text(
@@ -178,13 +169,9 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                                 ),
                                                 child: Icon(
                                                   isExpanded
-                                                      ? Icons
-                                                            .keyboard_arrow_up_rounded
-                                                      : Icons
-                                                            .keyboard_arrow_down_rounded,
-                                                  color: const Color(
-                                                    0xFFBDBDBD,
-                                                  ),
+                                                      ? Icons.keyboard_arrow_up_rounded
+                                                      : Icons.keyboard_arrow_down_rounded,
+                                                  color: const Color(0xFFBDBDBD),
                                                   size: 28,
                                                 ),
                                               ),
@@ -200,7 +187,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                               ),
                                               const SizedBox(width: 4),
                                               Text(
-                                                "${order.distanceKm?.toStringAsFixed(1) ?? '0'} km away from you",
+                                                "يبعد عنك ${order.distanceKm?.toStringAsFixed(1) ?? '0'} كم",
                                                 style: const TextStyle(
                                                   color: Color(0xFF90A4AE),
                                                   fontSize: 12,
@@ -217,30 +204,25 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                                 child: ElevatedButton(
                                                   onPressed: () =>
                                                       ordersCtrl.acceptOrder(
-                                                        order.towingRequestId,
-                                                      ),
+                                                    order.towingRequestId,
+                                                  ),
                                                   style: ElevatedButton.styleFrom(
                                                     backgroundColor:
                                                         const Color(0xFFE55757),
-                                                    foregroundColor:
-                                                        Colors.white,
+                                                    foregroundColor: Colors.white,
                                                     elevation: 0,
                                                     shape: RoundedRectangleBorder(
                                                       borderRadius:
-                                                          BorderRadius.circular(
-                                                            12,
-                                                          ),
+                                                          BorderRadius.circular(12),
                                                     ),
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          vertical: 14,
-                                                        ),
+                                                    padding: EdgeInsets.symmetric(
+                                                      vertical: height * 0.016,
+                                                    ),
                                                   ),
                                                   child: const Text(
-                                                    "Accept Request",
+                                                    "قبول الطلب",
                                                     style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontWeight: FontWeight.bold,
                                                       fontSize: 14,
                                                     ),
                                                   ),
@@ -252,8 +234,8 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                                 child: ElevatedButton(
                                                   onPressed: () =>
                                                       ordersCtrl.rejectOrder(
-                                                        order.towingRequestId,
-                                                      ),
+                                                    order.towingRequestId,
+                                                  ),
                                                   style: ElevatedButton.styleFrom(
                                                     backgroundColor:
                                                         const Color(0xFFF5F5F5),
@@ -262,20 +244,16 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                                     elevation: 0,
                                                     shape: RoundedRectangleBorder(
                                                       borderRadius:
-                                                          BorderRadius.circular(
-                                                            12,
-                                                          ),
+                                                          BorderRadius.circular(12),
                                                     ),
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          vertical: 14,
-                                                        ),
+                                                    padding: EdgeInsets.symmetric(
+                                                      vertical: height * 0.016,
+                                                    ),
                                                   ),
                                                   child: const Text(
-                                                    "Ignore",
+                                                    "تجاهل",
                                                     style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontWeight: FontWeight.bold,
                                                       fontSize: 14,
                                                     ),
                                                   ),
@@ -293,29 +271,29 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                         endIndent: 20,
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.all(18),
+                                        padding: EdgeInsets.all(width * 0.045),
                                         child: Column(
                                           children: [
                                             _buildSmallInfo(
                                               Icons.warning_amber_rounded,
-                                              "Problem",
-                                              (order.problemType ?? "General")
+                                              "المشكلة",
+                                              (order.problemType ?? "عامة")
                                                   .replaceAll('_', ' '),
                                             ),
                                             _buildSmallInfo(
                                               Icons.fingerprint,
-                                              "Plate Number",
-                                              order.plateNumber ?? "N/A",
+                                              "رقم اللوحة",
+                                              order.plateNumber ?? "غير متوفر",
                                             ),
                                             _buildSmallInfo(
                                               Icons.calendar_month,
-                                              "Year",
-                                              order.carYear ?? "N/A",
+                                              "سنة الصنع",
+                                              order.carYear ?? "غير متوفر",
                                             ),
                                             _buildSmallInfo(
                                               Icons.phone_android,
-                                              "Phone",
-                                              order.customerPhone ?? "N/A",
+                                              "رقم الهاتف",
+                                              order.customerPhone ?? "غير متوفر",
                                             ),
                                           ],
                                         ),
@@ -351,14 +329,14 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Welcome back,",
+                  "مرحباً بك مجدداً،",
                   style: TextStyle(
                     color: const Color(0xFF2D3243).withOpacity(0.6),
                     fontSize: 14,
                   ),
                 ),
                 Text(
-                  "Captain ${user?.name ?? "User"}",
+                  "كابتن ${user?.name ?? "المستخدم"}",
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 22,
@@ -425,7 +403,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
 
   Widget _buildSmallInfo(IconData icon, String label, String val) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Icon(icon, size: 16, color: Colors.grey),

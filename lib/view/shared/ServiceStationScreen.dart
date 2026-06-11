@@ -7,6 +7,10 @@ class ServiceStationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // استخدام MediaQuery لتحديد أبعاد الشاشة والاستجابة
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -38,14 +42,14 @@ class ServiceStationScreen extends StatelessWidget {
 
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 80),
+                  SizedBox(height: screenHeight * 0.08),
                   // العنوان الرئيسي
                   const Text(
-                    'Service Station',
+                    'محطة الخدمة',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 36,
@@ -57,17 +61,17 @@ class ServiceStationScreen extends StatelessWidget {
 
                   // العنوان الفرعي
                   const Text(
-                    'One solution for all your vehicle maintenance',
+                    'الحل الأمثل لجميع خدمات صيانة مركبتك',
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
 
                   const Spacer(),
                   SizedBox(
-                    width: 180,
+                    width: screenWidth * 0.45,
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.to(LoginScreen());
+                        Get.to(() => LoginScreen());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE55757),
@@ -76,7 +80,7 @@ class ServiceStationScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        "Let's get started",
+                        "لنبدأ الآن",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -86,7 +90,7 @@ class ServiceStationScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 50),
+                  SizedBox(height: screenHeight * 0.05),
                 ],
               ),
             ),

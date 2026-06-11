@@ -19,143 +19,148 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return GlassScaffold(
-      child: Column(
-        children: [
-          const Icon(
-            Icons.directions_car_filled_rounded,
-            color: Color(0xFFE55757),
-            size: 80,
-          ),
-
-          const SizedBox(height: 20),
-
-          const Text(
-            "Welcome Back",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+      child: Directionality(
+        textDirection: TextDirection.rtl, // لدعم اللغة العربية بشكل صحيح
+        child: Column(
+          children: [
+            const Icon(
+              Icons.directions_car_filled_rounded,
+              color: Color(0xFFE55757),
+              size: 80,
             ),
-          ),
 
-          const SizedBox(height: 40),
+            SizedBox(height: screenHeight * 0.02),
 
-          GlassCard(
-            child: Column(
-              children: [
-                // ================= EMAIL =================
-                Obx(
-                  () => GlassTextField(
-                    controller: emailController,
-                    hint: "Username / Email",
-                    prefixIcon: Icons.person_outline,
-                    hasError: controller.emailError.value.isNotEmpty,
+            const Text(
+              "مرحباً بعودتك",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            SizedBox(height: screenHeight * 0.04),
+
+            GlassCard(
+              child: Column(
+                children: [
+                  // ================= EMAIL =================
+                  Obx(
+                    () => GlassTextField(
+                      controller: emailController,
+                      hint: "اسم المستخدم / البريد الإلكتروني",
+                      prefixIcon: Icons.person_outline,
+                      hasError: controller.emailError.value.isNotEmpty,
+                    ),
                   ),
-                ),
 
-                Obx(
-                  () => controller.emailError.value.isNotEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: 5),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              controller.emailError.value,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
+                  Obx(
+                    () => controller.emailError.value.isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                controller.emailError.value,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
+                          )
+                        : const SizedBox(),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  // ================= PASSWORD =================
+                  Obx(() => GlassTextField(
+                        controller: passwordController,
+                        hint: "كلمة المرور",
+                        prefixIcon: Icons.lock_outline,
+                        isPassword: true,
+                        obscureText: controller.isPasswordHidden.value,
+                        hasError: controller.passwordError.value.isNotEmpty,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            controller.isPasswordHidden.value
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.white70,
                           ),
-                        )
-                      : const SizedBox(),
-                ),
+                          onPressed: controller.togglePasswordVisibility,
+                        ),
+                      )),
 
-                const SizedBox(height: 15),
-
-                // ================= PASSWORD =================
-             Obx(() => GlassTextField(
-  controller: passwordController,
-  hint: "Password",
-  prefixIcon: Icons.lock_outline,
-  isPassword: true,
-  obscureText: controller.isPasswordHidden.value,
-  hasError: controller.passwordError.value.isNotEmpty,
-  suffixIcon: IconButton(
-    icon: Icon(
-      controller.isPasswordHidden.value
-          ? Icons.visibility_off
-          : Icons.visibility,
-      color: Colors.white70,
-    ),
-    onPressed: controller.togglePasswordVisibility,
-  ),
-)),
-
-                Obx(
-                  () => controller.passwordError.value.isNotEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: 5),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              controller.passwordError.value,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
+                  Obx(
+                    () => controller.passwordError.value.isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                controller.passwordError.value,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                      : const SizedBox(),
-                ),
+                          )
+                        : const SizedBox(),
+                  ),
 
-                const SizedBox(height: 15),
+                  const SizedBox(height: 15),
 
-                // ================= FORGOT PASSWORD =================
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () => Get.to(() => ForgotPasswordScreen()),
-                    child: const Text(
-                      "Forgot Password?",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        decoration: TextDecoration.underline,
+                  // ================= FORGOT PASSWORD =================
+                  Align(
+                    alignment: Alignment.centerLeft, // تم التعديل لتناسب الاتجاه العربي
+                    child: GestureDetector(
+                      onTap: () => Get.to(() => ForgotPasswordScreen()),
+                      child: const Text(
+                        "هل نسيت كلمة المرور؟",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 30),
+                  SizedBox(height: screenHeight * 0.03),
 
-                // ================= LOGIN BUTTON =================
-                Obx(
-                  () => CustomButton(
-                    text: controller.isLoading.value ? "Loading..." : "LOGIN",
-                   onTap: () {
-  controller.handleLogin(
-    email: emailController.text.trim(),
-    password: passwordController.text,
-  );
-},
+                  // ================= LOGIN BUTTON =================
+                  Obx(
+                    () => CustomButton(
+                      text: controller.isLoading.value ? "جارٍ التحميل..." : "تسجيل الدخول",
+                      onTap: () {
+                        controller.handleLogin(
+                          email: emailController.text.trim(),
+                          password: passwordController.text,
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          const SizedBox(height: 25),
+            SizedBox(height: screenHeight * 0.03),
 
-          TextButton(
-            onPressed: () => Get.to(() => SignUpScreen()),
-            child: const Text(
-              "Don't have an account? Sign Up",
-              style: TextStyle(color: Colors.white70),
+            TextButton(
+              onPressed: () => Get.to(() => SignUpScreen()),
+              child: const Text(
+                "ليس لديك حساب؟ إنشاء حساب جديد",
+                style: TextStyle(color: Colors.white70),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

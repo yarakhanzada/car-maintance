@@ -38,102 +38,114 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final double screenWidth = mediaQuery.size.width;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F9),
-      body: Stack(
-        children: [
-          _buildBackgroundGradient(),
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                Expanded(
-                  child: FutureBuilder<List<CompletedServiceModel>>(
-                    future: _futureServices,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFFE55757),
-                            strokeWidth: 2.5,
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Stack(
+          children: [
+            _buildBackgroundGradient(screenWidth),
+            SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(screenWidth),
+                  Expanded(
+                    child: FutureBuilder<List<CompletedServiceModel>>(
+                      future: _futureServices,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFE55757),
+                              strokeWidth: 2.5,
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              "خطأ: ${snapshot.error}",
+                              style: TextStyle(fontSize: screenWidth * 0.035),
+                            ),
+                          );
+                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return _buildEmptyState(screenWidth);
+                        }
+
+                        return RefreshIndicator(
+                          onRefresh: () async => _refreshData(),
+                          color: const Color(0xFFE55757),
+                          child: ListView.builder(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.045,
+                              vertical: 8,
+                            ),
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (context, index) =>
+                                _buildServiceCard(snapshot.data![index], screenWidth),
                           ),
                         );
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text("Error: ${snapshot.error}"));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return _buildEmptyState();
-                      }
-
-                      return RefreshIndicator(
-                        onRefresh: () async => _refreshData(),
-                        color: const Color(0xFFE55757),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 8,
-                          ),
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) =>
-                              _buildServiceCard(snapshot.data![index]),
-                        ),
-                      );
-                    },
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(20, 25, 20, 10),
+  Widget _buildHeader(double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        screenWidth * 0.05,
+        25,
+        screenWidth * 0.05,
+        10,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Completed Services",
+            "الخدمات المكتملة",
             style: TextStyle(
-              fontSize: 26,
+              fontSize: screenWidth * 0.065,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF1A1A1A),
+              color: const Color(0xFF1A1A1A),
               letterSpacing: -0.8,
             ),
           ),
-          SizedBox(height: 3),
+          const SizedBox(height: 3),
           Text(
-            "Track your completed car maintenance logs",
-            style: TextStyle(color: Colors.grey, fontSize: 13),
+            "تتبع سجلات صيانة سيارتك المكتملة",
+            style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.032),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildServiceCard(CompletedServiceModel service) {
+  Widget _buildServiceCard(CompletedServiceModel service, double screenWidth) {
     return GestureDetector(
-      onTap: () =>
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  CompletedServiceDetailsScreen(service: service),
-            ),
-          ).then(
-            (_) => _refreshData(),
-          ), // تحديث البيانات عند العودة من شاشة التفاصيل
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CompletedServiceDetailsScreen(service: service),
+        ),
+      ).then((_) => _refreshData()),
       child: Container(
         margin: const EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: const Border(
-            left: BorderSide(color: Color(0xFF4CAF50), width: 5),
+            right: BorderSide(color: Color(0xFF4CAF50), width: 5),
           ),
           boxShadow: [
             BoxShadow(
@@ -144,7 +156,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(screenWidth * 0.04),
           child: Column(
             children: [
               Row(
@@ -164,14 +176,11 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          service.problemType.toUpperCase().replaceAll(
-                            '_',
-                            ' ',
-                          ),
-                          style: const TextStyle(
-                            fontSize: 13,
+                          service.problemType.toUpperCase().replaceAll('_', ' '),
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.032,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A1A1A),
+                            color: const Color(0xFF1A1A1A),
                             height: 1.2,
                           ),
                         ),
@@ -187,13 +196,12 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // استخدام دالة التنسيق لإزالة الأصفار
                   Text(
                     "${_formatPrice(service.finalCost)} \$",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      color: Color(0xFF1A1A1A),
+                      fontSize: screenWidth * 0.04,
+                      color: const Color(0xFF1A1A1A),
                     ),
                   ),
                 ],
@@ -232,15 +240,17 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                       if (service.isComplained)
                         _buildStatusBadge(
                           Icons.report_gmailerrorred_rounded,
-                          "Reported",
+                          "تم الإبلاغ",
                           Colors.red[400]!,
+                          screenWidth,
                         )
                       else
                         _buildSmallActionBtn(
                           icon: Icons.report_problem_outlined,
-                          label: "Report",
+                          label: "إبلاغ",
                           color: const Color(0xFFE55757),
-                          onTap: () => _showComplaintSheet(service.id),
+                          onTap: () => _showComplaintSheet(service.id, screenWidth),
+                          screenWidth: screenWidth,
                         ),
                       const SizedBox(width: 6),
                       if (service.isRated)
@@ -248,14 +258,15 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                           Icons.star_rounded,
                           _formatPrice(service.score),
                           Colors.amber[700]!,
+                          screenWidth,
                         )
                       else
                         _buildSmallActionBtn(
                           icon: Icons.star_rounded,
-                          label: "Rate",
+                          label: "تقييم",
                           color: Colors.amber[700]!,
-                          onTap: () =>
-                              _showRatingSheet(service.id, service.problemType),
+                          onTap: () => _showRatingSheet(service.id, service.problemType, screenWidth),
+                          screenWidth: screenWidth,
                         ),
                     ],
                   ),
@@ -268,7 +279,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     );
   }
 
-  Widget _buildStatusBadge(IconData icon, String label, Color color) {
+  Widget _buildStatusBadge(IconData icon, String label, Color color, double screenWidth) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -283,7 +294,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
             label,
             style: TextStyle(
               color: color,
-              fontSize: 10,
+              fontSize: screenWidth * 0.025,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -297,6 +308,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     required String label,
     required Color color,
     required VoidCallback onTap,
+    required double screenWidth,
   }) {
     return InkWell(
       onTap: onTap,
@@ -315,7 +327,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
               label,
               style: TextStyle(
                 color: color,
-                fontSize: 10,
+                fontSize: screenWidth * 0.025,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -325,114 +337,24 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     );
   }
 
-  void _showComplaintSheet(int requestId) {
+  void _showComplaintSheet(int requestId, double screenWidth) {
     final TextEditingController complaintController = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          12,
-          20,
-          MediaQuery.of(context).viewInsets.bottom + 25,
-        ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 35,
-              height: 3.5,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "File a Complaint",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 15),
-            TextField(
-              controller: complaintController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: "What went wrong?",
-                filled: true,
-                fillColor: const Color(0xFFF7F7F7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE55757),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 0,
-                ),
-                onPressed: () async {
-                  if (complaintController.text.isEmpty) return;
-                  var result = await _controller.submitComplaint(
-                    requestId: requestId,
-                    complaintText: complaintController.text,
-                  );
-                  if (mounted) {
-                    Navigator.pop(context);
-                    // حماية الـ null هنا أيضاً
-                    _showSnackBar(
-                      result?['message'] ?? "Error submitting complaint",
-                      result?['success'] ?? false,
-                    );
-                    if (result?['success'] == true) _refreshData();
-                  }
-                },
-                child: const Text(
-                  "Submit",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showRatingSheet(int requestId, String title) {
-    double tempRating = 0;
-    final TextEditingController commentController = TextEditingController();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Container(
           padding: EdgeInsets.fromLTRB(
-            25,
+            20,
             12,
-            25,
+            20,
             MediaQuery.of(context).viewInsets.bottom + 25,
           ),
           decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(35)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -446,84 +368,58 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                "Rate Service",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-              ),
               Text(
-                title.replaceAll('_', ' '),
-                style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                "تقديم شكوى",
+                style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.w900),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  5,
-                  (index) => IconButton(
-                    onPressed: () =>
-                        setModalState(() => tempRating = index + 1.0),
-                    icon: Icon(
-                      index < tempRating
-                          ? Icons.star_rounded
-                          : Icons.star_outline_rounded,
-                      color: index < tempRating
-                          ? Colors.amber
-                          : Colors.grey[300],
-                      size: 40,
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 15),
               TextField(
-                controller: commentController,
+                controller: complaintController,
+                maxLines: 4,
                 decoration: InputDecoration(
-                  hintText: "Your comment...",
+                  hintText: "ما المشكلة التي واجهتها？",
                   filled: true,
                   fillColor: const Color(0xFFF7F7F7),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide.none,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1A1A1A),
+                    backgroundColor: const Color(0xFFE55757),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
+                    elevation: 0,
                   ),
                   onPressed: () async {
-                    if (tempRating == 0) return;
-
-                    var result = await _controller.submitRating(
+                    if (complaintController.text.isEmpty) return;
+                    var result = await _controller.submitComplaint(
                       requestId: requestId,
-                      rating: tempRating,
-                      comment: commentController.text,
+                      complaintText: complaintController.text,
                     );
-
                     if (mounted) {
                       Navigator.pop(context);
-                      // تم تطبيق الحل الدفاعي هنا لمنع الـ Exception
-                      String message =
-                          result?['message'] ?? "Something went wrong";
-                      bool isSuccess = result?['success'] ?? false;
-
-                      _showSnackBar(message, isSuccess);
-
-                      if (isSuccess) {
-                        _refreshData();
-                      }
+                      _showSnackBar(
+                        result?['message'] ?? "خطأ في إرسال الشكوى",
+                        result?['success'] ?? false,
+                        screenWidth,
+                      );
+                      if (result?['success'] == true) _refreshData();
                     }
                   },
-                  child: const Text(
-                    "Submit",
+                  child: Text(
+                    'إرسال',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                      fontSize: screenWidth * 0.04,
                     ),
                   ),
                 ),
@@ -535,32 +431,149 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     );
   }
 
-  void _showSnackBar(String msg, bool success) {
+  void _showRatingSheet(int requestId, String title, double screenWidth) {
+    double tempRating = 0;
+    final TextEditingController commentController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(
+              25,
+              12,
+              25,
+              MediaQuery.of(context).viewInsets.bottom + 25,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(35)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 35,
+                  height: 3.5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "تقييم الخدمة",
+                  style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.w900),
+                ),
+                Text(
+                  title.replaceAll('_', ' '),
+                  style: TextStyle(color: Colors.grey[500], fontSize: screenWidth * 0.032),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    5,
+                    (index) => IconButton(
+                      onPressed: () => setModalState(() => tempRating = index + 1.0),
+                      icon: Icon(
+                        index < tempRating ? Icons.star_rounded : Icons.star_outline_rounded,
+                        color: index < tempRating ? Colors.amber : Colors.grey[300],
+                        size: 40,
+                      ),
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: commentController,
+                  decoration: InputDecoration(
+                    hintText: "أكتب تعليقك هنا...",
+                    filled: true,
+                    fillColor: const Color(0xFFF7F7F7),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1A1A1A),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: () async {
+                      if (tempRating == 0) return;
+
+                      var result = await _controller.submitRating(
+                        requestId: requestId,
+                        rating: tempRating,
+                        comment: commentController.text,
+                      );
+
+                      if (mounted) {
+                        Navigator.pop(context);
+                        String message = result?['message'] ?? "حدث خطأ ما";
+                        bool isSuccess = result?['success'] ?? false;
+
+                        _showSnackBar(message, isSuccess, screenWidth);
+
+                        if (isSuccess) {
+                          _refreshData();
+                        }
+                      }
+                    },
+                    child: Text(
+                      'إرسال',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth * 0.04,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSnackBar(String msg, bool success, double screenWidth) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
+        content: Text(msg, style: TextStyle(fontSize: screenWidth * 0.035)),
         backgroundColor: success ? Colors.green : Colors.red,
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return const Center(
+  Widget _buildEmptyState(double screenWidth) {
+    return Center(
       child: Text(
-        "No completed services yet.",
-        style: TextStyle(color: Colors.grey),
+        "لا توجد خدمات مكتملة حتى الآن.",
+        style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.038),
       ),
     );
   }
 
-  Widget _buildBackgroundGradient() {
+  Widget _buildBackgroundGradient(double screenWidth) {
     return Positioned(
       top: -60,
-      left: -60,
+      right: -60,
       child: Container(
-        width: 220,
-        height: 220,
+        width: screenWidth * 0.55,
+        height: screenWidth * 0.55,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: const Color(0xFFE55757).withOpacity(0.04),
