@@ -45,7 +45,8 @@ class ClientNotificationsScreen extends StatelessWidget {
                       itemCount: controller.notifications.length,
                       itemBuilder: (context, index) {
                         final item = controller.notifications[index];
-                        final bool isReadValue = item['is_read'] == true || item['is_read'] == 1;
+                        final bool isReadValue =
+                            item['is_read'] == true || item['is_read'] == 1;
 
                         return _buildModernNotificationCard(
                           id: item['id'],
@@ -54,6 +55,10 @@ class ClientNotificationsScreen extends StatelessWidget {
                           time: _formatDate(item['created_at']),
                           isUnread: !isReadValue,
                           width: width,
+                          onTap: () {
+                            // نداء دالة الـ API وتحديث الحالة عند الضغط على الكرت
+                            controller.markAsRead(item['id']);
+                          },
                         );
                       },
                     );
@@ -126,7 +131,11 @@ class ClientNotificationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCircleActionButton(IconData icon, VoidCallback onTap, {Color color = const Color(0xFF1A1A1A)}) {
+  Widget _buildCircleActionButton(
+    IconData icon,
+    VoidCallback onTap, {
+    Color color = const Color(0xFF1A1A1A),
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -147,50 +156,55 @@ class ClientNotificationsScreen extends StatelessWidget {
     required String time,
     required bool isUnread,
     required double width,
+    required VoidCallback
+    onTap, // تم إضافة الـ Callback هنا للـ GestureDetector
   }) {
-    return Container(
-      width: width,
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 16,
-                ),
-              ),
-              if (isUnread)
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: onTap, // تفعيل الضغط على كامل مساحة الإشعار
+      child: Container(
+        width: width,
+        margin: const EdgeInsets.only(bottom: 15),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 16,
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(msg, style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 8),
-          Text(time, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        ],
+                if (isUnread)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(msg, style: const TextStyle(color: Colors.grey)),
+            const SizedBox(height: 8),
+            Text(
+              time,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
+        ),
       ),
     );
   }

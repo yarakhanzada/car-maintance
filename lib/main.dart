@@ -11,6 +11,7 @@ import 'package:senior_project/view/Tow%20Trucker/DriverBottombar.dart';
 import 'package:senior_project/view/client/ClientBottombar.dart';
 import 'package:senior_project/view/client/SplashScreen.dart';
 import 'package:senior_project/view/shared/ServiceStationScreen.dart';
+import 'package:get_storage/get_storage.dart';
 
 Future<void> _backgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -18,10 +19,11 @@ Future<void> _backgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService.init();
- //String? token = await TokenService.getToken();
- //await TokenService.clearToken();
+  //String? token = await TokenService.getToken();
+  //await TokenService.clearToken();
 
   NotificationService.getDeviceToken();
 
@@ -34,18 +36,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-  debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false,
 
-
-
-  initialRoute: "/splash",
-  getPages: [
-    GetPage(name: "/splash", page: () => SplashScreen()),
-    GetPage(name: "/client", page: () => ClientBottombar()),
-    GetPage(name: "/driver", page: () => DriverBottombar()),
-    GetPage(name: "/tech", page: () => TechnicianBottombar()),
-    GetPage(name: "/ww", page: () => ServiceStationScreen()),
-  ],
-);
-}
+      initialRoute: "/splash",
+      getPages: [
+        GetPage(name: "/splash", page: () => SplashScreen()),
+        GetPage(name: "/client", page: () => ClientBottombar()),
+        GetPage(name: "/driver", page: () => DriverBottombar()),
+        GetPage(name: "/tech", page: () => TechnicianBottombar()),
+        GetPage(name: "/ww", page: () => ServiceStationScreen()),
+      ],
+    );
+  }
 }

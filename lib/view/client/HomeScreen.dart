@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:senior_project/controller/client controller/SubscriptionController.dart';
 import 'package:senior_project/controller/client controller/TowingController.dart';
 import 'package:senior_project/controller/client controller/VehicleController.dart';
@@ -12,6 +13,7 @@ import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/view/client/ClientNotificationsScreen.dart';
 import 'package:senior_project/view/client/MaintenanceRequestScreen.dart';
 import 'package:senior_project/view/client/TowingFormScreen.dart';
+import 'package:senior_project/view/client/TowingRequestScreen.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -155,7 +157,19 @@ class HomeScreen extends StatelessWidget {
               subtitle: "خدمة 24/7",
               icon: Icons.local_shipping_rounded,
               color: const Color(0xFFE55757),
-              onTap: () => Get.to(() => const TowingFormScreen()),
+              onTap: () {
+                final box = GetStorage();
+                final activeRequest = box.read('active_towing_request');
+
+                if (activeRequest != null) {
+                  Map<String, dynamic> requestData = Map<String, dynamic>.from(
+                    activeRequest,
+                  );
+                  Get.to(() => RequestTrackingScreen(requestData: requestData));
+                } else {
+                  Get.to(() => const TowingFormScreen());
+                }
+              },
             ),
           ),
         ],

@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/utils/map_helper.dart';
+import 'package:senior_project/view/client/HomeScreen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../../services/token_service.dart';
 
@@ -29,6 +32,23 @@ class TowingTrackingController {
 
   TowingTrackingController({required this.requestData, this.onUpdate}) {
     _initializeEstimatedStats();
+    final data = requestData.containsKey('data')
+        ? requestData['data']
+        : requestData;
+    if (data['status'] == 'accepted' || data['driver_id'] != null) {
+      isAccepted = true;
+      driverData = {
+        'driver_name': data['driver_name'] ?? 'سائق السحب',
+        'truck_model': data['truck_model'] ?? 'شاحنة سحب',
+      };
+      if (data['driver_latitude'] != null && data['driver_longitude'] != null) {
+        towTruckLocation = LatLng(
+          (data['driver_latitude'] as num).toDouble(),
+          (data['driver_longitude'] as num).toDouble(),
+        );
+        updateRouteData(towTruckLocation!);
+      }
+    }
   }
 
   void _initializeEstimatedStats() {
@@ -163,10 +183,28 @@ class TowingTrackingController {
     });
 
     socket!.on('tracking_ended', (data) {
+      print("🚨 [SOCKET] Tracking Ended Event Received Successfully!");
+
+      // 1. حذف الطلب  من الذاكرة المحلية (GetStorage)
+      final box = GetStorage();
+      box.remove('active_towing_request');
+
+      // 2. تصفير المتغيرات المحلية
       isAccepted = false;
       towTruckLocation = null;
       routePoints.clear();
       if (onUpdate != null) onUpdate!();
+
+      // 3.  \ إعادة لشاشة الهوم الرئيسية
+      Get.offAll(() => HomeScreen());
+
+      // 4.  رسالة تنبيه  بنجاح وإتمام الرحلة
+      Get.snackbar(
+        "Success",
+        "تم إنهاء الرحلة  ",
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 4),
+      );
     });
   }
 

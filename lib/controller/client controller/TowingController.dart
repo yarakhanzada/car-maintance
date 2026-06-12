@@ -1,5 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import 'package:senior_project/controller/client%20controller/VehicleController.
 
 class TowingController extends GetxController {
   var isLoading = false.obs;
-
+  final box = GetStorage();
   var selectedVehicleId = RxnInt();
   final problemController = TextEditingController();
   final RxList<XFile> images = <XFile>[].obs;
@@ -32,17 +33,14 @@ class TowingController extends GetxController {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         isLoading.value = false;
-        Get.snackbar(
-          "Warning",
-          "Please enable location services then press the button again",
-        );
+        Get.snackbar("تحذير", "من فضلك فعل خدمات الموقع لإرسال طلب السحب");
         return;
       }
 
       var position = await LocationService.getCurrentLocation();
       if (position == null) {
         isLoading.value = false;
-        Get.snackbar("Error", "We couldn't determine your location");
+        Get.snackbar("Error", "لم نتمكن من تحديد موقعك");
         return;
       }
 
@@ -67,6 +65,7 @@ class TowingController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         resetForm();
+        box.write('active_towing_request', data['data']);
         Get.off(() => RequestTrackingScreen(requestData: data['data']));
       } else {
         String errorMsg = data['message'] ?? "فشل إرسال الطلب";
