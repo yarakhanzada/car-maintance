@@ -16,8 +16,7 @@ class TowingFormScreen extends StatelessWidget {
     final double width = MediaQuery.of(context).size.width;
 
     return Directionality(
-      textDirection:
-          TextDirection.rtl, // لتوجيه الواجهة بالكامل من اليمين إلى اليسار
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Stack(
@@ -76,8 +75,7 @@ class TowingFormScreen extends StatelessWidget {
   Widget _buildBackground() {
     return Positioned(
       top: -100,
-      left:
-          -100, // تم التغيير إلى اليسار ليتناسب مع التصميم العربي العكسي للدوائر الخلفية
+      left: -100,
       child: Container(
         width: 350,
         height: 350,
@@ -190,10 +188,7 @@ class TowingFormScreen extends StatelessWidget {
 
   Widget _buildSectionHeader(IconData icon, String title) {
     return Padding(
-      padding: const EdgeInsets.only(
-        bottom: 12,
-        right: 4,
-      ), // تم تعديل الـ padding ليكون متناسقاً مع اليمين
+      padding: const EdgeInsets.only(bottom: 12, right: 4),
       child: Row(
         children: [
           Icon(icon, size: 18, color: const Color(0xFFE55757)),
@@ -326,9 +321,7 @@ class TowingFormScreen extends StatelessWidget {
 
   Widget _buildImageThumb(TowingController controller, int index) {
     return Container(
-      margin: const EdgeInsets.only(
-        left: 12,
-      ), // تم تعديل المارجن لليسار ليتناسب مع التمرير الأفقي العربي
+      margin: const EdgeInsets.only(left: 12),
       width: 80,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -338,8 +331,7 @@ class TowingFormScreen extends StatelessWidget {
         ),
       ),
       child: Align(
-        alignment: Alignment
-            .topLeft, // تم تغيير الزر ليصبح أعلى اليسار تماشياً مع الـ RTL
+        alignment: Alignment.topLeft,
         child: GestureDetector(
           onTap: () => controller.images.removeAt(index),
           child: Container(
