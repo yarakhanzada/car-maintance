@@ -7,7 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/utils/map_helper.dart';
-import 'package:senior_project/view/client/HomeScreen.dart';
+import 'package:senior_project/view/client/ClientBottombar.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../../services/token_service.dart';
 
@@ -196,7 +196,7 @@ class TowingTrackingController {
       if (onUpdate != null) onUpdate!();
 
       // 3.  \ إعادة لشاشة الهوم الرئيسية
-      Get.offAll(() => HomeScreen());
+      Get.offAll(() => ClientBottombar());
 
       // 4.  رسالة تنبيه  بنجاح وإتمام الرحلة
       Get.snackbar(
