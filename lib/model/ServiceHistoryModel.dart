@@ -109,7 +109,7 @@ class Vehicle {
   String? brand;
   String? year;
   String? model;
-  String? chassisNumber;
+  String? plate_number;
   String? createdAt;
   String? updatedAt;
 
@@ -119,7 +119,7 @@ class Vehicle {
     this.brand,
     this.year,
     this.model,
-    this.chassisNumber,
+    this.plate_number,
     this.createdAt,
     this.updatedAt,
   });
@@ -130,7 +130,7 @@ class Vehicle {
     brand = json['brand'];
     year = json['year'];
     model = json['model'];
-    chassisNumber = json['chassis_number'];
+    plate_number = json['plate_number'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
@@ -142,7 +142,7 @@ class Vehicle {
     data['brand'] = brand;
     data['year'] = year;
     data['model'] = model;
-    data['chassis_number'] = chassisNumber;
+    data['plate_number'] = plate_number;
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
     return data;

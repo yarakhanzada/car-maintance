@@ -32,11 +32,12 @@ class EditProfileController extends GetxController {
         "phone": phoneController.text,
       });
 
+      print(response.statusCode);
       final data = jsonDecode(response.body);
-
+      print(data);
       if (response.statusCode == 200 && data["status"] == 1) {
         Get.back(result: true);
-      } 
+      }
     } catch (e) {
       _showSnackBar("Error", "Something went wrong", Colors.grey[850]!);
     } finally {
