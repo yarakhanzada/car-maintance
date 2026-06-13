@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:senior_project/controller/technician%20%20controller/TaskController.dart';
-import 'package:senior_project/view/Technician/TechnicianBottombar.dart';
+import 'package:senior_project/controller/technician%20%20controller/taskcontroller.dart';
+import 'package:senior_project/view/Technician/TechNavigationController.dart';
 import '../../services/api_config.dart';
 import '../../services/api_helper.dart';
 import 'technician_tasks_controller.dart';
@@ -42,16 +42,20 @@ class TaskActionController extends GetxController {
       }
       print("=================================================");
 
-      Get.back();
-
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
       if (response != null &&
           (response.statusCode == 200 || response.statusCode == 201)) {
+        var responseData = jsonDecode(response.body);
+        var taskData = responseData['data'];
+
         if (Get.isRegistered<TechnicianTasksController>()) {
           Get.find<TechnicianTasksController>().fetchTechnicianTasks();
         }
 
-        final taskController = Get.put(TaskController(), permanent: true);
-        taskController.taskId.value = taskId.toString();
+        final taskController = Get.find<TaskController>();
+        taskController.setTask(taskData);
 
         final bottomBarController = Get.find<TechNavigationController>();
         bottomBarController.selectedIndex.value = 1;

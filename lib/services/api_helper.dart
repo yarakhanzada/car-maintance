@@ -93,7 +93,7 @@ class ApiHelper {
         } else {
           print(" [ApiHelper] Refresh Failed - Logging out...");
           await TokenService.clearToken();
-         Get.offAllNamed('/ww');
+          Get.offAllNamed('/ww');
           return response;
         }
       }
@@ -102,6 +102,35 @@ class ApiHelper {
     } catch (e) {
       rethrow;
     }
+  }
+
+  static Future<http.Response> postMaintenanceComplete(
+    String url,
+    Map<String, String> body,
+    List<XFile> beforeImages,
+    List<XFile> afterImages,
+  ) async {
+    final headers = await _getHeaders();
+    headers.remove("Content-Type");
+
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    request.headers.addAll(headers);
+    request.fields.addAll(body);
+
+    for (var file in beforeImages) {
+      request.files.add(
+        await http.MultipartFile.fromPath('before_images[]', file.path),
+      );
+    }
+
+    for (var file in afterImages) {
+      request.files.add(
+        await http.MultipartFile.fromPath('after_images[]', file.path),
+      );
+    }
+
+    var streamedResponse = await request.send();
+    return await http.Response.fromStream(streamedResponse);
   }
 
   static Future<http.Response> get(String url) => request(url, method: 'GET');

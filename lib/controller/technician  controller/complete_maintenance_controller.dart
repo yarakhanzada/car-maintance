@@ -1,69 +1,66 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/view/Technician/NewTasksScreen.dart';
+import 'package:senior_project/view/Technician/TechnicianBottombar.dart';
 import '../../services/api_helper.dart';
 
 class CompleteMaintenanceController extends GetxController {
   var isLoading = false.obs;
   final TextEditingController notesController = TextEditingController();
 
-  Future<void> completeTask({required String taskId}) async {
+  var beforeImages = <XFile>[].obs;
+  var afterImages = <XFile>[].obs;
+  Future<bool> completeTask({required String taskId}) async {
     String notes = notesController.text.trim();
 
     if (notes.isEmpty) {
-      Get.snackbar(
-        "تنبيه",
-        "الرجاء كتابة تقرير أو ملاحظات الصيانة قبل الإغلاق",
-      );
-      return;
+      Get.snackbar("تنبيه", "الرجاء كتابة ملاحظات الصيانة قبل الإغلاق");
+      return false;
     }
 
     try {
       isLoading(true);
-
       String url =
           "${ApiConfig.baseUrl}/v1/technician/maintenance-tasks/$taskId/complete";
+      Map<String, String> body = {"notes": notes};
 
-      Map<String, dynamic> body = {"notes": notes};
-
-      final response = await ApiHelper.post(url, body);
+      final response = await ApiHelper.postMaintenanceComplete(
+        url,
+        body,
+        beforeImages,
+        afterImages,
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-
+        print(responseData);
         if (responseData['status'] == 1) {
           Get.snackbar(
             "تمت العملية",
             responseData['message'] ?? "اكتملت الصيانة بنجاح.",
-            snackPosition: SnackPosition.BOTTOM,
           );
 
           notesController.clear();
+          beforeImages.clear();
+          afterImages.clear();
 
-          Get.offAll(() => const NewTasksScreen());
+          Get.offAll(() => TechnicianBottombar());
+          return true; // نجاح
         } else {
           Get.snackbar(
-            "تنبيه من النظام",
+            "تنبيه",
             responseData['message'] ?? "تعذر إكمال الصيانة.",
-            snackPosition: SnackPosition.BOTTOM,
-            duration: const Duration(seconds: 4),
           );
+          return false; // فشل
         }
-      } else {
-        Get.snackbar(
-          "خطأ",
-          "فشل الاتصال بالسيرفر. رمز الحالة: ${response.statusCode}",
-          snackPosition: SnackPosition.BOTTOM,
-        );
       }
+      return false; // فشل
     } catch (e) {
-      Get.snackbar(
-        "خطأ",
-        "حدث خطأ أثناء إرسال طلب الإنهاء: $e",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar("خطأ", "حدث خطأ أثناء الإرسال: $e");
+      return false; // فشل
     } finally {
       isLoading(false);
     }
