@@ -26,7 +26,7 @@ class DriverOrdersController extends GetxController {
       final response = await ApiHelper.get(
         "${ApiConfig.baseUrl}/v1/driver/tow-requests",
       );
-      
+
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         List rawData = responseData['data'];
@@ -58,7 +58,7 @@ class DriverOrdersController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        "خطأ", 
+        "خطأ",
         "تعذر تحميل التفاصيل: $e",
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
@@ -74,15 +74,13 @@ class DriverOrdersController extends GetxController {
         "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/accept",
         {},
       );
-      
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         Get.snackbar(
           "نجاح",
           "تم قبول الطلب بنجاح",
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
         );
         final navRepo = Get.find<DriverNavigationController>();
 
@@ -100,14 +98,12 @@ class DriverOrdersController extends GetxController {
         "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/reject",
         {},
       );
-      
+
       if (response.statusCode == 200) {
         Get.snackbar(
           "تم التجاهل",
           "تم تخطي الطلب",
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
         );
         fetchOrders();
       }

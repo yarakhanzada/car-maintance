@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -15,7 +17,6 @@ class TaskActionController extends GetxController {
   Future<void> startTask(int taskId) async {
     try {
       isStarting.value = true;
-
       _showLoadingDialog("Starting mission...");
 
       final response = await ApiHelper.post(
@@ -25,7 +26,20 @@ class TaskActionController extends GetxController {
 
       print("============== START TASK RESPONSE ==============");
       print("Status Code: ${response?.statusCode}");
-      print("Response Body: ${response?.body}");
+
+      if (response?.body != null) {
+        try {
+          var jsonResponse = jsonDecode(response!.body);
+          var prettyJson = const JsonEncoder.withIndent(
+            '  ',
+          ).convert(jsonResponse);
+          print("Response Body:\n$prettyJson");
+        } catch (e) {
+          print("Response Body (Raw): ${response?.body}");
+        }
+      } else {
+        print("Response Body: [Empty]");
+      }
       print("=================================================");
 
       Get.back();
@@ -35,6 +49,7 @@ class TaskActionController extends GetxController {
         if (Get.isRegistered<TechnicianTasksController>()) {
           Get.find<TechnicianTasksController>().fetchTechnicianTasks();
         }
+
         final taskController = Get.put(TaskController(), permanent: true);
         taskController.taskId.value = taskId.toString();
 
@@ -42,25 +57,20 @@ class TaskActionController extends GetxController {
         bottomBarController.selectedIndex.value = 1;
 
         Get.back();
+        Get.snackbar("Mission Started", "The task status has been updated.");
+      } else {
+        String errorMessage = "حدث خطأ غير معروف";
+        try {
+          var errorData = jsonDecode(response!.body);
+          errorMessage = errorData['message'] ?? errorMessage;
+        } catch (_) {}
 
-        Get.snackbar(
-          "Mission Started",
-          "The task status has been updated to In-Progress.",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.black87,
-          colorText: Colors.white,
-          icon: const Icon(Icons.play_arrow_rounded, color: Colors.green),
-        );
+        Get.snackbar("خطأ", errorMessage);
       }
     } catch (e) {
       Get.back();
-      print(" Error in startTask Catch: $e");
-      Get.snackbar(
-        "Error",
-        "Something went wrong: $e",
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+      print("خطا: $e");
+      Get.snackbar("خطأ", "حدث خطأ: $e");
     } finally {
       isStarting.value = false;
     }
@@ -69,7 +79,7 @@ class TaskActionController extends GetxController {
   // 2. (Reject Task)
   Future<void> rejectTask(int taskId, String reason) async {
     if (reason.trim().isEmpty) {
-      Get.snackbar("Warning", "Please provide a reason for rejection.");
+      Get.snackbar("تحذير", "يرجى تقديم سبب لرفض المهمة.");
       return;
     }
 
@@ -98,8 +108,8 @@ class TaskActionController extends GetxController {
         Get.close(2);
 
         Get.snackbar(
-          "Task Declined",
-          "The request has been rejected successfully.",
+          "المهمة مرفوضة",
+          "تم رفض المهمة بنجاح.",
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.black87,
           colorText: Colors.white,
@@ -109,12 +119,7 @@ class TaskActionController extends GetxController {
     } catch (e) {
       Get.back();
       print(" Error in rejectTask Catch: $e");
-      Get.snackbar(
-        "Error",
-        "Failed to reject task: $e",
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+      Get.snackbar("خطأ", "فشل في رفض المهمة: $e");
     } finally {
       isRejecting.value = false;
     }
