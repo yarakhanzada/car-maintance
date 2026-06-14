@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart'; // تمت الإضافة لدعم Colors
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/controller/towtrucker%20controller/DriverNavigationController.dart';
 import 'dart:convert';
@@ -77,6 +78,8 @@ class DriverOrdersController extends GetxController {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
+        final box = GetStorage();
+        box.write('active_order', responseData['data']);
         Get.snackbar(
           "نجاح",
           "تم قبول الطلب بنجاح",

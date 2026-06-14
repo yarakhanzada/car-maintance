@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -101,10 +102,11 @@ class DriverTowingController extends GetxController {
     positionStream =
         Geolocator.getPositionStream(
           locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 5,
+            accuracy: LocationAccuracy.bestForNavigation,
+            distanceFilter: 10,
           ),
         ).listen((Position pos) {
+          if (pos.latitude == 0 && pos.longitude == 0) return;
           driverLocation = LatLng(pos.latitude, pos.longitude);
           _sendLocationToSocket();
           _updateMapData();
@@ -262,7 +264,8 @@ class DriverTowingController extends GetxController {
         "latitude": driverLocation.latitude,
         "longitude": driverLocation.longitude,
       });
-      print("Response status: ${response.statusCode}, body: ${response.body}");
+      final decodedBody = utf8.decode(response.bodyBytes);
+      print("Response status: ${response.statusCode}, body: $decodedBody");
       if (response.statusCode == 200 || response.statusCode == 201) {
         isJobStarted = true;
         currentStatusIndex = 0;
@@ -295,7 +298,8 @@ class DriverTowingController extends GetxController {
         "latitude": driverLocation.latitude,
         "longitude": driverLocation.longitude,
       });
-      print("Response status: ${response.statusCode}, body: ${response.body}");
+      final decodedBody = utf8.decode(response.bodyBytes);
+      print("Response status: ${response.statusCode}, body: $decodedBody");
       if (response.statusCode == 200) {
         int nextIndex = statusSequence.indexWhere(
           (element) => element['key'] == status,
