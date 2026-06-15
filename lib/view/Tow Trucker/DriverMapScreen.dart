@@ -43,12 +43,21 @@ class _DriverMapScreenState extends State<DriverMapScreen>
 
       final String requestTag =
           (requestData['id'] ?? requestData['data']?['id'] ?? "0").toString();
-      final s = Get.put(
-        DriverTowingController(requestData: requestData),
-        tag: requestTag,
-        permanent: false,
-      );
+      // final s = Get.put(
+      //   DriverTowingController(requestData: requestData),
+      //   tag: requestTag,
+      //   permanent: false,
+      // );
+      DriverTowingController s;
 
+      if (Get.isRegistered<DriverTowingController>(tag: requestTag)) {
+        s = Get.find(tag: requestTag);
+      } else {
+        s = Get.put(
+          DriverTowingController(requestData: requestData),
+          tag: requestTag,
+        );
+      }
       return GetBuilder<DriverTowingController>(
         tag: requestTag,
         builder: (s) {
@@ -79,7 +88,7 @@ class _DriverMapScreenState extends State<DriverMapScreen>
                   child: _buildStatusStepper(s),
                 ),
                 Positioned(
-                  bottom: 110,
+                  bottom: 80,
                   left: 15,
                   right: 15,
                   child: _buildFancyInfoCard(s),
@@ -131,25 +140,73 @@ class _DriverMapScreenState extends State<DriverMapScreen>
   }
 
   Widget _buildStatusStepper(DriverTowingController s) {
+    final activeColor = const Color(0xFFE55757);
+    final inactiveColor = Colors.white54;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
+        color: Colors.black.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(s.statusSequence.length, (index) {
-          bool isCurrent = s.currentStatusIndex == index;
-          bool isPast = s.currentStatusIndex > index;
-          return Icon(
-            s.statusSequence[index]['icon'],
-            color: isCurrent
-                ? const Color(0xFFE55757)
-                : (isPast ? Colors.green : Colors.grey[300]),
-            size: 28,
+          bool isPastOrCurrent = s.currentStatusIndex >= index;
+          Color color = isPastOrCurrent ? activeColor : inactiveColor;
+
+          Widget circleWidget = Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isPastOrCurrent ? Colors.white : Colors.white24,
+                ),
+                child: Icon(
+                  s.statusSequence[index]['icon'],
+                  color: activeColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                s.statusSequence[index]['title'],
+                style: TextStyle(
+                  fontSize: 9,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           );
+
+          if (index < s.statusSequence.length - 1) {
+            return Expanded(
+              child: Row(
+                children: [
+                  Expanded(child: circleWidget),
+                  Container(
+                    width: 30,
+                    height: 2,
+                    margin: const EdgeInsets.only(bottom: 18),
+                    color: s.currentStatusIndex > index
+                        ? activeColor
+                        : Colors.white24,
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return Expanded(child: circleWidget);
+          }
         }),
       ),
     );
@@ -157,11 +214,12 @@ class _DriverMapScreenState extends State<DriverMapScreen>
 
   Widget _buildFancyInfoCard(DriverTowingController s) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 15)],
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -170,35 +228,32 @@ class _DriverMapScreenState extends State<DriverMapScreen>
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem(
-                Icons.social_distance,
+                Icons.location_on_outlined,
                 "${s.distanceToCustomer ?? '--'} كم",
-                "المسافة",
               ),
-              Container(height: 40, width: 1, color: Colors.grey[200]),
+              Container(height: 25, width: 1, color: Colors.grey[300]),
               _buildStatItem(
-                Icons.timelapse,
+                Icons.timer_outlined,
                 "${s.estimatedTime ?? '--'} د",
-                "الوقت المتوقع",
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const Divider(height: 20),
           _buildActionButton(s),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(IconData icon, String val, String label) {
-    return Column(
+  Widget _buildStatItem(IconData icon, String val) {
+    return Row(
       children: [
-        Icon(icon, color: const Color(0xFFE55757), size: 22),
-        const SizedBox(height: 4),
+        Icon(icon, color: const Color(0xFFE55757), size: 18),
+        const SizedBox(width: 6),
         Text(
           val,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }
@@ -211,25 +266,48 @@ class _DriverMapScreenState extends State<DriverMapScreen>
         backgroundColor: isLastStep
             ? Colors.green[600]
             : const Color(0xFFE55757),
-        minimumSize: const Size(double.infinity, 55),
+        minimumSize: const Size(double.infinity, 40),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
+      // onPressed: () async {
+      //   if (!s.isJobStarted) {
+      //     bool success = await s.startTowing();
+      //     if (success) {
+      //       Get.snackbar("نجاح", "بدأت المهمة");
+      //     }
+      //   } else if (!isLastStep) {
+      //     String nextStatusKey =
+      //         s.statusSequence[s.currentStatusIndex + 1]['key'];
+      //     bool apiSuccess = await s.updateTowStatusAPI(nextStatusKey);
+      //     if (!apiSuccess) {
+      //       Get.snackbar("تنبيه", "فشل تحديث الحالة");
+      //     }
+      //   } else {
+      //     s.completeTowingViaSocket();
+      //   }
+      // },
       onPressed: () async {
+        String? message;
+
         if (!s.isJobStarted) {
-          bool success = await s.startTowing();
-          if (success) {
-            Get.snackbar("نجاح", "بدأت المهمة");
-          }
+          message = await s.startTowing();
         } else if (!isLastStep) {
           String nextStatusKey =
               s.statusSequence[s.currentStatusIndex + 1]['key'];
-          bool apiSuccess = await s.updateTowStatusAPI(nextStatusKey);
-          if (!apiSuccess) {
-            Get.snackbar("تنبيه", "فشل تحديث الحالة");
-          }
+          message = await s.updateTowStatusAPI(nextStatusKey);
         } else {
-          s.completeTowingViaSocket();
+          message = await s.completeTowingAPI();
         }
+
+        Get.snackbar(
+          message == null ? "نجاح" : "تنبيه",
+          message ?? "تمت العملية بنجاح",
+          backgroundColor: message == null
+              ? Colors.green.withOpacity(0.9)
+              : Colors.red.withOpacity(0.9),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
       },
       child: Text(
         !s.isJobStarted

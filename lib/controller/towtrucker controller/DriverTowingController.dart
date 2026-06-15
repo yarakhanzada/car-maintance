@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:senior_project/controller/towtrucker%20controller/DriverNavigationController.dart';
@@ -98,17 +99,18 @@ class DriverTowingController extends GetxController {
 
   Future<void> initLocationServices() async {
     _sendLocationToSocket();
-
+    await updateDriverLocationAPI();
     positionStream =
         Geolocator.getPositionStream(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.bestForNavigation,
             distanceFilter: 10,
           ),
-        ).listen((Position pos) {
+        ).listen((Position pos) async {
           if (pos.latitude == 0 && pos.longitude == 0) return;
           driverLocation = LatLng(pos.latitude, pos.longitude);
           _sendLocationToSocket();
+          await updateDriverLocationAPI();
           _updateMapData();
         });
   }
@@ -177,7 +179,13 @@ class DriverTowingController extends GetxController {
 
     socket!.on('tracking_ended', (data) async {
       await completeTowingAPI();
-      Get.find<DriverNavigationController>().activeOrderData.value = null;
+      GetStorage().remove("active_order");
+
+      final nav = Get.find<DriverNavigationController>();
+
+      nav.activeOrderData.value = null;
+
+      nav.selectedIndex.value = 0;
       Get.snackbar("نجاح", "تم إنهاء المهمة وإغلاق التتبع");
       update();
     });
@@ -253,7 +261,52 @@ class DriverTowingController extends GetxController {
   //Update Tow Status API
   //Complete Towing API
 
-  Future<bool> startTowing() async {
+  // Future<bool> startTowing() async {
+  //   final id =
+  //       (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
+  //           .toString();
+  //   final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/start";
+
+  //   try {
+  //     final response = await ApiHelper.post(url, {
+  //       "latitude": driverLocation.latitude,
+  //       "longitude": driverLocation.longitude,
+  //     });
+  //     final decodedBody = utf8.decode(response.bodyBytes);
+
+  //     print("Response status: ${response.statusCode}, body: $decodedBody");
+  //     // if (response.statusCode == 200 || response.statusCode == 201) {
+  //     //   isJobStarted = true;
+  //     //   currentStatusIndex = 0;
+  //     //   update();
+  //     //   return true;
+  //     // }
+  //     if (response.statusCode == 200) {
+  //       final body = jsonDecode(decodedBody);
+
+  //       requestData.clear();
+
+  //       requestData.addAll(body["data"]["towing_request"]["service_request"]);
+
+  //       requestData["towing_request"] = body["data"]["towing_request"];
+
+  //       GetStorage().write("active_order", requestData);
+
+  //       Get.find<DriverNavigationController>().activeOrderData.value =
+  //           requestData;
+
+  //       _extractIds();
+
+  //       update();
+
+  //       return true;
+  //     }
+  //   } catch (e) {
+  //     debugPrint("خطأ في بدء عملية السحب: $e");
+  //   }
+  //   return false;
+  // }
+  Future<String?> startTowing() async {
     final id =
         (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
             .toString();
@@ -265,33 +318,78 @@ class DriverTowingController extends GetxController {
         "longitude": driverLocation.longitude,
       });
       final decodedBody = utf8.decode(response.bodyBytes);
-      print("Response status: ${response.statusCode}, body: $decodedBody");
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        isJobStarted = true;
-        currentStatusIndex = 0;
+      final body = jsonDecode(decodedBody);
+
+      if (response.statusCode == 200) {
+        requestData.clear();
+        requestData.addAll(body["data"]["towing_request"]["service_request"]);
+        requestData["towing_request"] = body["data"]["towing_request"];
+        GetStorage().write("active_order", requestData);
+        Get.find<DriverNavigationController>().activeOrderData.value =
+            requestData;
+        _extractIds();
         update();
-        return true;
+        return null; // نجاح
+      } else {
+        return body['message'] ?? "فشل بدء المهمة";
       }
     } catch (e) {
-      debugPrint("خطأ في بدء عملية السحب: $e");
+      return "خطأ في الاتصال: $e";
     }
-    return false;
   }
+  // Future<bool> updateTowStatusAPI(String status) async {
+  //   final id =
+  //       (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
+  //           .toString();
+  //   print(
+  //     "Debug: Driver Loc: ${driverLocation.latitude}, ${driverLocation.longitude}",
+  //   );
+  //   print(
+  //     "Debug: Customer Loc: ${customerLocation?.latitude}, ${customerLocation?.longitude}",
+  //   );
+  //   final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/status";
+  //   print(
+  //     "Updating tow status to '$status' at URL: $url with location (${driverLocation.latitude}, ${driverLocation.longitude})",
+  //   );
+  //   try {
+  //     final response = await ApiHelper.post(url, {
+  //       "status": status,
+  //       "latitude": driverLocation.latitude,
+  //       "longitude": driverLocation.longitude,
+  //     });
+  //     final decodedBody = utf8.decode(response.bodyBytes);
+  //     print("Response status: ${response.statusCode}, body: $decodedBody");
+  //     if (response.statusCode == 200) {
+  //       int nextIndex = statusSequence.indexWhere(
+  //         (element) => element['key'] == status,
+  //       );
+  //       if (nextIndex != -1) {
+  //         //    currentStatusIndex = nextIndex;
+  //         currentStatusIndex = nextIndex;
 
-  Future<bool> updateTowStatusAPI(String status) async {
+  //         requestData["status"] = status;
+
+  //         GetStorage().write("active_order", requestData);
+
+  //         Get.find<DriverNavigationController>().activeOrderData.value =
+  //             requestData;
+
+  //         update();
+  //         update();
+  //       }
+  //       return true;
+  //     }
+  //   } catch (e) {
+  //     debugPrint("خطأ في تحديث الحالة: $e");
+  //   }
+  //   return false;
+  // }
+  Future<String?> updateTowStatusAPI(String status) async {
     final id =
         (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
             .toString();
-    print(
-      "Debug: Driver Loc: ${driverLocation.latitude}, ${driverLocation.longitude}",
-    );
-    print(
-      "Debug: Customer Loc: ${customerLocation?.latitude}, ${customerLocation?.longitude}",
-    );
     final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/status";
-    print(
-      "Updating tow status to '$status' at URL: $url with location (${driverLocation.latitude}, ${driverLocation.longitude})",
-    );
+
     try {
       final response = await ApiHelper.post(url, {
         "status": status,
@@ -299,24 +397,59 @@ class DriverTowingController extends GetxController {
         "longitude": driverLocation.longitude,
       });
       final decodedBody = utf8.decode(response.bodyBytes);
-      print("Response status: ${response.statusCode}, body: $decodedBody");
+      final body = jsonDecode(decodedBody);
+
       if (response.statusCode == 200) {
         int nextIndex = statusSequence.indexWhere(
           (element) => element['key'] == status,
         );
         if (nextIndex != -1) {
           currentStatusIndex = nextIndex;
+          requestData["status"] = status;
+          GetStorage().write("active_order", requestData);
+          Get.find<DriverNavigationController>().activeOrderData.value =
+              requestData;
           update();
         }
-        return true;
+        return null;
+      } else {
+        return body['message'] ?? "فشل تحديث الحالة";
       }
     } catch (e) {
-      debugPrint("خطأ في تحديث الحالة: $e");
+      return "خطأ في الاتصال: $e";
     }
-    return false;
   }
+  // Future<bool> completeTowingAPI() async {
+  //   final id =
+  //       (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
+  //           .toString();
+  //   final url = "${ApiConfig.baseUrl}/v1/driver/tow-requests/$id/complete";
 
-  Future<bool> completeTowingAPI() async {
+  //   try {
+  //     final response = await ApiHelper.post(url, {
+  //       "latitude": driverLocation.latitude,
+  //       "longitude": driverLocation.longitude,
+  //     });
+
+  //     // return response.statusCode == 200;
+  //     if (response.statusCode == 200) {
+  //       GetStorage().remove("active_order");
+
+  //       final nav = Get.find<DriverNavigationController>();
+  //       nav.activeOrderData.value = null;
+
+  //       nav.selectedIndex.value = 0;
+
+  //       return true;
+  //     }
+
+  //     return false;
+  //   } catch (e) {
+  //     debugPrint("خطأ في إنهاء السحب: $e");
+  //     return false;
+  //   }
+  // }
+  Future<String?> completeTowingAPI() async {
     final id =
         (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
             .toString();
@@ -327,11 +460,57 @@ class DriverTowingController extends GetxController {
         "latitude": driverLocation.latitude,
         "longitude": driverLocation.longitude,
       });
+      final decodedBody = utf8.decode(response.bodyBytes);
+      final body = jsonDecode(decodedBody);
 
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        GetStorage().remove("active_order");
+        final nav = Get.find<DriverNavigationController>();
+        nav.activeOrderData.value = null;
+        nav.selectedIndex.value = 0;
+        return null;
+      } else {
+        return body['message'] ?? "فشل إنهاء المهمة";
+      }
     } catch (e) {
-      debugPrint("خطأ في إنهاء السحب: $e");
-      return false;
+      return "خطأ في الاتصال: $e";
+    }
+  }
+
+  Future<void> updateDriverLocationAPI() async {
+    try {
+      final serviceRequestId =
+          requestData['id'] ??
+          requestData['towing_request']?['service_request_id'] ??
+          requestId;
+
+      final body = {
+        "service_request_id": serviceRequestId,
+        "latitude": driverLocation.latitude,
+        "longitude": driverLocation.longitude,
+      };
+
+      final response = await ApiHelper.post(
+        "${ApiConfig.baseUrl}/v1/driver/location/update",
+        body,
+      );
+
+      final decodedBody = utf8.decode(response.bodyBytes);
+
+      print("========== UPDATE DRIVER LOCATION ==========");
+      print("URL: ${ApiConfig.baseUrl}/v1/driver/location/update");
+      print("Request Body: $body");
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: $decodedBody");
+      print("===========================================");
+
+      final jsonData = json.decode(decodedBody);
+    } catch (e) {
+      print("========== UPDATE DRIVER LOCATION ERROR ==========");
+      print(e);
+      print("=================================================");
+
+      Get.snackbar("خطأ", e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
   }
 }

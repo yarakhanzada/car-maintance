@@ -79,7 +79,11 @@ class DriverOrdersController extends GetxController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         final box = GetStorage();
-        box.write('active_order', responseData['data']);
+        box.remove("active_order");
+        box.write("active_order", responseData["data"]);
+        print("Saved Order = ${box.read("active_order")}");
+        Get.find<DriverNavigationController>().activeOrderData.value =
+            responseData["data"];
         Get.snackbar(
           "نجاح",
           "تم قبول الطلب بنجاح",
