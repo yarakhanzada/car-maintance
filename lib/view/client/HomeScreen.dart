@@ -159,6 +159,8 @@ class HomeScreen extends StatelessWidget {
               color: const Color(0xFFE55757),
               onTap: () {
                 final box = GetStorage();
+                //box.erase();
+
                 final activeRequest = box.read('active_towing_request');
 
                 if (activeRequest != null) {

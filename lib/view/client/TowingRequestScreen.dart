@@ -40,15 +40,11 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
       },
     );
 
-    _controller.initSocket();
-    _controller.initLocationServices().then((_) {
+    _controller.start().then((_) {
       _googleMapController?.animateCamera(
-        CameraUpdate.newLatLngZoom(_controller.userLocation, 15.0),
+        CameraUpdate.newLatLngZoom(_controller.routeService.userLocation, 15.0),
       );
 
-      if (mounted) setState(() {});
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() {});
     });
   }
@@ -75,10 +71,8 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
                   ? widget.requestData['data']
                   : widget.requestData;
 
-              // 2. استخراج حالة الطلب وتحويلها لنصوص صغيرة لتفادي مشاكل الـ
               final status = (reqData['status'] ?? '').toString().toLowerCase();
 
-              // 3. فحص جميع المؤشرات على أن هناك سائق مستلم للطلب
               bool hasDriver =
                   _controller.isAccepted ||
                   status == 'accepted' ||
@@ -99,7 +93,7 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
   Widget _buildGoogleMap() {
     return GoogleMap(
       initialCameraPosition: CameraPosition(
-        target: _controller.userLocation,
+        target: _controller.routeService.userLocation,
         zoom: 15,
       ),
       onMapCreated: (controller) => _googleMapController = controller,
@@ -108,10 +102,11 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
       compassEnabled: false,
       mapToolbarEnabled: false,
       polylines: {
-        if (_controller.isAccepted && _controller.routePoints.isNotEmpty)
+        if (_controller.isAccepted &&
+            _controller.routeService.routePoints.isNotEmpty)
           Polyline(
             polylineId: const PolylineId("route"),
-            points: _controller.routePoints,
+            points: _controller.routeService.routePoints,
             color: const Color(0xFFE55757),
             width: 5,
             jointType: JointType.round,
@@ -163,8 +158,8 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
           ),
           const SizedBox(height: 15),
           _infoRow(
-            _controller.liveDuration,
-            _controller.liveDistance,
+            _controller.routeService.liveDuration,
+            _controller.routeService.liveDistance,
             _estimatedFee,
           ),
         ],
@@ -180,42 +175,42 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _dragHandle(),
-          _buildStatusBadge(),
+          //   _buildStatusBadge(),
           const SizedBox(height: 15),
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 26,
-                backgroundColor: Colors.grey[200],
-                child: const Icon(Icons.person, size: 30, color: Colors.grey),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _controller.driverData?['driver_name'] ?? 'سائق السحب',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      _controller.driverData?['truck_model'] ?? 'شاحنة  ',
-                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              _contactButton(Icons.phone, Colors.green, () {}),
-            ],
-          ),
-          const Divider(height: 30),
+          // Row(
+          //   children: [
+          //     CircleAvatar(
+          //       radius: 26,
+          //       backgroundColor: Colors.grey[200],
+          //       child: const Icon(Icons.person, size: 30, color: Colors.grey),
+          //     ),
+          //     const SizedBox(width: 12),
+          //     Expanded(
+          //       child: Column(
+          //         crossAxisAlignment: CrossAxisAlignment.start,
+          //         children: [
+          //           Text(
+          //             _controller.driverData?['driver_name'] ?? 'سائق السحب',
+          //             style: const TextStyle(
+          //               fontWeight: FontWeight.bold,
+          //               fontSize: 16,
+          //             ),
+          //           ),
+          //           Text(
+          //             _controller.driverData?['truck_model'] ?? 'شاحنة  ',
+          //             style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //     const SizedBox(width: 8),
+          //     _contactButton(Icons.phone, Colors.green, () {}),
+          //   ],
+          // ),
+          // const Divider(height: 30),
           _infoRow(
-            _controller.liveDuration,
-            _controller.liveDistance,
+            _controller.routeService.liveDuration,
+            _controller.routeService.liveDistance,
             _estimatedFee,
           ),
         ],
@@ -225,8 +220,8 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
 
   Widget _buildStatusBadge() {
     bool isVeryClose =
-        _controller.liveDistance.contains("0.") ||
-        _controller.liveDistance == "0 كم";
+        _controller.routeService.liveDistance.contains("0.") ||
+        _controller.routeService.liveDistance == "0 كم";
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
