@@ -12,7 +12,8 @@ class CompletedServicesController {
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
         final List<dynamic> dataList = jsonData['data'];
-        ;
+        print("?????????????????????????????????????");
+        print(dataList);
         return dataList
             .map((item) => CompletedServiceModel.fromJson(item))
             .toList();

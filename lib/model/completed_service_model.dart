@@ -18,6 +18,13 @@ class CompletedServiceModel {
   final double score;
   final String? ratingComment;
   final String? complaintDescription;
+  final String? complaintCategory;
+  final String? complaintPriority;
+  final String? complaintPriorityLabel;
+  final String? complaintDaysAgo;
+  final String? complaintFormattedDate;
+  final String? complaintWhatsappUrl;
+  final String? complaintCallUrl;
   final String? receivedAt;
   final String? paidAt;
   final String immediatePremium;
@@ -42,6 +49,13 @@ class CompletedServiceModel {
     required this.score,
     this.ratingComment,
     this.complaintDescription,
+    this.complaintCategory,
+    this.complaintPriority,
+    this.complaintPriorityLabel,
+    this.complaintDaysAgo,
+    this.complaintFormattedDate,
+    this.complaintWhatsappUrl,
+    this.complaintCallUrl,
     this.receivedAt,
     this.paidAt,
     required this.immediatePremium,
@@ -74,7 +88,15 @@ class CompletedServiceModel {
       isComplained: json['is_complained'] ?? false,
       score: (rating['score'] ?? 0).toDouble(),
       ratingComment: rating['comment'],
-      complaintDescription: complaint['description'],
+      complaintDescription:
+          complaint['description'] ?? complaint['complaint_text'],
+      complaintCategory: complaint['category'],
+      complaintPriority: complaint['priority'],
+      complaintPriorityLabel: complaint['priority_label'],
+      complaintDaysAgo: complaint['days_ago'],
+      complaintFormattedDate: complaint['formatted_date'],
+      complaintWhatsappUrl: complaint['whatsapp_url'],
+      complaintCallUrl: complaint['call_url'],
       receivedAt: json['received_at'],
       paidAt: bill['paid_at'],
       immediatePremium: bill['immediate_premium']?.toString() ?? "0",
