@@ -64,7 +64,7 @@ class LocationService {
 
             if (lastApiUpdate == null ||
                 DateTime.now().difference(lastApiUpdate!).inSeconds > 30) {
-              updateCustomerLocationApi(pos.latitude, pos.longitude);
+              //    updateCustomerLocationApi(pos.latitude, pos.longitude);
 
               lastApiUpdate = DateTime.now();
             }
@@ -82,36 +82,36 @@ class LocationService {
     }
   }
 
-  Future<void> updateCustomerLocationApi(double lat, double lng) async {
-    final url = "${ApiConfig.baseUrl}/v1/customer/location/update";
+  // Future<void> updateCustomerLocationApi(double lat, double lng) async {
+  //   final url = "${ApiConfig.baseUrl}/v1/customer/location/update";
 
-    final data = requestData.containsKey('data')
-        ? requestData['data']
-        : requestData;
+  //   final data = requestData.containsKey('data')
+  //       ? requestData['data']
+  //       : requestData;
 
-    final serviceRequestId = data['towing_request']?['service_request_id'] ?? 0;
+  //   final serviceRequestId = data['towing_request']?['service_request_id'] ?? 0;
 
-    print("DEBUG: Updating location for Service Request ID: $serviceRequestId");
+  //   print("DEBUG: Updating location for Service Request ID: $serviceRequestId");
 
-    try {
-      final response = await ApiHelper.post(url, {
-        "latitude": lat,
-        "longitude": lng,
-        "service_request_id": serviceRequestId,
-      });
+  //   try {
+  //     final response = await ApiHelper.post(url, {
+  //       "latitude": lat,
+  //       "longitude": lng,
+  //       "service_request_id": serviceRequestId,
+  //     });
 
-      if (response.statusCode == 200) {
-        final responseBody = json.decode(response.body);
+  //     if (response.statusCode == 200) {
+  //       final responseBody = json.decode(response.body);
 
-        print("✅ API Update: ${responseBody['message']}");
-      } else {
-        print(" Failed to update location. Status: ${response.statusCode}");
-        print(" Server Response: ${response.body}");
-      }
-    } catch (e) {
-      print(" Error: $e");
-    }
-  }
+  //       print("✅ API Update: ${responseBody['message']}");
+  //     } else {
+  //       print(" Failed to update location. Status: ${response.statusCode}");
+  //       print(" Server Response: ${response.body}");
+  //     }
+  //   } catch (e) {
+  //     print(" Error: $e");
+  //   }
+  // }
 
   void dispose() {
     positionStream?.cancel();

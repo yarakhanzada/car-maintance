@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/controller/client controller/MaintenanceController.dart';
+import 'package:senior_project/controller/client%20controller/departmentController.dart';
 import 'package:senior_project/widgets/CustomButton.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class MaintenanceRequestScreen extends StatelessWidget {
   final String categoryName;
   final int? categoryId;
-
+  final deptController = Get.put(DepartmentController());
   MaintenanceRequestScreen({
     super.key,
     required this.categoryName,
@@ -22,7 +23,9 @@ class MaintenanceRequestScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.initDepartments(categoryId);
+    });
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -54,6 +57,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
                             ),
                             _buildVehicleDropdown(),
                             const SizedBox(height: 30),
+
                             _buildSectionHeader(
                               "تفاصيل الخدمة",
                               Icons.calendar_today_rounded,
@@ -78,7 +82,19 @@ class MaintenanceRequestScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 15),
                             _buildImageUploader(),
+                            // ... بعد قسم الصور
                             const SizedBox(height: 30),
+
+                            // شرط: يظهر فقط إذا كان هناك categoryId (أي صيانة غير عامة)
+                            if (categoryId != null && categoryId != 0) ...[
+                              _buildSectionHeader(
+                                "هل ترغب بإضافة أقسام أخرى؟",
+                                Icons.category_rounded,
+                              ),
+                              const SizedBox(height: 15),
+                              _buildDepartmentSelector(),
+                              const SizedBox(height: 30),
+                            ],
                             _buildSubmitButton(),
                             const SizedBox(height: 40),
                           ],
@@ -127,6 +143,67 @@ class MaintenanceRequestScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildDepartmentSelector() {
+    return Obx(() {
+      return Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: deptController.departments.map((dept) {
+          bool isSelected = controller.selectedDepartmentIds.contains(dept.id);
+          bool isPrimary = (dept.id == controller.initialDepartmentId);
+
+          return GestureDetector(
+            onTap: isPrimary
+                ? null
+                : () => controller.toggleDepartment(dept.id),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: (isSelected || isPrimary)
+                    ? const Color(0xFFE55757)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: (isSelected || isPrimary)
+                      ? const Color(0xFFE55757)
+                      : Colors.grey.shade300,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min, // ليأخذ حجم النص فقط
+                children: [
+                  Icon(
+                    isPrimary
+                        ? Icons.lock
+                        : (isSelected
+                              ? Icons.check_circle
+                              : Icons.circle_outlined),
+                    color: (isSelected || isPrimary)
+                        ? Colors.white
+                        : Colors.grey,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    dept.name,
+                    style: TextStyle(
+                      color: (isSelected || isPrimary)
+                          ? Colors.white
+                          : Colors.black87,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    });
   }
 
   Widget _buildDateTimeSelectors(BuildContext context) {
@@ -328,7 +405,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
             )
           : CustomButton(
               text: "تأكيد الطلب",
-              onTap: () => controller.submitRequest(categoryId ?? null),
+              onTap: () => controller.submitRequest(),
             ),
     );
   }
