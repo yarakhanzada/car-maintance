@@ -99,7 +99,7 @@ class DriverTowingController extends GetxController {
 
   Future<void> initLocationServices() async {
     _sendLocationToSocket();
-    await updateDriverLocationAPI();
+    //  await updateDriverLocationAPI();
     positionStream =
         Geolocator.getPositionStream(
           locationSettings: const LocationSettings(
@@ -385,6 +385,7 @@ class DriverTowingController extends GetxController {
   //   return false;
   // }
   Future<String?> updateTowStatusAPI(String status) async {
+    await updateDriverLocationAPI();
     final id =
         (requestData['towing_request']?['id'] ?? requestData['id'] ?? requestId)
             .toString();
