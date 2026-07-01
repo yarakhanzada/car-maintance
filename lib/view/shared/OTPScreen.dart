@@ -19,7 +19,7 @@ class OTPScreen extends StatelessWidget {
 
     return GlassScaffold(
       child: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: TextDirection.ltr,
         child: Column(
           children: [
             const AuthHeaderIcon(icon: Icons.vibration_rounded),

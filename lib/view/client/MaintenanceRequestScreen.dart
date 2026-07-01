@@ -325,12 +325,25 @@ class MaintenanceRequestScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == controller.images.length) {
             return GestureDetector(
-              onTap: () async {
-                final XFile? img = await ImagePicker().pickImage(
-                  source: ImageSource.gallery,
-                );
-                if (img != null) controller.images.add(img);
-              },
+           onTap: () async {
+  if (controller.isPickingImage.value) return;
+
+  controller.isPickingImage.value = true;
+
+  try {
+    final XFile? img = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (img != null) {
+      controller.images.add(img);
+    }
+  } catch (e) {
+    print(e);
+  } finally {
+    controller.isPickingImage.value = false;
+  }
+},
               child: Container(
                 width: 85,
                 height: 85,

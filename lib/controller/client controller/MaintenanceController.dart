@@ -220,7 +220,7 @@ class MaintenanceController extends GetxController {
   var selectedVehicleId = RxnInt();
   final problemController = TextEditingController();
   final RxList<XFile> images = <XFile>[].obs;
-
+RxBool isPickingImage = false.obs;
   final VehicleController _vehicleCtrl = Get.find<VehicleController>();
   List get userVehicles => _vehicleCtrl.vehicleList;
 
@@ -281,81 +281,103 @@ class MaintenanceController extends GetxController {
       borderRadius: 10,
     );
   }
+Future<void> submitRequest() async {
+  if (selectedVehicleId.value == null) {
+    _showServerSnackBar("تنبيه", "يرجى اختيار مركبة");
+    return;
+  }
 
-  Future<void> submitRequest() async {
-    if (selectedVehicleId.value == null) {
-      _showServerSnackBar("تنبيه", "يرجى اختيار مركبة");
-      return;
+  // مطلوب فقط عندما تكون الصيانة ضمن قسم محدد
+  if ((initialDepartmentId != null) && selectedDepartmentIds.isEmpty) {
+    _showServerSnackBar("تنبيه", "يرجى اختيار قسم واحد على الأقل");
+    return;
+  }
+
+  isLoading.value = true;
+
+  try {
+    if (isimmediate.value) {
+      selectedDate.value = DateTime.now();
+      selectedTime.value = TimeOfDay.now();
     }
-    if (selectedDepartmentIds.isEmpty) {
-      _showServerSnackBar("تنبيه", "يرجى اختيار قسم واحد على الأقل");
-      return;
-    }
 
-    isLoading.value = true;
+    String formattedTime =
+        "${selectedTime.value.hour.toString().padLeft(2, '0')}:${selectedTime.value.minute.toString().padLeft(2, '0')}";
 
-    try {
-      if (isimmediate.value) {
-        selectedDate.value = DateTime.now();
-        selectedTime.value = TimeOfDay.now();
-      }
+    Map<String, dynamic> fields = {
+      'vehicles_id': selectedVehicleId.value.toString(),
+      'maintenance_type': isimmediate.value ? 'immediate' : 'scheduled',
+      'scheduled_date': selectedDate.value.toString().split(' ')[0],
+      'scheduled_time': formattedTime,
+    };
 
-      String formattedTime =
-          "${selectedTime.value.hour.toString().padLeft(2, '0')}:${selectedTime.value.minute.toString().padLeft(2, '0')}";
-
-      Map<String, dynamic> fields = {
-        'vehicles_id': selectedVehicleId.value.toString(),
-        'maintenance_type': isimmediate.value ? 'immediate' : 'scheduled',
-        'scheduled_date': selectedDate.value.toString().split(' ')[0],
-        'scheduled_time': formattedTime,
-      };
-      if (selectedDepartmentIds.isEmpty && initialDepartmentId != null) {
+    // أرسل الأقسام فقط إذا كانت الصيانة ليست عامة
+    if (initialDepartmentId != null) {
+      if (selectedDepartmentIds.isEmpty) {
         selectedDepartmentIds.add(initialDepartmentId!);
       }
 
-      fields['department_id'] = jsonEncode(selectedDepartmentIds.toList());
-      if (problemController.text.isNotEmpty) {
-        fields['problem_type'] = problemController.text;
-      }
-
-      final url = "${ApiConfig.baseUrl}/requests/maintenance";
-
-      var response = await ApiHelper.postWithImages(url, fields, images);
-      print("Selected Department IDs List: ${selectedDepartmentIds.toList()}");
-      print("------- API FULL RESPONSE DEBUG START -------");
-      print("Status Code: ${response.statusCode}");
-      printFullResponse(response.body);
-      print("------- API FULL RESPONSE DEBUG END -------");
-
-      final jsonData = jsonDecode(response.body);
-      print("Parsed Keys: ${jsonData.keys.toList()}");
-
-      if (response.statusCode == 200 && jsonData['status'] == 1) {
-        selectedDepartmentIds.clear();
-        isInitialized = false;
-        Get.back();
-        _showServerSnackBar("Success", jsonData['message']);
-      } else {
-        String errorMsg = jsonData['message'] ?? "Request failed";
-        if (jsonData['data'] != null && jsonData['data'] is Map) {
-          Map<String, dynamic> errors = jsonData['data'];
-          if (errors.isNotEmpty) {
-            errorMsg = errors.values.first[0].toString();
-          }
-        }
-        _showServerSnackBar("Failed", errorMsg);
-      }
-    } catch (e) {
-      print("Catch Error: $e");
-      _showServerSnackBar(
-        "Error",
-        "An unexpected error occurred: ${e.toString().split(':').last}",
-      );
-    } finally {
-      isLoading.value = false;
+      fields['department_id'] =
+          jsonEncode(selectedDepartmentIds.toList());
     }
-  }
 
+    if (problemController.text.isNotEmpty) {
+      fields['problem_type'] = problemController.text;
+    }
+
+    final url = "${ApiConfig.baseUrl}/requests/maintenance";
+
+    var response = await ApiHelper.postWithImages(
+      url,
+      fields,
+      images,
+    );
+
+    print(
+      "Selected Department IDs List: ${selectedDepartmentIds.toList()}",
+    );
+    print("------- API FULL RESPONSE DEBUG START -------");
+    print("Status Code: ${response.statusCode}");
+    printFullResponse(response.body);
+    print("------- API FULL RESPONSE DEBUG END -------");
+
+    final jsonData = jsonDecode(response.body);
+    print("Parsed Keys: ${jsonData.keys.toList()}");
+
+    if (response.statusCode == 200 && jsonData['status'] == 1) {
+      selectedDepartmentIds.clear();
+      isInitialized = false;
+      Get.back();
+
+      _showServerSnackBar(
+        "Success",
+        jsonData['message'],
+      );
+    } else {
+      String errorMsg = jsonData['message'] ?? "Request failed";
+
+      if (jsonData['data'] != null &&
+          jsonData['data'] is Map) {
+        Map<String, dynamic> errors = jsonData['data'];
+
+        if (errors.isNotEmpty) {
+          errorMsg = errors.values.first[0].toString();
+        }
+      }
+
+      _showServerSnackBar("Failed", errorMsg);
+    }
+  } catch (e) {
+    print("Catch Error: $e");
+
+    _showServerSnackBar(
+      "Error",
+      "An unexpected error occurred: ${e.toString().split(':').last}",
+    );
+  } finally {
+    isLoading.value = false;
+  }
+}
   Future<void> pickTime(BuildContext context) async {
     TimeOfDay? picked = await showTimePicker(
       context: context,
