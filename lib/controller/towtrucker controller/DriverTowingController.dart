@@ -466,6 +466,7 @@ class DriverTowingController extends GetxController {
 
       if (response.statusCode == 200) {
         GetStorage().remove("active_order");
+        await TokenService.clearActiveRequestForUser(customerId);
         final nav = Get.find<DriverNavigationController>();
         nav.activeOrderData.value = null;
         nav.selectedIndex.value = 0;

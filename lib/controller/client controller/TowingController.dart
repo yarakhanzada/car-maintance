@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:senior_project/services/location_service.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/api_helper.dart';
+import 'package:senior_project/services/token_service.dart';
 import 'package:senior_project/view/client/TowingRequestScreen.dart';
 import 'package:senior_project/controller/client%20controller/VehicleController.dart';
 
 class TowingController extends GetxController {
   var isLoading = false.obs;
-  final box = GetStorage();
   var selectedVehicleId = RxnInt();
   final problemController = TextEditingController();
   final RxList<XFile> images = <XFile>[].obs;
@@ -65,7 +65,10 @@ class TowingController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         resetForm();
-        box.write('active_towing_request', data['data']);
+        final requestData = data['data'];
+        requestData['user_id'] = await TokenService.getID();
+
+        await TokenService.saveActiveRequest(jsonEncode(requestData));
         Get.off(() => RequestTrackingScreen(requestData: data['data']));
       } else {
         String errorMsg = data['message'] ?? "فشل إرسال الطلب";

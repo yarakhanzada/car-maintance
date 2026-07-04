@@ -132,11 +132,13 @@ class SocketService {
       if (onUpdate != null) onUpdate!();
     });
 
-    socket!.on('tracking_ended', (data) {
+    socket!.on('tracking_ended', (data) async {
       print("🚨 [SOCKET] Tracking Ended Event Received Successfully!");
 
       final box = GetStorage();
       box.remove('active_towing_request');
+
+      await TokenService.clearActiveRequestForUser(customerId);
 
       isAccepted = false;
       towTruckLocation = null;

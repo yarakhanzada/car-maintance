@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:senior_project/controller/client controller/departmentController
 import 'package:senior_project/controller/client controller/profile_controller.dart';
 import 'package:senior_project/model/subscriptionModel.dart';
 import 'package:senior_project/services/api_config.dart';
+import 'package:senior_project/services/token_service.dart';
 import 'package:senior_project/view/client/ClientNotificationsScreen.dart';
 import 'package:senior_project/view/client/MaintenanceRequestScreen.dart';
 import 'package:senior_project/view/client/TowingFormScreen.dart';
@@ -157,16 +159,13 @@ class HomeScreen extends StatelessWidget {
               subtitle: "خدمة 24/7",
               icon: Icons.local_shipping_rounded,
               color: const Color(0xFFE55757),
-              onTap: () {
-                final box = GetStorage();
-                //box.erase();
+              onTap: () async {
+                final currentUserId = await TokenService.getID();
+                String? requestString =
+                    await TokenService.getActiveRequestForUser(currentUserId);
 
-                final activeRequest = box.read('active_towing_request');
-
-                if (activeRequest != null) {
-                  Map<String, dynamic> requestData = Map<String, dynamic>.from(
-                    activeRequest,
-                  );
+                if (requestString != null) {
+                  Map<String, dynamic> requestData = jsonDecode(requestString);
                   Get.to(() => RequestTrackingScreen(requestData: requestData));
                 } else {
                   Get.to(() => const TowingFormScreen());

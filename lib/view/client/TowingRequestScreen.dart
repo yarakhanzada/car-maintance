@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'dart:math' as math;
 
 import 'package:senior_project/controller/client%20controller/TowingTrackingController.dart';
+import 'package:senior_project/services/token_service.dart';
 
 class RequestTrackingScreen extends StatefulWidget {
   final Map<String, dynamic> requestData;
@@ -22,6 +24,8 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
   @override
   void initState() {
     super.initState();
+    _checkRequestValidity();
+
     _parseInitialData();
 
     _controller = TowingTrackingController(
@@ -47,6 +51,22 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
 
       if (mounted) setState(() {});
     });
+  }
+
+  Future<void> _checkRequestValidity() async {
+    final reqData = widget.requestData.containsKey('data')
+        ? widget.requestData['data']
+        : widget.requestData;
+
+    final requestId = reqData['id'];
+
+    if (requestId == null || requestId == 0) {
+      await TokenService.clearActiveRequestForCurrentUser();
+      if (mounted) {
+        Get.back();
+      }
+      return;
+    }
   }
 
   void _parseInitialData() {

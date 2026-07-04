@@ -54,7 +54,7 @@ class OTPController extends GetxController {
       );
 
       var jsonData = jsonDecode(response.body);
-
+      print("Resend code response: $jsonData");
       if (jsonData['status'] == 1) {
         startTimer();
       }
@@ -88,17 +88,13 @@ class OTPController extends GetxController {
 
     try {
       isLoading.value = true;
-      var response = await ApiHelper.post(
-        "${ApiConfig.baseUrl}/verify",
-        {
-          "email": email,
-          "code": fullCode,
-        },
-        skipAuth: true,
-      );
+      var response = await ApiHelper.post("${ApiConfig.baseUrl}/verify", {
+        "email": email,
+        "code": fullCode,
+      }, skipAuth: true);
 
       var jsonData = jsonDecode(response.body);
-      
+
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         Get.snackbar(
           "نجاح",

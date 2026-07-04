@@ -92,7 +92,7 @@ class ApiHelper {
           );
         } else {
           print(" [ApiHelper] Refresh Failed - Logging out...");
-          await TokenService.clearToken();
+          await TokenService.clearSessionData();
           Get.offAllNamed('/ww');
           return response;
         }

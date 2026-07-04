@@ -18,15 +18,11 @@ class LogoutController extends GetxController {
 
     String? token = await TokenService.getToken();
 
-    await TokenService.clearToken();
-
+    await TokenService.clearSessionData();
 
     try {
       if (token != null && token.isNotEmpty) {
-        await ApiHelper.post(
-          "${ApiConfig.baseUrl}/logout",
-          {},
-        );
+        await ApiHelper.post("${ApiConfig.baseUrl}/logout", {});
       }
     } catch (e) {
       print("Silent logout error: $e");

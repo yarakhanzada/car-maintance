@@ -287,7 +287,6 @@ Future<void> submitRequest() async {
     return;
   }
 
-  // مطلوب فقط عندما تكون الصيانة ضمن قسم محدد
   if ((initialDepartmentId != null) && selectedDepartmentIds.isEmpty) {
     _showServerSnackBar("تنبيه", "يرجى اختيار قسم واحد على الأقل");
     return;
@@ -311,7 +310,6 @@ Future<void> submitRequest() async {
       'scheduled_time': formattedTime,
     };
 
-    // أرسل الأقسام فقط إذا كانت الصيانة ليست عامة
     if (initialDepartmentId != null) {
       if (selectedDepartmentIds.isEmpty) {
         selectedDepartmentIds.add(initialDepartmentId!);
