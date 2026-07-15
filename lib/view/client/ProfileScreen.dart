@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/controller/client controller/SubscriptionController.dart';
 import 'package:senior_project/controller/client controller/profile_controller.dart';
+import 'package:senior_project/view/client/SystemSupportScreen.dart';
 import '../../controller/logout_controller.dart';
 import 'EditProfileScreen.dart';
 import 'ServiceHistoryScreen.dart';
@@ -56,7 +57,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           _buildProfileHeader(user),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 40),
                           _buildSubscriptionCard(context, width),
                         ],
                       ),
@@ -81,10 +82,10 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         _buildMenuTile(
                           icon: Icons.history_rounded,
-                          title: "سجل الخدمات",
-                          subtitle: "تحقق من خدمات سيارتك السابقة",
+                          title: "نظام الدعم والمعلومات ",
+                          subtitle: "تحقق من نظام الدعم والمعلومات  ",
                           onTap: () =>
-                              Get.to(() => const ServiceHistoryScreen()),
+                              Get.to(() => const SystemSupportScreen()),
                         ),
                         const SizedBox(height: 15),
                         _buildSectionTitle("إجراءات"),
@@ -103,18 +104,29 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileHeader(user) {
+    String initial = (user.name != null && user.name.isNotEmpty)
+        ? user.name[0].toUpperCase()
+        : "U";
+
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(2.5),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFFE55757), width: 2),
+            border: Border.all(color: const Color(0xFFE55757), width: 1),
           ),
-          child: const CircleAvatar(
+          child: CircleAvatar(
             radius: 32,
-            backgroundColor: Color(0xFFE0E0E0),
-            child: Icon(Icons.person, size: 32, color: Colors.white),
+            backgroundColor: Colors.white,
+            child: Text(
+              initial,
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFE55757),
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 15),
@@ -124,14 +136,26 @@ class ProfileScreen extends StatelessWidget {
             Text(
               user.name ?? "",
               style: const TextStyle(
-                fontSize: 19,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A1A1A),
               ),
             ),
-            Text(
-              user.email ?? "",
-              style: const TextStyle(color: Colors.grey, fontSize: 12.5),
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE55757).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                user.email ?? "",
+                style: const TextStyle(
+                  color: Color(0xFFE55757),
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),
@@ -436,14 +460,18 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildBackgroundGradient() {
     return Positioned(
-      top: -80,
-      left: -40,
+      top: -50,
+      right: -50, // تم نقلها لليمين
       child: Container(
-        width: 250,
-        height: 250,
+        width: 280,
+        height: 280,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: const Color(0xFFE55757).withOpacity(0.04),
+          color: const Color(0xFFE55757).withOpacity(0.06),
+        ),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+          child: Container(color: Colors.transparent),
         ),
       ),
     );

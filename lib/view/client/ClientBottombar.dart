@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:senior_project/view/client/ServiceHistoryScreen.dart';
 import 'package:senior_project/view/client/completed_services_screen.dart';
 import 'package:senior_project/view/client/Chatbot.dart';
 import 'package:senior_project/view/client/HomeScreen.dart';
@@ -18,6 +19,7 @@ class ClientBottombar extends StatelessWidget {
   final List<Widget> screens = [
     HomeScreen(),
     const CompletedServicesScreen(),
+    ServiceHistoryScreen(),
     MyGarageScreen(),
     ProfileScreen(),
   ];
@@ -83,7 +85,9 @@ class ClientBottombar extends StatelessWidget {
                     gap: 6,
                     activeColor: Colors.white,
                     iconSize: 22,
-                    tabBackgroundColor: const Color(0xFFE55757).withOpacity(0.9),
+                    tabBackgroundColor: const Color(
+                      0xFFE55757,
+                    ).withOpacity(0.9),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
@@ -95,8 +99,15 @@ class ClientBottombar extends StatelessWidget {
                         controller.selectedIndex.value = index,
                     tabs: const [
                       GButton(icon: Icons.home_rounded, text: 'الرئيسية'),
-                      GButton(icon: Icons.calendar_today_rounded, text: 'المكتملة'),
-                      GButton(icon: Icons.directions_car_rounded, text: 'الكراج'),
+                      GButton(
+                        icon: Icons.calendar_today_rounded,
+                        text: 'المكتملة',
+                      ),
+                      GButton(icon: Icons.list_rounded, text: 'طلباتي'),
+                      GButton(
+                        icon: Icons.directions_car_rounded,
+                        text: 'الكراج',
+                      ),
                       GButton(icon: Icons.person_rounded, text: 'الملف'),
                     ],
                   ),

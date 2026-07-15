@@ -72,83 +72,39 @@ class ServiceHistoryScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 15,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: Color(0xFF1A1A1A),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             Stack(
               children: [
-                Text(
-                  "السجل",
-                  style: TextStyle(
-                    fontSize: isTablet ? 60 : 48,
-                    height: 0.8,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF1A1A1A).withOpacity(0.04),
-                    letterSpacing: -2,
-                  ),
-                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "سجل",
+                      "طلباتي",
                       style: TextStyle(
-                        fontSize: isTablet ? 46 : 40,
+                        fontSize: 32,
                         fontWeight: FontWeight.w900,
                         color: const Color(0xFF1A1A1A),
-                        letterSpacing: -1.5,
+                        letterSpacing: -1,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          "الخدمات",
-                          style: TextStyle(
-                            fontSize: isTablet ? 46 : 40,
-                            fontWeight: FontWeight.w300,
-                            color: const Color(0xFFE55757),
-                            letterSpacing: -1.5,
-                          ),
+                    const SizedBox(width: 15),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A1A1A),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Text(
+                        "$count سجل",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(width: 15),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A1A),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Text(
-                            "$count سجل",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

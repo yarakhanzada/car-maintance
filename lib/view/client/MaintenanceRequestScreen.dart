@@ -325,25 +325,25 @@ class MaintenanceRequestScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == controller.images.length) {
             return GestureDetector(
-           onTap: () async {
-  if (controller.isPickingImage.value) return;
+              onTap: () async {
+                if (controller.isPickingImage.value) return;
 
-  controller.isPickingImage.value = true;
+                controller.isPickingImage.value = true;
 
-  try {
-    final XFile? img = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
+                try {
+                  final XFile? img = await ImagePicker().pickImage(
+                    source: ImageSource.gallery,
+                  );
 
-    if (img != null) {
-      controller.images.add(img);
-    }
-  } catch (e) {
-    print(e);
-  } finally {
-    controller.isPickingImage.value = false;
-  }
-},
+                  if (img != null) {
+                    controller.images.add(img);
+                  }
+                } catch (e) {
+                  print(e);
+                } finally {
+                  controller.isPickingImage.value = false;
+                }
+              },
               child: Container(
                 width: 85,
                 height: 85,
@@ -432,11 +432,11 @@ class MaintenanceRequestScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _toggleElement(
-            "فوري",
-            controller.isimmediate.value,
-            () => controller.updateMaintenanceType(true),
-          ),
+          // _toggleElement(
+          //   "فوري",
+          //   controller.isimmediate.value,
+          //   () => controller.updateMaintenanceType(true),
+          // ),
           _toggleElement(
             "جدولة",
             !controller.isimmediate.value,

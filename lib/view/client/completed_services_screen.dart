@@ -57,7 +57,8 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                     child: FutureBuilder<List<CompletedServiceModel>>(
                       future: _futureServices,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Center(
                             child: CircularProgressIndicator(
                               color: Color(0xFFE55757),
@@ -71,7 +72,8 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                               style: TextStyle(fontSize: screenWidth * 0.035),
                             ),
                           );
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
                           return _buildEmptyState(screenWidth);
                         }
 
@@ -85,8 +87,10 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                             ),
                             physics: const BouncingScrollPhysics(),
                             itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) =>
-                                _buildServiceCard(snapshot.data![index], screenWidth),
+                            itemBuilder: (context, index) => _buildServiceCard(
+                              snapshot.data![index],
+                              screenWidth,
+                            ),
                           ),
                         );
                       },
@@ -105,7 +109,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         screenWidth * 0.05,
-        25,
+        30,
         screenWidth * 0.05,
         10,
       ),
@@ -115,16 +119,16 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
           Text(
             "الخدمات المكتملة",
             style: TextStyle(
-              fontSize: screenWidth * 0.065,
+              fontSize: screenWidth * 0.070,
               fontWeight: FontWeight.w900,
               color: const Color(0xFF1A1A1A),
-              letterSpacing: -0.8,
+              letterSpacing: -1,
             ),
           ),
           const SizedBox(height: 3),
           Text(
             "تتبع سجلات صيانة سيارتك المكتملة",
-            style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.032),
+            style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.035),
           ),
         ],
       ),
@@ -176,7 +180,10 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          service.problemType.toUpperCase().replaceAll('_', ' '),
+                          service.problemType.toUpperCase().replaceAll(
+                            '_',
+                            ' ',
+                          ),
                           style: TextStyle(
                             fontSize: screenWidth * 0.032,
                             fontWeight: FontWeight.bold,
@@ -249,7 +256,8 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                           icon: Icons.report_problem_outlined,
                           label: "إبلاغ",
                           color: const Color(0xFFE55757),
-                          onTap: () => _showComplaintSheet(service.id, screenWidth),
+                          onTap: () =>
+                              _showComplaintSheet(service.id, screenWidth),
                           screenWidth: screenWidth,
                         ),
                       const SizedBox(width: 6),
@@ -265,7 +273,11 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                           icon: Icons.star_rounded,
                           label: "تقييم",
                           color: Colors.amber[700]!,
-                          onTap: () => _showRatingSheet(service.id, service.problemType, screenWidth),
+                          onTap: () => _showRatingSheet(
+                            service.id,
+                            service.problemType,
+                            screenWidth,
+                          ),
                           screenWidth: screenWidth,
                         ),
                     ],
@@ -279,7 +291,12 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     );
   }
 
-  Widget _buildStatusBadge(IconData icon, String label, Color color, double screenWidth) {
+  Widget _buildStatusBadge(
+    IconData icon,
+    String label,
+    Color color,
+    double screenWidth,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -370,7 +387,10 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
               const SizedBox(height: 20),
               Text(
                 "تقديم شكوى",
-                style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.w900),
+                style: TextStyle(
+                  fontSize: screenWidth * 0.05,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 15),
               TextField(
@@ -466,21 +486,32 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                 const SizedBox(height: 20),
                 Text(
                   "تقييم الخدمة",
-                  style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.w900),
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.05,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 Text(
                   title.replaceAll('_', ' '),
-                  style: TextStyle(color: Colors.grey[500], fontSize: screenWidth * 0.032),
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: screenWidth * 0.032,
+                  ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     5,
                     (index) => IconButton(
-                      onPressed: () => setModalState(() => tempRating = index + 1.0),
+                      onPressed: () =>
+                          setModalState(() => tempRating = index + 1.0),
                       icon: Icon(
-                        index < tempRating ? Icons.star_rounded : Icons.star_outline_rounded,
-                        color: index < tempRating ? Colors.amber : Colors.grey[300],
+                        index < tempRating
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                        color: index < tempRating
+                            ? Colors.amber
+                            : Colors.grey[300],
                         size: 40,
                       ),
                     ),

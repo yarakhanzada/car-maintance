@@ -53,6 +53,7 @@ dependencies:
   google_maps_flutter: ^2.17.0
   get_storage: ^2.1.1
   flutter_launcher_icons: ^0.14.4
+  url_launcher: ^6.3.2
  
   
 
