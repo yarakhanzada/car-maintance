@@ -1,13 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:http/http.dart' as http;
 import 'package:senior_project/controller/towtrucker%20controller/DriverNavigationController.dart';
-import 'dart:convert';
-
 import 'package:senior_project/model/TowRequestModel.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/api_helper.dart';
+import 'package:senior_project/services/token_service.dart';
 import 'package:senior_project/view/Tow%20Trucker/DriverMapScreen.dart';
 
 class DriverOrdersController extends GetxController {
@@ -78,18 +76,21 @@ class DriverOrdersController extends GetxController {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        final box = GetStorage();
-        box.remove("active_order");
-        box.write("active_order", responseData["data"]);
-        print("Saved Order = ${box.read("active_order")}");
-        Get.find<DriverNavigationController>().activeOrderData.value =
-            responseData["data"];
+        final driverId = await TokenService.getID();
+        if (driverId != null && driverId.isNotEmpty) {
+          await TokenService.saveActiveRequest(
+            jsonEncode(responseData['data']),
+            userId: driverId,
+          );
+        }
+
+        final navRepo = Get.find<DriverNavigationController>();
+        await navRepo.saveActiveOrder(responseData['data']);
         Get.snackbar(
           "نجاح",
           "تم قبول الطلب بنجاح",
           snackPosition: SnackPosition.BOTTOM,
         );
-        final navRepo = Get.find<DriverNavigationController>();
 
         navRepo.changePage(1, orderData: responseData['data']);
         fetchOrders();

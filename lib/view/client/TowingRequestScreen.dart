@@ -24,6 +24,9 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
   @override
   void initState() {
     super.initState();
+    //TokenService.clearActiveRequestForCurrentUser();
+    print("DEBUG: Raw requestData received: ${widget.requestData}");
+
     _checkRequestValidity();
 
     _parseInitialData();
@@ -54,13 +57,16 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
   }
 
   Future<void> _checkRequestValidity() async {
-    final reqData = widget.requestData.containsKey('data')
+    final body = widget.requestData.containsKey('data')
         ? widget.requestData['data']
         : widget.requestData;
 
-    final requestId = reqData['id'];
+    final requestId = body['id'] ?? body['service_request']?['id'];
 
-    if (requestId == null || requestId == 0) {
+    print("DEBUG: Final Request ID found: $requestId");
+
+    if (requestId == null) {
+      print("DEBUG: No ID found, closing screen.");
       await TokenService.clearActiveRequestForCurrentUser();
       if (mounted) {
         Get.back();

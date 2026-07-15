@@ -7,11 +7,13 @@ class TaskDetailsResponse {
 
   factory TaskDetailsResponse.fromJson(Map<String, dynamic> json) {
     return TaskDetailsResponse(
-      status: json['status'] ?? 0,
+      status: json['status'] is int
+          ? json['status']
+          : int.tryParse(json['status'].toString()) ?? 0,
       data: json['data'] != null
           ? MaintenanceTaskDetails.fromJson(json['data'])
           : null,
-      message: json['message'] ?? '',
+      message: json['message']?.toString() ?? '',
     );
   }
 }
@@ -50,15 +52,23 @@ class MaintenanceTaskDetails {
   factory MaintenanceTaskDetails.fromJson(Map<String, dynamic> json) {
     var techniciansList = json['maintenance_technician'] as List?;
     return MaintenanceTaskDetails(
-      id: json['id'],
-      maintenanceRequestId: json['maintenance_request_id'],
-      departmentId: json['department_id'],
-      startDate: json['start_date'],
-      endDate: json['end_date'],
-      status: json['status'] ?? 'pending',
-      priority: json['priority'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      maintenanceRequestId: json['maintenance_request_id'] is int
+          ? json['maintenance_request_id']
+          : int.tryParse(json['maintenance_request_id'].toString()),
+      departmentId: json['department_id'] is int
+          ? json['department_id']
+          : int.tryParse(json['department_id'].toString()),
+      startDate: json['start_date']?.toString(),
+      endDate: json['end_date']?.toString(),
+      status: json['status']?.toString() ?? 'pending',
+      priority: json['priority'] is int
+          ? json['priority']
+          : int.tryParse(json['priority'].toString()),
       estimatedTime: json['estimated_time']?.toString(),
-      notes: json['notes'],
+      notes: json['notes']?.toString(),
       maintenanceRequest: json['maintenance_request'] != null
           ? MaintenanceRequest.fromJson(json['maintenance_request'])
           : null,
@@ -92,12 +102,14 @@ class MaintenanceRequest {
 
   factory MaintenanceRequest.fromJson(Map<String, dynamic> json) {
     return MaintenanceRequest(
-      id: json['id'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       serviceRequest: json['service_request'] != null
           ? ServiceRequest.fromJson(json['service_request'])
           : null,
-      totalEstimatedCost: json['total_estimated_cost'],
-      finalTotalCost: json['final_total_cost'],
+      totalEstimatedCost: json['total_estimated_cost']?.toString(),
+      finalTotalCost: json['final_total_cost']?.toString(),
     );
   }
 }
@@ -119,9 +131,11 @@ class ServiceRequest {
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {
     return ServiceRequest(
-      id: json['id'],
-      problemType: json['problem_type'],
-      status: json['status'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      problemType: json['problem_type']?.toString(),
+      status: json['status']?.toString(),
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       vehicle: json['vehicle'] != null
           ? Vehicle.fromJson(json['vehicle'])
@@ -139,9 +153,11 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
-      name: json['name'] ?? 'Unknown',
-      phone: json['phone'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      name: json['name']?.toString() ?? 'Unknown',
+      phone: json['phone']?.toString(),
     );
   }
 }
@@ -163,11 +179,13 @@ class Vehicle {
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
     return Vehicle(
-      id: json['id'],
-      brand: json['brand'],
-      model: json['model'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      brand: json['brand']?.toString(),
+      model: json['model']?.toString(),
       year: json['year']?.toString(),
-      plateNumber: json['plate_number'],
+      plateNumber: json['plate_number']?.toString(),
     );
   }
 }
@@ -180,7 +198,9 @@ class MaintenanceTechnician {
 
   factory MaintenanceTechnician.fromJson(Map<String, dynamic> json) {
     return MaintenanceTechnician(
-      id: json['id'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       technician: json['technician'] != null
           ? TechnicianDetails.fromJson(json['technician'])
           : null,
@@ -203,8 +223,10 @@ class TechnicianDetails {
 
   factory TechnicianDetails.fromJson(Map<String, dynamic> json) {
     return TechnicianDetails(
-      id: json['id'],
-      availabilityStatus: json['availability_status'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      availabilityStatus: json['availability_status']?.toString(),
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       department: json['department'] != null
           ? Department.fromJson(json['department'])
@@ -220,14 +242,19 @@ class Department {
   Department({required this.id, required this.name});
 
   factory Department.fromJson(Map<String, dynamic> json) {
-    return Department(id: json['id'], name: json['name'] ?? '');
+    return Department(
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      name: json['name']?.toString() ?? '',
+    );
   }
 }
 
 class Inspection {
   final int id;
   final String? notes;
-  final User? user; // المهندس الذي قام بالفحص
+  final User? user;
   final List<Fault> faults;
 
   Inspection({required this.id, this.notes, this.user, required this.faults});
@@ -235,8 +262,10 @@ class Inspection {
   factory Inspection.fromJson(Map<String, dynamic> json) {
     var faultsList = json['faults'] as List?;
     return Inspection(
-      id: json['id'],
-      notes: json['notes'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      notes: json['notes']?.toString(),
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       faults: faultsList != null
           ? faultsList.map((f) => Fault.fromJson(f)).toList()
@@ -266,10 +295,14 @@ class Fault {
     var parts = json['spare_parts'] as List?;
     var services = json['labor_services'] as List?;
     return Fault(
-      id: json['id'],
-      faultName: json['fault_name'] ?? 'Unknown Fault',
-      description: json['description'] ?? '',
-      time: json['time'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      faultName: json['fault_name']?.toString() ?? 'Unknown Fault',
+      description: json['description']?.toString() ?? '',
+      time: json['time'] is int
+          ? json['time']
+          : int.tryParse(json['time'].toString()),
       spareParts: parts != null
           ? parts.map((p) => SparePart.fromJson(p)).toList()
           : [],
@@ -297,10 +330,12 @@ class SparePart {
 
   factory SparePart.fromJson(Map<String, dynamic> json) {
     return SparePart(
-      id: json['id'],
-      name: json['name'] ?? '',
-      price: json['price'],
-      description: json['description'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      name: json['name']?.toString() ?? '',
+      price: json['price']?.toString(),
+      description: json['description']?.toString(),
       pivot: json['pivot'] != null ? PartPivot.fromJson(json['pivot']) : null,
     );
   }
@@ -315,9 +350,11 @@ class PartPivot {
 
   factory PartPivot.fromJson(Map<String, dynamic> json) {
     return PartPivot(
-      quantity: json['quantity'],
-      unitPrice: json['unit_price'],
-      totalPrice: json['total_price'],
+      quantity: json['quantity'] is int
+          ? json['quantity']
+          : int.tryParse(json['quantity'].toString()),
+      unitPrice: json['unit_price']?.toString(),
+      totalPrice: json['total_price']?.toString(),
     );
   }
 }
@@ -332,9 +369,11 @@ class LaborService {
 
   factory LaborService.fromJson(Map<String, dynamic> json) {
     return LaborService(
-      id: json['id'],
-      name: json['name'] ?? '',
-      price: json['price'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      name: json['name']?.toString() ?? '',
+      price: json['price']?.toString(),
       pivot: json['pivot'] != null
           ? ServicePivot.fromJson(json['pivot'])
           : null,
@@ -351,9 +390,11 @@ class ServicePivot {
 
   factory ServicePivot.fromJson(Map<String, dynamic> json) {
     return ServicePivot(
-      quantity: json['quantity'],
-      unitPrice: json['unit_price'],
-      totalPrice: json['total_price'],
+      quantity: json['quantity'] is int
+          ? json['quantity']
+          : int.tryParse(json['quantity'].toString()),
+      unitPrice: json['unit_price']?.toString(),
+      totalPrice: json['total_price']?.toString(),
     );
   }
 }

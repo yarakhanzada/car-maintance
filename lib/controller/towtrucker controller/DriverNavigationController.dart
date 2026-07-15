@@ -1,30 +1,80 @@
+import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import '../../services/token_service.dart';
 
 class DriverNavigationController extends GetxController {
   var selectedIndex = 0.obs;
-  final box = GetStorage();
   var activeOrderData = Rxn<Map<String, dynamic>>();
+
+  String? currentDriverId;
+
   @override
   void onInit() {
     super.onInit();
     selectedIndex.value = 0;
-    //box.erase();
-
-    restoreSavedOrder();
+    _loadCurrentDriverId();
   }
 
-  void restoreSavedOrder() {
-    final saved = box.read("active_order");
-    print("📍 RAW CACHED ORDER = $saved");
+  Future<void> _loadCurrentDriverId() async {
+    currentDriverId = await TokenService.getID();
+    await restoreSavedOrder();
+  }
 
-    if (saved != null) {
-      activeOrderData.value = Map<String, dynamic>.from(saved);
+  Future<void> restoreSavedOrder() async {
+    currentDriverId = await TokenService.getID();
 
-      print("📍 CACHED LOCATION = ${saved['towing_request']?['location']}");
-
-      selectedIndex.value = 1;
+    if (currentDriverId == null || currentDriverId!.isEmpty) {
+      activeOrderData.value = null;
+      selectedIndex.value = 0;
+      return;
     }
+
+    final savedJson = await TokenService.getActiveRequestForUser(
+      currentDriverId,
+    );
+    if (savedJson == null || savedJson.isEmpty) {
+      activeOrderData.value = null;
+      selectedIndex.value = 0;
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(savedJson);
+      if (decoded is Map<String, dynamic>) {
+        activeOrderData.value = decoded;
+        selectedIndex.value = 1;
+      } else if (decoded is Map) {
+        activeOrderData.value = Map<String, dynamic>.from(decoded);
+        selectedIndex.value = 1;
+      } else {
+        activeOrderData.value = null;
+        selectedIndex.value = 0;
+      }
+    } catch (_) {
+      activeOrderData.value = null;
+      selectedIndex.value = 0;
+    }
+  }
+
+  Future<void> saveActiveOrder(Map<String, dynamic> orderData) async {
+    final driverId = currentDriverId ?? await TokenService.getID();
+    if (driverId == null || driverId.isEmpty) return;
+
+    await TokenService.saveActiveRequest(
+      jsonEncode(orderData),
+      userId: driverId,
+    );
+    activeOrderData.value = orderData;
+    selectedIndex.value = 1;
+  }
+
+  Future<void> clearActiveOrder() async {
+    final driverId = currentDriverId ?? await TokenService.getID();
+    if (driverId == null || driverId.isEmpty) return;
+
+    await TokenService.clearActiveRequestForUser(driverId);
+    activeOrderData.value = null;
+    selectedIndex.value = 0;
   }
 
   void changePage(int index, {Map<String, dynamic>? orderData}) {

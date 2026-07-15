@@ -33,7 +33,9 @@ class CompleteMaintenanceController extends GetxController {
         beforeImages,
         afterImages,
       );
-
+      // --- إضافة طباعة لحالة الاستجابة ---
+      print("Response Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print(responseData);

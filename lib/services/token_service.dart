@@ -1,51 +1,56 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenService {
+  static String _activeRequestKey(String userId) => 'active_request_$userId';
+
   static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("token", token);
+    await prefs.setString('token', token);
   }
 
   static Future<String?> getID() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("id");
+    return prefs.getString('id');
   }
 
   static Future<void> saveID(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("id", token);
+    await prefs.setString('id', token);
   }
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("token");
+    return prefs.getString('token');
   }
 
   static Future<void> saveRefreshToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("refresh_token", token);
+    await prefs.setString('refresh_token', token);
   }
 
   static Future<String?> getRefreshToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("refresh_token");
+    return prefs.getString('refresh_token');
   }
 
   static Future<void> saveRole(String role) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("role", role);
+    await prefs.setString('role', role);
   }
 
   static Future<String?> getRole() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("role");
+    return prefs.getString('role');
   }
 
-  static Future<void> saveActiveRequest(String requestData) async {
+  static Future<void> saveActiveRequest(
+    String requestData, {
+    String? userId,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = await getID();
-    if (userId != null) {
-      await prefs.setString("active_request_$userId", requestData);
+    final resolvedUserId = userId ?? await getID();
+    if (resolvedUserId != null && resolvedUserId.isNotEmpty) {
+      await prefs.setString(_activeRequestKey(resolvedUserId), requestData);
     }
   }
 
@@ -58,14 +63,14 @@ class TokenService {
     if (userId == null || userId.isEmpty) return null;
 
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("active_request_$userId");
+    return prefs.getString(_activeRequestKey(userId));
   }
 
   static Future<void> clearActiveRequestForUser(String? userId) async {
     if (userId == null || userId.isEmpty) return;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove("active_request_$userId");
+    await prefs.remove(_activeRequestKey(userId));
   }
 
   static Future<void> clearActiveRequestForCurrentUser() async {
@@ -75,10 +80,10 @@ class TokenService {
 
   static Future<void> clearSessionData() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove("token");
-    await prefs.remove("refresh_token");
-    await prefs.remove("role");
-    await prefs.remove("id");
+    await prefs.remove('token');
+    await prefs.remove('refresh_token');
+    await prefs.remove('role');
+    await prefs.remove('id');
   }
 
   static Future<void> clearToken() async {

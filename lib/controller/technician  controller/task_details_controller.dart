@@ -27,12 +27,17 @@ class TaskDetailsController extends GetxController {
           taskDetails.value = taskResponse.data;
         } else {
           Get.snackbar("تنبيه", taskResponse.message);
+          print("⚠️ [TaskDetailsController]: ${taskResponse.message}");
         }
       } else {
         Get.snackbar("خطأ", "فشل الاتصال بالسيرفر: ${response.statusCode}");
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       Get.snackbar("خطأ في الاتصال", "حدث خطأ غير متوقع: $e");
+      print("🔥 [TaskDetailsController]: حدث خطأ غير متوقع: $e");
+      print(
+        "StackTrace: $stackTrace",
+      ); // هذا سيخبرنا بالضبط أي سطر في الموديل هو المسبب
     } finally {
       isLoadingDetails(false);
     }

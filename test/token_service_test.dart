@@ -31,4 +31,32 @@ void main() {
       contains('"id":10'),
     );
   });
+
+  test('stores active requests separately per user id', () async {
+    await TokenService.saveActiveRequest(
+      jsonEncode({'id': 10, 'driver_id': 'driver-1'}),
+      userId: 'driver-1',
+    );
+    await TokenService.saveActiveRequest(
+      jsonEncode({'id': 20, 'driver_id': 'driver-2'}),
+      userId: 'driver-2',
+    );
+
+    expect(
+      await TokenService.getActiveRequestForUser('driver-1'),
+      contains('"id":10'),
+    );
+    expect(
+      await TokenService.getActiveRequestForUser('driver-2'),
+      contains('"id":20'),
+    );
+
+    await TokenService.clearActiveRequestForUser('driver-1');
+
+    expect(await TokenService.getActiveRequestForUser('driver-1'), isNull);
+    expect(
+      await TokenService.getActiveRequestForUser('driver-2'),
+      contains('"id":20'),
+    );
+  });
 }

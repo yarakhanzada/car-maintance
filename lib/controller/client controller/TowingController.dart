@@ -19,6 +19,10 @@ class TowingController extends GetxController {
 
   final VehicleController _vehicleCtrl = Get.find<VehicleController>();
   List get userVehicles => _vehicleCtrl.vehicleList;
+  void printFullResponse(String text) {
+    final pattern = RegExp('.{1,800}');
+    pattern.allMatches(text).forEach((match) => print(match.group(0)));
+  }
 
   Future<void> sendTowingRequest() async {
     if (selectedVehicleId.value == null) {
@@ -60,7 +64,7 @@ class TowingController extends GetxController {
 
       print("------- TOWING DEBUG START -------");
       print("Status: ${response.statusCode}");
-      print("Body: ${response.body}");
+      printFullResponse(response.body);
       print("------- TOWING DEBUG END ---------");
 
       if (response.statusCode == 200 || response.statusCode == 201) {

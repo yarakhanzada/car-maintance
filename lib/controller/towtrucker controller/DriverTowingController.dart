@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:senior_project/controller/towtrucker%20controller/DriverNavigationController.dart';
@@ -178,15 +177,12 @@ class DriverTowingController extends GetxController {
     });
 
     socket!.on('tracking_ended', (data) async {
-      await completeTowingAPI();
-      GetStorage().remove("active_order");
-
-      final nav = Get.find<DriverNavigationController>();
-
-      nav.activeOrderData.value = null;
-
-      nav.selectedIndex.value = 0;
-      Get.snackbar("نجاح", "تم إنهاء المهمة وإغلاق التتبع");
+      final result = await completeTowingAPI();
+      if (result == null) {
+        final nav = Get.find<DriverNavigationController>();
+        await nav.clearActiveOrder();
+        Get.snackbar("نجاح", "تم إنهاء المهمة وإغلاق التتبع");
+      }
       update();
     });
 
@@ -324,9 +320,13 @@ class DriverTowingController extends GetxController {
         requestData.clear();
         requestData.addAll(body["data"]["towing_request"]["service_request"]);
         requestData["towing_request"] = body["data"]["towing_request"];
-        GetStorage().write("active_order", requestData);
-        Get.find<DriverNavigationController>().activeOrderData.value =
-            requestData;
+        await TokenService.saveActiveRequest(
+          jsonEncode(requestData),
+          userId: driverId,
+        );
+        await Get.find<DriverNavigationController>().saveActiveOrder(
+          requestData,
+        );
         _extractIds();
         update();
         return null; // نجاح
@@ -407,9 +407,13 @@ class DriverTowingController extends GetxController {
         if (nextIndex != -1) {
           currentStatusIndex = nextIndex;
           requestData["status"] = status;
-          GetStorage().write("active_order", requestData);
-          Get.find<DriverNavigationController>().activeOrderData.value =
-              requestData;
+          await TokenService.saveActiveRequest(
+            jsonEncode(requestData),
+            userId: driverId,
+          );
+          await Get.find<DriverNavigationController>().saveActiveOrder(
+            requestData,
+          );
           update();
         }
         return null;
@@ -465,11 +469,9 @@ class DriverTowingController extends GetxController {
       final body = jsonDecode(decodedBody);
 
       if (response.statusCode == 200) {
-        GetStorage().remove("active_order");
-        await TokenService.clearActiveRequestForUser(customerId);
+        await TokenService.clearActiveRequestForUser(driverId);
         final nav = Get.find<DriverNavigationController>();
-        nav.activeOrderData.value = null;
-        nav.selectedIndex.value = 0;
+        await nav.clearActiveOrder();
         return null;
       } else {
         return body['message'] ?? "فشل إنهاء المهمة";

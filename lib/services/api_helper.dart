@@ -108,8 +108,9 @@ class ApiHelper {
     String url,
     Map<String, String> body,
     List<XFile> beforeImages,
-    List<XFile> afterImages,
-  ) async {
+    List<XFile> afterImages, {
+    bool isRetry = false,
+  }) async {
     final headers = await _getHeaders();
     headers.remove("Content-Type");
 
@@ -122,7 +123,6 @@ class ApiHelper {
         await http.MultipartFile.fromPath('before_images[]', file.path),
       );
     }
-
     for (var file in afterImages) {
       request.files.add(
         await http.MultipartFile.fromPath('after_images[]', file.path),
@@ -130,7 +130,34 @@ class ApiHelper {
     }
 
     var streamedResponse = await request.send();
-    return await http.Response.fromStream(streamedResponse);
+    http.Response response = await http.Response.fromStream(streamedResponse);
+
+    // --- منطق تجديد التوكن إذا حدث خطأ 401 ---
+    if (response.statusCode == 401 && !isRetry) {
+      print(" [ApiHelper] Unauthorized - Attempting Refresh...");
+      final authController = Get.isRegistered<AuthController>()
+          ? Get.find<AuthController>()
+          : Get.put(AuthController(), permanent: true);
+
+      bool refreshed = await authController.refreshToken();
+
+      if (refreshed) {
+        print(" [ApiHelper] Refresh Success - Retrying Request...");
+        return await postMaintenanceComplete(
+          url,
+          body,
+          beforeImages,
+          afterImages,
+          isRetry: true,
+        );
+      } else {
+        print(" [ApiHelper] Refresh Failed - Logging out...");
+        await TokenService.clearSessionData();
+        Get.offAllNamed('/ww');
+      }
+    }
+
+    return response;
   }
 
   static Future<http.Response> get(String url) => request(url, method: 'GET');

@@ -237,7 +237,7 @@ class InProgressTaskScreen extends StatelessWidget {
                 size: 30,
               )
             : const Text(
-                "إرسال التقرير النهائي",
+                "إرسال المهمة",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
