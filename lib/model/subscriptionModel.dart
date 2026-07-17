@@ -6,6 +6,7 @@ class SubscriptionModel {
   String? description;
   int? inspectionsCount;
   int? duration;
+  String? imageUrl;
 
   SubscriptionModel({
     this.id,
@@ -15,6 +16,7 @@ class SubscriptionModel {
     this.description,
     this.inspectionsCount,
     this.duration,
+    this.imageUrl,
   });
 
   SubscriptionModel.fromJson(Map<String, dynamic> json) {
@@ -25,5 +27,6 @@ class SubscriptionModel {
     description = json['description'];
     inspectionsCount = json['periodic_inspections_count'];
     duration = json['duration'];
+    imageUrl = json['image_url'];
   }
 }

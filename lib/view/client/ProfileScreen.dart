@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/controller/client controller/SubscriptionController.dart';
 import 'package:senior_project/controller/client controller/profile_controller.dart';
+import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/view/client/SystemSupportScreen.dart';
 import '../../controller/logout_controller.dart';
 import 'EditProfileScreen.dart';
-import 'ServiceHistoryScreen.dart';
 import '../../widgets/logout_widget.dart';
 import 'package:intl/intl.dart';
 
@@ -21,15 +21,6 @@ class ProfileScreen extends StatelessWidget {
     SubscriptionController(),
   );
 
-  List<Color> _getPlanColors(String planName) {
-    String name = planName.toLowerCase();
-    if (name.contains("الفضية")) return [Colors.blueGrey, Colors.grey.shade400];
-    if (name.contains("الذهبية"))
-      return [const Color(0xFFFFD700), const Color(0xFFB8860B)];
-    if (name.contains("البلاتينية"))
-      return [const Color(0xFF232526), Colors.black];
-    return [const Color(0xFFE55757), const Color(0xFFB71C1C)];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,114 +153,129 @@ class ProfileScreen extends StatelessWidget {
       ],
     );
   }
+Widget _buildSubscriptionCard(BuildContext context, double width) {
+  return Obx(() {
+    if (subscriptionController.isLoading.value &&
+        subscriptionController.mySubscriptions.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-  Widget _buildSubscriptionCard(BuildContext context, double width) {
-    return Obx(() {
-      if (subscriptionController.isLoading.value &&
-          subscriptionController.mySubscriptions.isEmpty)
-        return const Center(child: CircularProgressIndicator());
-      if (subscriptionController.mySubscriptions.isEmpty)
-        return _buildEmptySubscription(width);
-      final mySub = subscriptionController.mySubscriptions.first;
-      final planDetails = mySub?['subscription'];
-      if (planDetails == null) return _buildEmptySubscription(width);
-      final String planName = (planDetails['name'] ?? "باقة").toString();
-      final String discount = (planDetails['discount_percentage'] ?? "0")
-          .toString();
-      String rawDate = (mySub['end_date'] ?? "").toString();
-      String formattedDate = "غير محدد";
-      if (rawDate.isNotEmpty) {
-        try {
-          DateTime dateTime = DateTime.parse(rawDate);
-          formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
-        } catch (e) {
-          formattedDate = "تاريخ غير صالح";
-        }
-      }
-      List<Color> cardColors = _getPlanColors(planName);
-      return Container(
-        width: width,
-        height: 150,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(35),
-          gradient: LinearGradient(
-            colors: cardColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    if (subscriptionController.mySubscriptions.isEmpty) {
+      return _buildEmptySubscription(width);
+    }
+
+    final mySub = subscriptionController.mySubscriptions.first;
+    final planDetails = mySub?['subscription'];
+
+    if (planDetails == null) {
+      return _buildEmptySubscription(width);
+    }
+
+    final String planName =
+        (planDetails['name'] ?? "باقة").toString();
+        final imageUrl = (planDetails['image_url'] ?? '').toString();
+
+    String rawDate = (mySub['end_date'] ?? "").toString();
+    String formattedDate = "غير محدد";
+
+    if (rawDate.isNotEmpty) {
+      try {
+        formattedDate = DateFormat(
+          'yyyy-MM-dd',
+        ).format(DateTime.parse(rawDate));
+      } catch (_) {}
+    }
+return Container(
+  width: width,
+  height: 170,
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(28),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.12),
+        blurRadius: 20,
+        offset: const Offset(0, 10),
+      ),
+    ],
+  ),
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(28),
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+       Image.network(
+  "${ApiConfig.base}$imageUrl",
+  fit: BoxFit.cover,
+  loadingBuilder: (context, child, loadingProgress) {
+    if (loadingProgress == null) return child;
+
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  },),
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.35),
+                Colors.transparent,
+                Colors.black.withOpacity(0.25),
+              ],
+            ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: cardColors[0].withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+        ),
+        Positioned(
+  bottom: 29,
+  right: 18,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      Text(
+        planName,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+             overflow: TextOverflow.ellipsis,
+          fontWeight: FontWeight.bold,
+          shadows: [
+            Shadow(
+              blurRadius: 10,
+              color: Colors.black,
             ),
           ],
         ),
-        child: Stack(
-          children: [
-            Positioned(
-              left: 20,
-              bottom: -15,
-              child: Icon(
-                Icons.workspace_premium,
-                size: 110,
-                color: Colors.white.withOpacity(0.1),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(25),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        planName.toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const Icon(
-                        Icons.auto_awesome,
-                        color: Colors.white70,
-                        size: 28,
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
-                    ),
-                    child: Row(
-                      children: [
-                        _buildInfoItem(Icons.percent, "$discount% خصم"),
-                        const VerticalDivider(color: Colors.white24, width: 20),
-                        Expanded(
-                          child: _buildInfoItem(
-                            Icons.calendar_today,
-                            "ينتهي في: $formattedDate",
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
+      ),
+      const SizedBox(height: 4),
+    ],
+  ),
+),
 
+        Positioned(
+          bottom: 14,
+          right: 18,
+          child: Text(
+            "تنتهي في: $formattedDate",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  blurRadius: 8,
+                  color: Colors.black,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+);
+  });
+}
   Widget _buildInfoItem(IconData icon, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -461,7 +467,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildBackgroundGradient() {
     return Positioned(
       top: -50,
-      right: -50, // تم نقلها لليمين
+      right: -50, 
       child: Container(
         width: 280,
         height: 280,

@@ -36,6 +36,8 @@ class SubscriptionController extends GetxController {
         if (jsonData['status'] == 1 || jsonData['status'] == "1") {
           var singleSubscription = jsonData['data'];
           mySubscriptions.assignAll([singleSubscription]);
+          print("STATUS CODE: ${response.statusCode}");
+print("BODY: ${response.body}");
 
           print("Subscription loaded successfully as a list");
         } else {
@@ -77,6 +79,8 @@ class SubscriptionController extends GetxController {
           subscriptions.assignAll(
             list.map((e) => SubscriptionModel.fromJson(e)).toList(),
           );
+          print("STATUS CODE: ${response.statusCode}");
+print("BODY: ${response.body}");
         } else {
           Get.snackbar("Alert", jsonData['message'] ?? "Failed to load data");
         }

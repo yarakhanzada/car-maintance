@@ -255,128 +255,158 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildPremiumPackagesSlider(double width) {
-    return Obx(() {
-      if (subscriptionController.isLoading.value)
-        return const Center(child: CircularProgressIndicator());
-      if (subscriptionController.subscriptions.isEmpty)
-        return const Center(child: Text("لا توجد باقات متاحة"));
-      return CarouselSlider(
-        options: CarouselOptions(
-          height: 220,
-          enlargeCenterPage: true,
-          autoPlay: true,
-          viewportFraction: 0.85,
-        ),
-        items: subscriptionController.subscriptions.map((item) {
-          List<Color> getGradient() {
-            String name = item.name?.toLowerCase() ?? "";
-            if (name.contains("الفضية"))
-              return [Colors.blueGrey, Colors.grey.shade400];
-            if (name.contains("الذهبية"))
-              return [const Color(0xFFFFD700), const Color(0xFFB8860B)];
-            if (name.contains("البلاتينية"))
-              return [const Color(0xFF232526), Colors.black];
-            return [const Color(0xFFE55757), const Color(0xFFB71C1C)];
-          }
+  return Obx(() {
+    if (subscriptionController.isLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-          return GestureDetector(
-            onTap: () => _showCoolSubscriptionSheet(item),
-            child: Container(
-              width: width,
-              margin: const EdgeInsets.symmetric(vertical: 5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                gradient: LinearGradient(
-                  colors: getGradient(),
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+    if (subscriptionController.subscriptions.isEmpty) {
+      return const Center(child: Text("لا توجد باقات متاحة"));
+    }
+
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 220,
+        enlargeCenterPage: true,
+        autoPlay: true,
+        viewportFraction: 0.85,
+      ),
+      items: subscriptionController.subscriptions.map((item) {
+        return GestureDetector(
+          onTap: () => _showCoolSubscriptionSheet(item),
+          child: Container(
+            width: width,
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: getGradient()[0].withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      left: -30,
-                      top: -30,
-                      child: Icon(
-                        Icons.workspace_premium,
-                        size: 160,
-                        color: Colors.white.withOpacity(0.1),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            (item.name ?? "الباقة").toUpperCase(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: Text(
-                              item.description ?? "",
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 13,
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "${item.price} ل.س",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const CircleAvatar(
-                                backgroundColor: Colors.white24,
-                                radius: 18,
-                                child: Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+
+               Image.network(
+  "${ApiConfig.base}${item.imageUrl}",
+  fit: BoxFit.cover,
+  loadingBuilder: (context, child, loadingProgress) {
+    if (loadingProgress == null) return child;
+
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  },),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.85),
+                          Colors.black.withOpacity(0.25),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  Positioned(
+                    left: -25,
+                    top: -25,
+                    child: Icon(
+                      Icons.workspace_premium,
+                      size: 150,
+                      color: Colors.white.withOpacity(0.08),
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        Text(
+                          item.name ?? "الباقة",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Expanded(
+                          child: Text(
+                            item.description ?? "",
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                          children: [
+
+                            Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+
+                              
+
+                                Text(
+                                  "${item.price} ل.س",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.white24,
+                              child: Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          );
-        }).toList(),
-      );
-    });
-  }
-
+          ),
+        );
+      }).toList(),
+    );
+  });
+}
   void _showCoolSubscriptionSheet(SubscriptionModel item) {
     Get.bottomSheet(
       Container(
@@ -620,4 +650,5 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
 }
