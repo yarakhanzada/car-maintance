@@ -18,7 +18,7 @@ class LogoutController extends GetxController {
 
     String? token = await TokenService.getToken();
 
-    //   await TokenService.clearSessionData();
+       await TokenService.clearSessionData();
 
     try {
       if (token != null && token.isNotEmpty) {
@@ -26,14 +26,15 @@ class LogoutController extends GetxController {
       }
     } catch (e) {
       print("Silent logout error: $e");
-    } finally {
-      await TokenService.clearSessionData();
-
-      isLoading.value = false;
-
-      Get.offAll(() => LoginScreen());
-    }
+    } 
+    // finally {
+    //   await TokenService.clearSessionData();
 
     //   isLoading.value = false;
+
+    //   Get.offAll(() => LoginScreen());
+    // }
+
+       isLoading.value = false;
   }
 }

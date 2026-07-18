@@ -104,45 +104,56 @@ class ApiHelper {
     }
   }
 
-  static Future<http.Response> postMaintenanceComplete(
-    String url,
-    Map<String, String> body,
-    List<XFile> beforeImages,
-    List<XFile> afterImages, {
-    bool isRetry = false,
-  }) async {
-    final headers = await _getHeaders();
-    headers.remove("Content-Type");
+ static Future<http.Response> postMaintenanceComplete(
+  String url,
+  Map<String, String> body,
+  List<XFile> beforeImages,
+  List<XFile> afterImages, {
+  bool isRetry = false,
+}) async {
+  final headers = await _getHeaders();
 
-    var request = http.MultipartRequest('POST', Uri.parse(url));
+  try {
+    final request = http.MultipartRequest('POST', Uri.parse(url));
+
     request.headers.addAll(headers);
+    request.headers.remove("Content-Type");
+
     request.fields.addAll(body);
 
-    for (var file in beforeImages) {
+    for (final file in beforeImages) {
       request.files.add(
-        await http.MultipartFile.fromPath('before_images[]', file.path),
-      );
-    }
-    for (var file in afterImages) {
-      request.files.add(
-        await http.MultipartFile.fromPath('after_images[]', file.path),
+        await http.MultipartFile.fromPath(
+          'before_images[]',
+          file.path,
+        ),
       );
     }
 
-    var streamedResponse = await request.send();
-    http.Response response = await http.Response.fromStream(streamedResponse);
+    for (final file in afterImages) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'after_images[]',
+          file.path,
+        ),
+      );
+    }
 
-    // --- منطق تجديد التوكن إذا حدث خطأ 401 ---
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
     if (response.statusCode == 401 && !isRetry) {
-      print(" [ApiHelper] Unauthorized - Attempting Refresh...");
+      print("[ApiHelper] Unauthorized - Attempting Refresh...");
+
       final authController = Get.isRegistered<AuthController>()
           ? Get.find<AuthController>()
           : Get.put(AuthController(), permanent: true);
 
-      bool refreshed = await authController.refreshToken();
+      final refreshed = await authController.refreshToken();
 
       if (refreshed) {
-        print(" [ApiHelper] Refresh Success - Retrying Request...");
+        print("[ApiHelper] Refresh Success - Retrying Request...");
+
         return await postMaintenanceComplete(
           url,
           body,
@@ -151,15 +162,22 @@ class ApiHelper {
           isRetry: true,
         );
       } else {
-        print(" [ApiHelper] Refresh Failed - Logging out...");
+        print("[ApiHelper] Refresh Failed - Logging out...");
+
         await TokenService.clearSessionData();
         Get.offAllNamed('/ww');
       }
     }
 
     return response;
+  } catch (e, stackTrace) {
+    print("========== Multipart Error ==========");
+    print("URL: $url");
+    print("ERROR: $e");
+    print(stackTrace);
+    rethrow;
   }
-
+}
   static Future<http.Response> get(String url) => request(url, method: 'GET');
 
   static Future<http.Response> post(

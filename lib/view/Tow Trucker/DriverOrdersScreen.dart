@@ -345,24 +345,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                 ),
               ],
             ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.notifications_none_rounded,
-                color: Colors.black,
-                size: 24,
-              ),
-            ),
+           
           ],
         ),
       );

@@ -55,6 +55,22 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
               _buildSectionTitle("الجدول الزمني للخدمة", screenWidth),
               _buildTimelineCard(screenWidth),
               const SizedBox(height: 25),
+               _buildSectionTitle("صور قبل الصيانة", screenWidth),
+
+_buildImageSection(
+  "",
+  service.beforeImages,
+),
+
+const SizedBox(height: 20),
+   _buildSectionTitle("صور بعد الصيانة", screenWidth),
+
+_buildImageSection(
+  "",
+  service.afterImages,
+),
+
+const SizedBox(height: 25),
               if (service.isRated || service.isComplained) ...[
                 _buildSectionTitle("الآراء والدعم", screenWidth),
                 _buildFeedbackCard(screenWidth),
@@ -613,4 +629,59 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
 
     return val.toStringAsFixed(2).replaceFirst(RegExp(r'\.00$'), '');
   }
+ Widget _buildImageSection(String title, List<String> images) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 20),
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(24),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        if (images.isEmpty)
+          const Center(child: Text("لا توجد صور"))
+        else
+          SizedBox(
+            height: 50,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: images.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => Dialog(
+                        child: InteractiveViewer(
+                          child: Image.network(images[index]),
+                        ),
+                      ),
+                    );
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.network(
+                      images[index],
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 180,
+                        color: Colors.grey.shade200,
+                        child: const Icon(Icons.broken_image, size: 40),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    ),
+  );
+}
 }

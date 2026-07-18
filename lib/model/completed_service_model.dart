@@ -1,3 +1,5 @@
+import 'package:senior_project/services/api_config.dart';
+
 class CompletedServiceModel {
   final int id;
   final String problemType;
@@ -28,6 +30,8 @@ class CompletedServiceModel {
   final String? receivedAt;
   final String? paidAt;
   final String immediatePremium;
+  final List<String> beforeImages;
+final List<String> afterImages;
 
   CompletedServiceModel({
     required this.id,
@@ -59,6 +63,8 @@ class CompletedServiceModel {
     this.receivedAt,
     this.paidAt,
     required this.immediatePremium,
+    required this.beforeImages,
+required this.afterImages,
   });
 
   factory CompletedServiceModel.fromJson(Map<String, dynamic> json) {
@@ -100,6 +106,13 @@ class CompletedServiceModel {
       receivedAt: json['received_at'],
       paidAt: bill['paid_at'],
       immediatePremium: bill['immediate_premium']?.toString() ?? "0",
+  beforeImages: (json['before_images'] as List? ?? [])
+    .map((e) => "${ApiConfig.base}${e['url']}")
+    .toList(),
+
+  afterImages: (json['after_images'] as List? ?? [])
+    .map((e) => "${ApiConfig.base}${e['url']}")
+    .toList(),
     );
   }
 }

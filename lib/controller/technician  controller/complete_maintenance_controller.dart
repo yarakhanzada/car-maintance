@@ -16,16 +16,16 @@ class CompleteMaintenanceController extends GetxController {
   Future<bool> completeTask({required String taskId}) async {
     String notes = notesController.text.trim();
 
-    if (notes.isEmpty) {
-      Get.snackbar("تنبيه", "الرجاء كتابة ملاحظات الصيانة قبل الإغلاق");
-      return false;
-    }
+    // if (notes.isEmpty) {
+    //   Get.snackbar("تنبيه", "الرجاء كتابة ملاحظات الصيانة قبل الإغلاق");
+    //   return false;
+    // }
 
     try {
       isLoading(true);
       String url =
           "${ApiConfig.baseUrl}/v1/technician/maintenance-tasks/$taskId/complete";
-      Map<String, String> body = {"notes": notes};
+          Map<String, String> body = {"notes": notes};
 
       final response = await ApiHelper.postMaintenanceComplete(
         url,
@@ -36,6 +36,7 @@ class CompleteMaintenanceController extends GetxController {
       // --- إضافة طباعة لحالة الاستجابة ---
       print("Response Status Code: ${response.statusCode}");
       print("Response Body: ${response.body}");
+      
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print(responseData);

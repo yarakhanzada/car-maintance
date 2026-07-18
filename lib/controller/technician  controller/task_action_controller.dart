@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:senior_project/controller/technician%20%20controller/task_details_controller.dart';
 import 'package:senior_project/controller/technician%20%20controller/taskcontroller.dart';
 import 'package:senior_project/view/Technician/TechNavigationController.dart';
 import '../../services/api_config.dart';
@@ -56,6 +57,8 @@ class TaskActionController extends GetxController {
 
         final taskController = Get.find<TaskController>();
         taskController.setTask(taskData);
+        final detailsController = Get.put(TaskDetailsController());
+        await detailsController.fetchTaskDetails(taskId);
 
         final bottomBarController = Get.find<TechNavigationController>();
         bottomBarController.selectedIndex.value = 1;

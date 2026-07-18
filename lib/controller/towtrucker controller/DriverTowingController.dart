@@ -482,6 +482,7 @@ class DriverTowingController extends GetxController {
   }
 
   Future<void> updateDriverLocationAPI() async {
+    
     try {
       final serviceRequestId =
           requestData['id'] ??
@@ -500,13 +501,18 @@ class DriverTowingController extends GetxController {
       );
 
       final decodedBody = utf8.decode(response.bodyBytes);
-
+print("serviceRequestId = $serviceRequestId");
+print("requestData = $requestData");
       print("========== UPDATE DRIVER LOCATION ==========");
       print("URL: ${ApiConfig.baseUrl}/v1/driver/location/update");
       print("Request Body: $body");
       print("Status Code: ${response.statusCode}");
       print("Response Body: $decodedBody");
       print("===========================================");
+if (response.statusCode == 404) {
+  print("Route not found");
+  return;
+}
 
       final jsonData = json.decode(decodedBody);
     } catch (e) {

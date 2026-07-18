@@ -33,6 +33,9 @@ class HistoryTask {
   final MaintenanceRequest? maintenanceRequest;
   final List<MaintenanceTechnicianElement> maintenanceTechnician;
   final Department? department;
+  final String enteredAt;
+final String exitedAt;
+
 
   HistoryTask({
     required this.id,
@@ -47,6 +50,8 @@ class HistoryTask {
     this.maintenanceRequest,
     required this.maintenanceTechnician,
     this.department,
+    required this.enteredAt,
+    required this.exitedAt,
   });
 
   factory HistoryTask.fromJson(Map<String, dynamic> json) {
@@ -69,6 +74,8 @@ class HistoryTask {
       department: json['department'] != null
           ? Department.fromJson(json['department'])
           : null,
+          enteredAt: json['entered_at'] ?? '',
+         exitedAt: json['exited_at'] ?? '',
     );
   }
 }
@@ -76,9 +83,7 @@ class HistoryTask {
 class MaintenanceRequest {
   final int id;
   final int serviceRequestId;
-  final String totalEstimatedCost;
-  final String immediatePremium;
-  final String finalTotalCost;
+  final int estimatedDurationMinutes;
   final String engineerNotes;
   final String startedAt;
   final String completedAt;
@@ -87,9 +92,7 @@ class MaintenanceRequest {
   MaintenanceRequest({
     required this.id,
     required this.serviceRequestId,
-    required this.totalEstimatedCost,
-    required this.immediatePremium,
-    required this.finalTotalCost,
+    required this.estimatedDurationMinutes,
     required this.engineerNotes,
     required this.startedAt,
     required this.completedAt,
@@ -100,9 +103,7 @@ class MaintenanceRequest {
     return MaintenanceRequest(
       id: json['id'] ?? 0,
       serviceRequestId: json['service_request_id'] ?? 0,
-      totalEstimatedCost: json['total_estimated_cost'] ?? '0.00',
-      immediatePremium: json['immediate_premium'] ?? '0.00',
-      finalTotalCost: json['final_total_cost'] ?? '0.00',
+      estimatedDurationMinutes: json['estimated_duration_minutes'] ?? 0,
       engineerNotes: json['engineer_notes'] ?? '',
       startedAt: json['started_at'] ?? '',
       completedAt: json['completed_at'] ?? '',

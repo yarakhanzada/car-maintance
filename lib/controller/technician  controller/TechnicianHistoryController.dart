@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/model/technician%20model/TechnicianHistoryModel.dart';
 import 'dart:convert';
@@ -21,6 +22,16 @@ class TechnicianHistoryController extends GetxController {
           "${ApiConfig.baseUrl}/v1/technician/maintenance-tasks/history";
 
       final response = await ApiHelper.get(url);
+      print("========== RESPONSE ==========");
+print("STATUS CODE: ${response.statusCode}");
+print("BODY:");
+const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+debugPrint(
+  encoder.convert(jsonDecode(response.body)),
+  wrapWidth: 4096,
+);
+
+print("==============================");
 
       if (response != null && response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
@@ -42,4 +53,5 @@ class TechnicianHistoryController extends GetxController {
       isLoading.value = false;
     }
   }
+  
 }
