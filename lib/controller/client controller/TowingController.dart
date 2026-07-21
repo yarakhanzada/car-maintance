@@ -71,7 +71,7 @@ class TowingController extends GetxController {
         resetForm();
         final requestData = data['data'];
         requestData['user_id'] = await TokenService.getID();
-
+        print("Saved Request ID: ${requestData['service_request']['id']}");
         await TokenService.saveActiveRequest(jsonEncode(requestData));
         Get.off(() => RequestTrackingScreen(requestData: data['data']));
       } else {

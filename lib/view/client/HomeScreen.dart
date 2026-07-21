@@ -9,6 +9,7 @@ import 'package:senior_project/controller/client controller/TowingController.dar
 import 'package:senior_project/controller/client controller/VehicleController.dart';
 import 'package:senior_project/controller/client controller/departmentController.dart';
 import 'package:senior_project/controller/client controller/profile_controller.dart';
+import 'package:senior_project/controller/client%20controller/HistoryController.dart';
 import 'package:senior_project/model/subscriptionModel.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/token_service.dart';
@@ -161,15 +162,36 @@ class HomeScreen extends StatelessWidget {
               color: const Color(0xFFE55757),
               onTap: () async {
                 final currentUserId = await TokenService.getID();
+
                 String? requestString =
                     await TokenService.getActiveRequestForUser(currentUserId);
 
-                if (requestString != null) {
-                  Map<String, dynamic> requestData = jsonDecode(requestString);
-                  Get.to(() => RequestTrackingScreen(requestData: requestData));
-                } else {
-                  Get.to(() => const TowingFormScreen());
+                if (requestString == null) {
+                  Get.to(() => TowingFormScreen());
+                  return;
                 }
+
+                final historyController = Get.put(HistoryController());
+
+                await historyController.fetchHistory();
+
+                Map<String, dynamic> requestData = jsonDecode(requestString);
+
+                final requestId = requestData['service_request']['id'];
+                final request = historyController.requestsList.firstWhereOrNull(
+                  (request) => request.id.toString() == requestId.toString(),
+                );
+
+                bool exists = request != null && request.status != "completed";
+
+                if (!exists) {
+                  await TokenService.clearActiveRequestForCurrentUser();
+
+                  Get.to(() => TowingFormScreen());
+                  return;
+                }
+
+                Get.to(() => RequestTrackingScreen(requestData: requestData));
               },
             ),
           ),
@@ -255,158 +277,150 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildPremiumPackagesSlider(double width) {
-  return Obx(() {
-    if (subscriptionController.isLoading.value) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return Obx(() {
+      if (subscriptionController.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-    if (subscriptionController.subscriptions.isEmpty) {
-      return const Center(child: Text("لا توجد باقات متاحة"));
-    }
+      if (subscriptionController.subscriptions.isEmpty) {
+        return const Center(child: Text("لا توجد باقات متاحة"));
+      }
 
-    return CarouselSlider(
-      options: CarouselOptions(
-        height: 220,
-        enlargeCenterPage: true,
-        autoPlay: true,
-        viewportFraction: 0.85,
-      ),
-      items: subscriptionController.subscriptions.map((item) {
-        return GestureDetector(
-          onTap: () => _showCoolSubscriptionSheet(item),
-          child: Container(
-            width: width,
-            margin: const EdgeInsets.symmetric(vertical: 5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 12,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-
-               Image.network(
-  "${ApiConfig.base}${item.imageUrl}",
-  fit: BoxFit.cover,
-  loadingBuilder: (context, child, loadingProgress) {
-    if (loadingProgress == null) return child;
-
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  },),
-
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.85),
-                          Colors.black.withOpacity(0.25),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  Positioned(
-                    left: -25,
-                    top: -25,
-                    child: Icon(
-                      Icons.workspace_premium,
-                      size: 150,
-                      color: Colors.white.withOpacity(0.08),
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-
-                        Text(
-                          item.name ?? "الباقة",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        Expanded(
-                          child: Text(
-                            item.description ?? "",
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 13,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                          children: [
-
-                            Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-
-                              
-
-                                Text(
-                                  "${item.price} ل.س",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.white24,
-                              child: Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+      return CarouselSlider(
+        options: CarouselOptions(
+          height: 220,
+          enlargeCenterPage: true,
+          autoPlay: true,
+          viewportFraction: 0.85,
+        ),
+        items: subscriptionController.subscriptions.map((item) {
+          return GestureDetector(
+            onTap: () => _showCoolSubscriptionSheet(item),
+            child: Container(
+              width: width,
+              margin: const EdgeInsets.symmetric(vertical: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      "${ApiConfig.base}${item.imageUrl}",
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    ),
+
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.85),
+                            Colors.black.withOpacity(0.25),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    Positioned(
+                      left: -25,
+                      top: -25,
+                      child: Icon(
+                        Icons.workspace_premium,
+                        size: 150,
+                        color: Colors.white.withOpacity(0.08),
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name ?? "الباقة",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Expanded(
+                            child: Text(
+                              item.description ?? "",
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${item.price} ل.س",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Colors.white24,
+                                child: Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        );
-      }).toList(),
-    );
-  });
-}
+          );
+        }).toList(),
+      );
+    });
+  }
+
   void _showCoolSubscriptionSheet(SubscriptionModel item) {
     Get.bottomSheet(
       Container(
@@ -650,5 +664,4 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
 }

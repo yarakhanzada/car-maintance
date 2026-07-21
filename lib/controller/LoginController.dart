@@ -40,6 +40,7 @@ class LoginController extends GetxController {
       final jsonData = jsonDecode(response.body);
 
       if (response.statusCode == 200 && jsonData["status"] == 1) {
+        print(response.body);
         return LoginModel.fromJson(jsonData);
       }
 
@@ -71,6 +72,7 @@ class LoginController extends GetxController {
 
     await TokenService.saveRole(role);
     await TokenService.saveID(result.data.user.id.toString());
+    print("SAVED LOGIN ID = ${await TokenService.getID()}");
 
     _navigateByRole(role);
   }

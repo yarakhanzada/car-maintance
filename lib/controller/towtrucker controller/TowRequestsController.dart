@@ -59,7 +59,7 @@ class DriverOrdersController extends GetxController {
       Get.snackbar(
         "خطأ",
         "تعذر تحميل التفاصيل: $e",
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.grey,
         colorText: Colors.white,
       );
     } finally {
@@ -75,6 +75,8 @@ class DriverOrdersController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        print(response.statusCode);
+        print(response.body);
         final Map<String, dynamic> responseData = json.decode(response.body);
         final driverId = await TokenService.getID();
         if (driverId != null && driverId.isNotEmpty) {

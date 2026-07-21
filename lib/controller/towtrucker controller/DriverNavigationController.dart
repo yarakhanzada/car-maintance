@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:senior_project/controller/towtrucker%20controller/checkactiverequest.dart';
 import '../../services/token_service.dart';
 
 class DriverNavigationController extends GetxController {
@@ -41,6 +42,19 @@ class DriverNavigationController extends GetxController {
     try {
       final decoded = jsonDecode(savedJson);
       if (decoded is Map<String, dynamic>) {
+        final serviceRequestId = decoded['id'];
+
+        if (serviceRequestId != null) {
+          final isActive = await checkActiveRequest(
+            int.parse(serviceRequestId.toString()),
+          );
+
+          if (!isActive) {
+            await clearActiveOrder();
+            return;
+          }
+        }
+
         activeOrderData.value = decoded;
         selectedIndex.value = 1;
       } else if (decoded is Map) {

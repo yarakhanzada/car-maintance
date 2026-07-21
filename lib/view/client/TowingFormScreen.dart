@@ -49,15 +49,17 @@ class TowingFormScreen extends StatelessWidget {
                         "وصف المشكلة",
                       ),
                       _buildModernTextField(controller),
-                      const SizedBox(height: 25),
+
+                      const SizedBox(height: 20),
 
                       _buildSectionHeader(
-                        Icons.camera_enhance_rounded,
-                        "الأدلة المرئية (الصور)",
+                        Icons.tips_and_updates_rounded,
+                        "نصائح مهمة",
                       ),
-                      _buildModernImagePicker(controller),
-                      const SizedBox(height: 40),
 
+                      _buildTipsCard(),
+
+                      const SizedBox(height: 40),
                       _buildSubmitButton(controller),
 
                       const SizedBox(height: 50),
@@ -68,6 +70,53 @@ class TowingFormScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: const Color(0xFFE55757)),
+
+          const SizedBox(width: 12),
+
+          Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTipsCard() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+
+        borderRadius: BorderRadius.circular(24),
+      ),
+
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
+        children: [
+          Text("• شغل أضواء التحذير", style: TextStyle(fontSize: 13)),
+
+          SizedBox(height: 8),
+
+          Text("• ابقَ بالقرب من السيارة", style: TextStyle(fontSize: 13)),
+
+          SizedBox(height: 8),
+
+          Text(
+            "• لا تحاول تشغيل السيارة إذا كان العطل خطيراً",
+            style: TextStyle(fontSize: 13),
+          ),
+        ],
       ),
     );
   }
@@ -138,51 +187,127 @@ class TowingFormScreen extends StatelessWidget {
   }
 
   Widget _buildTopStatusCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE55757).withOpacity(0.1)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE55757),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.location_on, color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: 15),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "موقع الـ GPS",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        bool locationEnabled = false;
+
+        Future<void> checkLocation() async {
+          bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+          if (serviceEnabled) {
+            setState(() {
+              locationEnabled = true;
+            });
+          } else {
+            await Geolocator.openLocationSettings();
+          }
+        }
+
+        return StatefulBuilder(
+          builder: (context, update) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFFE55757).withOpacity(0.1),
                 ),
-                Text(
-                  "مطلوب لتحديد مكان وصول خدمة السحب",
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () async => await Geolocator.openLocationSettings(),
-            child: const Text(
-              "تفعيل",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFE55757),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 20,
+                  ),
+                ],
               ),
-            ),
-          ),
-        ],
-      ),
+
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: locationEnabled
+                          ? Colors.green.withOpacity(0.12)
+                          : const Color(0xFFFFEEEE),
+                      shape: BoxShape.circle,
+                    ),
+
+                    child: Icon(
+                      locationEnabled ? Icons.my_location : Icons.location_on,
+                      color: locationEnabled
+                          ? Colors.green
+                          : const Color(0xFFE55757),
+                      size: 22,
+                    ),
+                  ),
+
+                  const SizedBox(width: 15),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                      children: [
+                        Text(
+                          locationEnabled ? "تم تحديد الموقع" : "موقع الـ GPS",
+
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        Text(
+                          locationEnabled
+                              ? "موقعك جاهز لإرسال طلب السحب"
+                              : "فعّل الموقع لتحديد مكان وصول خدمة السحب",
+
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  locationEnabled
+                      ? const Icon(Icons.check_circle, color: Colors.green)
+                      : TextButton(
+                          onPressed: () async {
+                            bool enabled =
+                                await Geolocator.isLocationServiceEnabled();
+
+                            if (!enabled) {
+                              await Geolocator.openLocationSettings();
+                            }
+
+                            bool after =
+                                await Geolocator.isLocationServiceEnabled();
+
+                            if (after) {
+                              update(() {
+                                locationEnabled = true;
+                              });
+                            }
+                          },
+
+                          child: const Text(
+                            "تفعيل",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFE55757),
+                            ),
+                          ),
+                        ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -261,87 +386,6 @@ class TowingFormScreen extends StatelessWidget {
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           contentPadding: const EdgeInsets.all(20),
           border: InputBorder.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModernImagePicker(TowingController controller) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () async {
-            final picker = ImagePicker();
-            final List<XFile> picked = await picker.pickMultiImage();
-            if (picked.isNotEmpty) controller.images.addAll(picked);
-          },
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey[200]!),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.add_a_photo_rounded,
-                  color: Colors.grey[400],
-                  size: 28,
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  "ارفع لقطات الشاشة أو الصور",
-                  style: TextStyle(color: Colors.grey[500], fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Obx(
-          () => controller.images.isNotEmpty
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: SizedBox(
-                    height: 80,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: controller.images.length,
-                      itemBuilder: (context, index) =>
-                          _buildImageThumb(controller, index),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildImageThumb(TowingController controller, int index) {
-    return Container(
-      margin: const EdgeInsets.only(left: 12),
-      width: 80,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        image: DecorationImage(
-          image: FileImage(File(controller.images[index].path)),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Align(
-        alignment: Alignment.topLeft,
-        child: GestureDetector(
-          onTap: () => controller.images.removeAt(index),
-          child: Container(
-            margin: const EdgeInsets.all(4),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.close, size: 14, color: Colors.red),
-          ),
         ),
       ),
     );

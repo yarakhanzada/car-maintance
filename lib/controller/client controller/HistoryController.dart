@@ -20,8 +20,17 @@ class HistoryController extends GetxController {
       final response = await ApiHelper.get(
         "${ApiConfig.baseUrl}/customer/requests/history",
       );
-
+      print(response.statusCode);
+      print(
+        response.body.toString().substring(
+          0,
+          response.body.toString().length > 800
+              ? 800
+              : response.body.toString().length,
+        ),
+      );
       var jsonData = jsonDecode(response.body);
+
       ServiceHistoryModel model = ServiceHistoryModel.fromJson(jsonData);
 
       if (response.statusCode == 200) {
@@ -36,5 +45,30 @@ class HistoryController extends GetxController {
     } finally {
       isLoading(false);
     }
+  }
+
+  Future<bool> isRequestActive(int requestId) async {
+    await fetchHistory();
+
+    final request = requestsList.firstWhereOrNull((e) => e.id == requestId);
+
+    if (request == null) {
+      return false;
+    }
+
+    const finishedStatuses = [
+      "tow_completed",
+      "completed",
+      "cancelled",
+      "rejected",
+    ];
+
+    return !finishedStatuses.contains(request.status);
+  }
+
+  Future<bool> requestExists(int requestId) async {
+    await fetchHistory();
+
+    return requestsList.any((request) => request.id == requestId);
   }
 }
