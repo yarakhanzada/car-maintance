@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/controller/logout_controller.dart';
+import 'package:senior_project/services/location_service.dart';
 import 'package:senior_project/services/notification_service.dart';
 import 'package:senior_project/firebase_options.dart';
 import 'package:senior_project/services/token_service.dart';
@@ -19,6 +21,16 @@ Future<void> _backgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final Position? position = await LocationService.getCurrentLocation();
+
+  if (position != null) {
+    print("========== APP START LOCATION ==========");
+    print("LAT = ${position.latitude}");
+    print("LON = ${position.longitude}");
+    print("========================================");
+  } else {
+    print("Could not get current location.");
+  }
   await GetStorage.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService.init();

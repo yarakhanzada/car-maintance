@@ -486,6 +486,112 @@ class HomeScreen extends StatelessWidget {
                     height: 1.5,
                   ),
                 ),
+                const SizedBox(height: 25),
+
+                const Text(
+                  "مميزات الباقة",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+
+                const SizedBox(height: 10),
+
+                ...item.directBenefits.map(
+                  (benefit) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(benefit)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                const Text(
+                  "الخصومات",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+
+                const SizedBox(height: 10),
+
+                ...item.permanentDiscounts.map(
+                  (discount) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.percent,
+                          color: const Color(0xFFE55757),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(discount)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 25),
+
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Column(
+                    children: [
+                      _infoRow(
+                        Icons.calendar_today,
+                        "مدة الاشتراك",
+                        "${item.duration} يوم",
+                      ),
+
+                      _infoRow(
+                        Icons.local_gas_station,
+                        "تغيير الزيت",
+                        "${item.freeOilChanges} مرات",
+                      ),
+
+                      _infoRow(
+                        Icons.discount,
+                        "خصم أجور اليد",
+                        "${item.laborDiscountPercentage}%",
+                      ),
+
+                      _infoRow(
+                        Icons.build,
+                        "خصم قطع الغيار",
+                        "${item.partsDiscountPercentage}%",
+                      ),
+
+                      _infoRow(
+                        Icons.notifications,
+                        "تنبيهات العروض",
+                        item.includesOfferNotifications == true
+                            ? "متوفر"
+                            : "غير متوفر",
+                      ),
+
+                      _infoRow(
+                        Icons.access_time,
+                        "تذكير الصيانة",
+                        "${item.maintenanceReminderHours} ساعة",
+                      ),
+
+                      _infoRow(
+                        Icons.verified,
+                        "الحالة",
+                        item.statusLabel ?? "",
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 30),
                 Container(
                   padding: const EdgeInsets.all(20),
@@ -551,6 +657,25 @@ class HomeScreen extends StatelessWidget {
       ),
       isScrollControlled: true,
       barrierColor: Colors.black54,
+    );
+  }
+
+  Widget _infoRow(IconData icon, String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFFE55757), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 
