@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class ServiceHistoryModel {
   int? status;
@@ -92,8 +91,9 @@ class ServiceData {
     data['updated_at'] = updatedAt;
     if (vehicle != null) data['vehicle'] = vehicle!.toJson();
     if (towingRequest != null) data['towing_request'] = towingRequest!.toJson();
-    if (maintenanceRequest != null)
+    if (maintenanceRequest != null) {
       data['maintenance_request'] = maintenanceRequest!.toJson();
+    }
     if (requestStatusHistory != null) {
       data['request_status_history'] = requestStatusHistory!
           .map((v) => v.toJson())

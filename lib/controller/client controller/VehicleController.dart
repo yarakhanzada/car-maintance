@@ -142,10 +142,11 @@ class VehicleController extends GetxController {
       Map<String, dynamic> errors = jsonData['data'];
       List<String> details = [];
       errors.forEach((k, v) {
-        if (v is List)
+        if (v is List) {
           details.addAll(v.map((e) => e.toString()));
-        else
+        } else {
           details.add(v.toString());
+        }
       });
       if (details.isNotEmpty) errorMsg = details.join("\n");
     }

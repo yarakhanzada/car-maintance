@@ -21,6 +21,8 @@ class TechnicianBottombar extends StatelessWidget {
     TechnicianProfileScreen(),
   ];
 
+   TechnicianBottombar({super.key});
+
   @override
   Widget build(BuildContext context) {
     Get.put(TaskController(), permanent: true);

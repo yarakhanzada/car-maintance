@@ -33,11 +33,13 @@ class ProfileScreen extends StatelessWidget {
           children: [
             _buildBackgroundGradient(),
             Obx(() {
-              if (controller.isLoading.value)
+              if (controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
+              }
               final user = controller.profile.value;
-              if (user == null)
+              if (user == null) {
                 return const Center(child: Text("لا توجد بيانات"));
+              }
               return CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [

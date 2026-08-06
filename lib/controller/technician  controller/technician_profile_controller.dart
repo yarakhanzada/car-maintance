@@ -22,7 +22,7 @@ class TechnicianProfileController extends GetxController {
         "${ApiConfig.baseUrl}/v1/technician/profile",
       );
 
-      if (response != null && response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
 
         if (responseData['status'] == 1) {
@@ -38,7 +38,7 @@ class TechnicianProfileController extends GetxController {
       } else {
         Get.snackbar(
           "خطأ",
-          "فشل الاتصال بالسيرفر. رمز الحالة: ${response?.statusCode ?? 'غير معروف'}",
+          "فشل الاتصال بالسيرفر. رمز الحالة: ${response.statusCode ?? 'غير معروف'}",
           snackPosition: SnackPosition.BOTTOM,
         );
       }

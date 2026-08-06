@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:senior_project/model/completed_service_model.dart';
 
@@ -80,7 +79,7 @@ const SizedBox(height: 25),
 
   ...service.billItems
       .map((item) => _buildMaintenanceTaskCard(item, screenWidth))
-      .toList(),
+      ,
 
   const SizedBox(height: 25),
 ],
@@ -480,7 +479,7 @@ const SizedBox(height: 25),
                     part['quantity'],
                   ),
                 )
-                .toList(),
+                ,
             const SizedBox(height: 15),
           ],
           if (laborServices.isNotEmpty) ...[
@@ -502,7 +501,7 @@ const SizedBox(height: 25),
                     null,
                   ),
                 )
-                .toList(),
+                ,
           ],
         ],
       ),
@@ -649,7 +648,7 @@ const SizedBox(height: 25),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: images.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
@@ -669,7 +668,7 @@ const SizedBox(height: 25),
                       width: 50,
                       height: 50,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         width: 180,
                         color: Colors.grey.shade200,
                         child: const Icon(Icons.broken_image, size: 40),

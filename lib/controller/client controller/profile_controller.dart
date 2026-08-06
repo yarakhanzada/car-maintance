@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:senior_project/controller/auth_controller.dart';
 import 'package:senior_project/model/profile_model.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/token_service.dart';

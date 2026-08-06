@@ -48,56 +48,84 @@ class MaintenanceRequestScreen extends StatelessWidget {
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildGlassToggle(),
-                            const SizedBox(height: 30),
-                            _buildSectionHeader(
-                              "اختر مركبتك",
-                              Icons.directions_car_filled_rounded,
-                            ),
-                            _buildVehicleDropdown(),
-                            const SizedBox(height: 30),
+                  children: [
+  _buildGlassToggle(),
+  const SizedBox(height: 30),
 
-                            _buildSectionHeader(
-                              "تفاصيل الخدمة",
-                              Icons.calendar_today_rounded,
-                            ),
-                            const SizedBox(height: 15),
-                            _buildDateTimeSelectors(context),
-                            const SizedBox(height: 30),
-                            _buildSectionHeader(
-                              "المشكلة",
-                              Icons.report_problem_rounded,
-                            ),
-                            _buildModernInput(
-                              "صف المشكلة التي تواجهها...",
-                              Icons.notes_rounded,
-                              controller.problemController,
-                              maxLines: 3,
-                            ),
-                            const SizedBox(height: 30),
-                            _buildSectionHeader(
-                              "الصور",
-                              Icons.camera_enhance_rounded,
-                            ),
-                            const SizedBox(height: 15),
-                            _buildImageUploader(),
-                            // ... بعد قسم الصور
-                            const SizedBox(height: 30),
+  _buildSectionHeader(
+    "اختر مركبتك",
+    Icons.directions_car_filled_rounded,
+  ),
+  _buildVehicleDropdown(),
 
-                            // شرط: يظهر فقط إذا كان هناك categoryId (أي صيانة غير عامة)
-                            if (categoryId != null && categoryId != 0) ...[
-                              _buildSectionHeader(
-                                "هل ترغب بإضافة أقسام أخرى؟",
-                                Icons.category_rounded,
-                              ),
-                              const SizedBox(height: 15),
-                              _buildDepartmentSelector(),
-                              const SizedBox(height: 30),
-                            ],
-                            _buildSubmitButton(),
-                            const SizedBox(height: 40),
-                          ],
+  const SizedBox(height: 30),
+
+  _buildSectionHeader(
+    "تفاصيل الخدمة",
+    Icons.calendar_today_rounded,
+  ),
+
+  const SizedBox(height: 15),
+
+  _buildDateTimeSelectors(context),
+
+  const SizedBox(height: 30),
+
+  /// إذا كانت صيانة عامة
+  if (categoryId == null || categoryId == 0) ...[
+    _buildSectionHeader(
+      "المشكلة",
+      Icons.report_problem_rounded,
+    ),
+
+    const SizedBox(height: 15),
+
+    _buildModernInput(
+      "صف المشكلة",
+      Icons.notes_rounded,
+      controller.problemControllers.putIfAbsent(
+        0,
+        () => TextEditingController(),
+      ),
+      minLines: 3,
+  maxLines: 5,
+    ),
+
+    const SizedBox(height: 30),
+  ],
+
+  _buildSectionHeader(
+    "الصور",
+    Icons.camera_enhance_rounded,
+  ),
+
+  const SizedBox(height: 15),
+
+  _buildImageUploader(),
+
+  const SizedBox(height: 30),
+
+  if (categoryId != null && categoryId != 0) ...[
+    _buildSectionHeader(
+      "هل ترغب بإضافة أقسام أخرى؟",
+      Icons.category_rounded,
+    ),
+
+    const SizedBox(height: 15),
+
+    _buildDepartmentSelector(),
+
+    const SizedBox(height: 25),
+
+    _buildDepartmentProblems(),
+
+    const SizedBox(height: 30),
+  ],
+
+  _buildSubmitButton(),
+
+  const SizedBox(height: 40),
+],
                         ),
                       ),
                     ),
@@ -288,32 +316,58 @@ class MaintenanceRequestScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModernInput(
-    String hint,
-    IconData icon,
-    TextEditingController textController, {
-    int maxLines = 1,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(top: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: TextField(
-        controller: textController,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.grey[400], size: 20),
-          hintText: hint,
-          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(20),
+Widget _buildModernInput(
+  String hint,
+  IconData icon,
+  TextEditingController textController, {
+  int minLines = 1,
+  int maxLines = 5,
+}) {
+  return Container(
+    margin: const EdgeInsets.only(top: 10),
+    padding: const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 12,
+    ),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(
+            icon,
+            size: 20,
+            color: Colors.grey[400],
+          ),
         ),
-      ),
-    );
-  }
 
+        const SizedBox(width: 12),
+
+        Expanded(
+          child: TextField(
+            controller: textController,
+            minLines: minLines,
+            maxLines: maxLines,
+            textInputAction: TextInputAction.newline,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+              border: InputBorder.none,
+              isCollapsed: true,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
   Widget _buildImageUploader() {
     return SizedBox(
       height: 90,
@@ -552,4 +606,50 @@ class MaintenanceRequestScreen extends StatelessWidget {
       ),
     );
   }
+  Widget _buildDepartmentProblems() {
+  return Obx(() {
+    return Column(
+      children: controller.selectedDepartmentIds.map((departmentId) {
+        final dept = deptController.departments.firstWhere(
+          (e) => e.id == departmentId,
+        );
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              Text(
+                dept.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+             _buildModernInput(
+  "صف المشكلة الخاصة بقسم ${dept.name}",
+  Icons.notes_rounded,
+  controller.problemControllers.putIfAbsent(
+    departmentId,
+    () => TextEditingController(),
+  ),
+  minLines: 1,
+  maxLines: 5,
+),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  });
+}
 }

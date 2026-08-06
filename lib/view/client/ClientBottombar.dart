@@ -24,6 +24,8 @@ class ClientBottombar extends StatelessWidget {
     ProfileScreen(),
   ];
 
+ ClientBottombar({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Directionality(

@@ -127,8 +127,9 @@ class SignUpScreen extends StatelessWidget {
 
                   /// PASSWORD ERRORS
                   Obx(() {
-                    if (controller.passwordErrors.isEmpty)
+                    if (controller.passwordErrors.isEmpty) {
                       return const SizedBox();
+                    }
 
                     return Padding(
                       padding: const EdgeInsets.only(top: 8, right: 5),

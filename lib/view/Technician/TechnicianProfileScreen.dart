@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -92,7 +91,7 @@ class TechnicianProfileScreen extends StatelessWidget {
           children: [
             _buildBentoBox("قيد التنفيذ", "${data.tasksSummary?.active ?? 0}", Icons.bolt_rounded, Colors.blueAccent),
             const SizedBox(width: 15),
-            _buildBentoBox("الحالة", "${data.availabilityStatus == 'busy' ? 'مشغول' : 'متاح'}".toUpperCase(), Icons.hourglass_empty_rounded, statusColor),
+            _buildBentoBox("الحالة", (data.availabilityStatus == 'busy' ? 'مشغول' : 'متاح').toUpperCase(), Icons.hourglass_empty_rounded, statusColor),
           ],
         ),
         const SizedBox(height: 12),

@@ -6,7 +6,6 @@ import 'package:senior_project/model/TowRequestModel.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/api_helper.dart';
 import 'package:senior_project/services/token_service.dart';
-import 'package:senior_project/view/Tow%20Trucker/DriverMapScreen.dart';
 
 class DriverOrdersController extends GetxController {
   var isLoading = true.obs;

@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:senior_project/controller/client controller/SubscriptionController.dart';
 import 'package:senior_project/controller/client controller/TowingController.dart';
 import 'package:senior_project/controller/client controller/VehicleController.dart';
@@ -528,7 +526,7 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         const Icon(
                           Icons.percent,
-                          color: const Color(0xFFE55757),
+                          color: Color(0xFFE55757),
                         ),
                         const SizedBox(width: 8),
                         Expanded(child: Text(discount)),
@@ -680,8 +678,9 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildFullImageDepartmentsGrid() {
-    if (deptController.isLoading.value)
+    if (deptController.isLoading.value) {
       return const Center(child: CircularProgressIndicator());
+    }
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -715,7 +714,7 @@ class HomeScreen extends StatelessWidget {
                   child: Image.network(
                     imageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       color: Colors.grey[200],
                       child: const Icon(Icons.car_repair),
                     ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'dart:math' as math;
 
 import 'package:senior_project/controller/client%20controller/TowingTrackingController.dart';
 import 'package:senior_project/services/token_service.dart';

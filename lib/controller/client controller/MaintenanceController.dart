@@ -218,7 +218,7 @@ class MaintenanceController extends GetxController {
   var selectedDate = DateTime.now().obs;
   var selectedTime = TimeOfDay.now().obs;
   var selectedVehicleId = RxnInt();
-  final problemController = TextEditingController();
+  final Map<int, TextEditingController> problemControllers = {};
   final RxList<XFile> images = <XFile>[].obs;
   RxBool isPickingImage = false.obs;
   final VehicleController _vehicleCtrl = Get.find<VehicleController>();
@@ -237,6 +237,10 @@ class MaintenanceController extends GetxController {
     if (initialDepartmentId != null &&
         !selectedDepartmentIds.contains(initialDepartmentId)) {
       selectedDepartmentIds.add(initialDepartmentId!);
+      problemControllers.putIfAbsent(
+  initialDepartmentId!,
+  () => TextEditingController(),
+);
     }
   }
 
@@ -244,9 +248,17 @@ class MaintenanceController extends GetxController {
     if (initialDepartmentId != null && id == initialDepartmentId) return;
 
     if (selectedDepartmentIds.contains(id)) {
-      selectedDepartmentIds.remove(id);
+   selectedDepartmentIds.remove(id);
+
+problemControllers[id]?.dispose();
+problemControllers.remove(id);
     } else {
-      selectedDepartmentIds.add(id);
+     selectedDepartmentIds.add(id);
+
+problemControllers.putIfAbsent(
+  id,
+  () => TextEditingController(),
+);
     }
     selectedDepartmentIds.refresh();
   }
@@ -260,7 +272,9 @@ class MaintenanceController extends GetxController {
   void updateMaintenanceType(bool immediate) {
     if (isimmediate.value == immediate) return;
     isimmediate.value = immediate;
-    problemController.clear();
+for (final controller in problemControllers.values) {
+  controller.clear();
+}
     images.clear();
     _setImmediateDefaults();
   }
@@ -311,17 +325,19 @@ class MaintenanceController extends GetxController {
         'scheduled_time': formattedTime,
       };
 
-      if (initialDepartmentId != null) {
-        if (selectedDepartmentIds.isEmpty) {
-          selectedDepartmentIds.add(initialDepartmentId!);
-        }
+     if (initialDepartmentId != null) {
+  if (selectedDepartmentIds.isEmpty) {
+    selectedDepartmentIds.add(initialDepartmentId!);
+  }
 
-        fields['department_id'] = jsonEncode(selectedDepartmentIds.toList());
-      }
+  for (int i = 0; i < selectedDepartmentIds.length; i++) {
+    final id = selectedDepartmentIds[i];
 
-      if (problemController.text.isNotEmpty) {
-        fields['problem_type'] = problemController.text;
-      }
+    fields['departments[$i][id]'] = id.toString();
+    fields['departments[$i][description]'] =
+        problemControllers[id]?.text ?? "";
+  }
+}
 
       final url = "${ApiConfig.baseUrl}/requests/maintenance";
 
@@ -336,13 +352,22 @@ class MaintenanceController extends GetxController {
       final jsonData = jsonDecode(response.body);
       print("Parsed Keys: ${jsonData.keys.toList()}");
 
-      if (response.statusCode == 200 && jsonData['status'] == 1) {
-        selectedDepartmentIds.clear();
-        isInitialized = false;
-        Get.back();
+   if (response.statusCode == 200 && jsonData['status'] == 1) {
 
-        _showServerSnackBar("Success", jsonData['message']);
-      } else {
+  for (final c in problemControllers.values) {
+    c.dispose();
+  }
+
+  problemControllers.clear();
+  selectedDepartmentIds.clear();
+  images.clear();
+
+  isInitialized = false;
+
+  Get.back();
+
+  _showServerSnackBar("Success", jsonData['message']);
+} else {
         String errorMsg = jsonData['message'] ?? "Request failed";
 
         if (jsonData['data'] != null && jsonData['data'] is Map) {

@@ -427,11 +427,11 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                     if (mounted) {
                       Navigator.pop(context);
                       _showSnackBar(
-                        result?['message'] ?? "خطأ في إرسال الشكوى",
-                        result?['success'] ?? false,
+                        result['message'] ?? "خطأ في إرسال الشكوى",
+                        result['success'] ?? false,
                         screenWidth,
                       );
-                      if (result?['success'] == true) _refreshData();
+                      if (result['success'] == true) _refreshData();
                     }
                   },
                   child: Text(
@@ -551,8 +551,8 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
 
                       if (mounted) {
                         Navigator.pop(context);
-                        String message = result?['message'] ?? "حدث خطأ ما";
-                        bool isSuccess = result?['success'] ?? false;
+                        String message = result['message'] ?? "حدث خطأ ما";
+                        bool isSuccess = result['success'] ?? false;
 
                         _showSnackBar(message, isSuccess, screenWidth);
 

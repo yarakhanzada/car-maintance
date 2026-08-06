@@ -6,6 +6,8 @@ import 'package:senior_project/controller/midleController.dart';
 class SplashScreen extends StatelessWidget {
   final controller = Get.put(Midlecontroller());
 
+ SplashScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     Future.microtask(() {

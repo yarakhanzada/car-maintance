@@ -26,9 +26,7 @@ class NotificationController extends GetxController {
         "${ApiConfig.baseUrl}/customer/notifications",
       );
 
-      var jsonData = response.body is String
-          ? json.decode(response.body)
-          : response.body;
+      var jsonData = json.decode(response.body);
       print("Debug JSON: $jsonData");
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         var list = jsonData['data'] as List;
@@ -56,9 +54,7 @@ class NotificationController extends GetxController {
         "${ApiConfig.baseUrl}/customer/notifications/unread-count",
       );
 
-      var jsonData = response.body is String
-          ? json.decode(response.body)
-          : response.body;
+      var jsonData = json.decode(response.body);
 
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         unreadCount.value = jsonData['data']['unread_count'];
@@ -83,9 +79,7 @@ class NotificationController extends GetxController {
         {},
       );
 
-      var jsonData = response.body is String
-          ? json.decode(response.body)
-          : response.body;
+      var jsonData = json.decode(response.body);
 
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         int index = notifications.indexWhere((n) => n['id'] == id);
@@ -123,9 +117,7 @@ class NotificationController extends GetxController {
         {},
       );
 
-      var jsonData = response.body is String
-          ? json.decode(response.body)
-          : response.body;
+      var jsonData = json.decode(response.body);
 
       if (response.statusCode == 200 && jsonData['status'] == 1) {
         for (var n in notifications) {

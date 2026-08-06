@@ -128,7 +128,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                               Container(
                                                 padding: EdgeInsets.all(width * 0.025),
                                                 decoration: BoxDecoration(
-                                                  color: const Color(0xFFFFEEDEA),
+                                                  color: const Color(0xffffeedea),
                                                   borderRadius:
                                                       BorderRadius.circular(12),
                                                 ),
@@ -187,7 +187,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                                               ),
                                               const SizedBox(width: 4),
                                               Text(
-                                                "يبعد عنك ${order.distanceKm?.toStringAsFixed(1) ?? '0'} كم",
+                                                "يبعد عنك ${order.distanceKm.toStringAsFixed(1) ?? '0'} كم",
                                                 style: const TextStyle(
                                                   color: Color(0xFF90A4AE),
                                                   fontSize: 12,

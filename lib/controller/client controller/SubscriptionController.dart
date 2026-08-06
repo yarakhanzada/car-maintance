@@ -34,9 +34,7 @@ class SubscriptionController extends GetxController {
       print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
       print(data);
       if (response.statusCode == 200) {
-        var jsonData = response.body is String
-            ? json.decode(response.body)
-            : response.body;
+        var jsonData = json.decode(response.body);
 
         if (jsonData['status'] == 1 || jsonData['status'] == "1") {
           final data = jsonData['data'];
@@ -60,9 +58,7 @@ class SubscriptionController extends GetxController {
           );
         }
       } else {
-        var errorData = response.body is String
-            ? json.decode(response.body)
-            : response.body;
+        var errorData = json.decode(response.body);
         String errorMsg =
             errorData?['message'] ?? "Server Error: ${response.statusCode}";
         Get.snackbar("Error", errorMsg);
@@ -82,9 +78,7 @@ class SubscriptionController extends GetxController {
       var response = await ApiHelper.get("${ApiConfig.baseUrl}/subscriptions");
 
       if (response.statusCode == 200) {
-        var jsonData = response.body is String
-            ? json.decode(response.body)
-            : response.body;
+        var jsonData = json.decode(response.body);
 
         if (jsonData['status'] == 1 || jsonData['status'] == "1") {
           var list = jsonData['data'] as List;
@@ -98,9 +92,7 @@ class SubscriptionController extends GetxController {
           Get.snackbar("Alert", jsonData['message'] ?? "Failed to load data");
         }
       } else {
-        var errorData = response.body is String
-            ? json.decode(response.body)
-            : response.body;
+        var errorData = json.decode(response.body);
         String errorMsg =
             errorData?['message'] ?? "Server Error: ${response.statusCode}";
         Get.snackbar("Error", errorMsg);
@@ -122,9 +114,7 @@ class SubscriptionController extends GetxController {
         {},
       );
 
-      var jsonData = response.body is String
-          ? json.decode(response.body)
-          : response.body;
+      var jsonData = json.decode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (jsonData['status'] == 1) {
@@ -179,9 +169,7 @@ class SubscriptionController extends GetxController {
         "${ApiConfig.baseUrl}/subscriptions/requests/$requestId/cancel",
       );
 
-      var jsonData = response.body is String
-          ? json.decode(response.body)
-          : response.body;
+      var jsonData = json.decode(response.body);
 
       print("CANCEL STATUS CODE: ${response.statusCode}");
       print("CANCEL BODY: ${response.body}");
@@ -216,9 +204,7 @@ class SubscriptionController extends GetxController {
         "${ApiConfig.baseUrl}/customer/subscriptions/benefits",
       );
 
-      var jsonData = response.body is String
-          ? json.decode(response.body)
-          : response.body;
+      var jsonData = json.decode(response.body);
 
       print("BENEFITS RESPONSE");
       print(response.body);

@@ -6,6 +6,8 @@ import 'package:senior_project/controller/towtrucker%20controller/DriverNavigati
 import 'package:senior_project/widgets/CustomGoogleMapWidget.dart';
 
 class DriverMapScreen extends StatefulWidget {
+  const DriverMapScreen({super.key});
+
   @override
   State<DriverMapScreen> createState() => _DriverMapScreenState();
 }

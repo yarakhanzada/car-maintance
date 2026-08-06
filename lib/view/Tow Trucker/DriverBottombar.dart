@@ -20,6 +20,8 @@ class DriverBottombar extends StatelessWidget {
     DriverProfileScreen(),
   ];
 
+   DriverBottombar({super.key});
+
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;

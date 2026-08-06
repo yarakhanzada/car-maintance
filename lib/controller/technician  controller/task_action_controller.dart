@@ -26,28 +26,23 @@ class TaskActionController extends GetxController {
       );
 
       print("============== START TASK RESPONSE ==============");
-      print("Status Code: ${response?.statusCode}");
+      print("Status Code: ${response.statusCode}");
 
-      if (response?.body != null) {
-        try {
-          var jsonResponse = jsonDecode(response!.body);
-          var prettyJson = const JsonEncoder.withIndent(
-            '  ',
-          ).convert(jsonResponse);
-          print("Response Body:\n$prettyJson");
-        } catch (e) {
-          print("Response Body (Raw): ${response?.body}");
-        }
-      } else {
-        print("Response Body: [Empty]");
+      try {
+        var jsonResponse = jsonDecode(response.body);
+        var prettyJson = const JsonEncoder.withIndent(
+          '  ',
+        ).convert(jsonResponse);
+        print("Response Body:\n$prettyJson");
+      } catch (e) {
+        print("Response Body (Raw): ${response.body}");
       }
-      print("=================================================");
+          print("=================================================");
 
       if (Get.isDialogOpen == true) {
         Get.back();
       }
-      if (response != null &&
-          (response.statusCode == 200 || response.statusCode == 201)) {
+      if ((response.statusCode == 200 || response.statusCode == 201)) {
         var responseData = jsonDecode(response.body);
         var taskData = responseData['data'];
 
@@ -68,7 +63,7 @@ class TaskActionController extends GetxController {
       } else {
         String errorMessage = "حدث خطأ غير معروف";
         try {
-          var errorData = jsonDecode(response!.body);
+          var errorData = jsonDecode(response.body);
           errorMessage = errorData['message'] ?? errorMessage;
         } catch (_) {}
 
@@ -100,14 +95,13 @@ class TaskActionController extends GetxController {
       );
 
       print("============== REJECT TASK RESPONSE ==============");
-      print("Status Code: ${response?.statusCode}");
-      print("Response Body: ${response?.body}");
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
       print("==================================================");
 
       Get.back();
 
-      if (response != null &&
-          (response.statusCode == 200 || response.statusCode == 201)) {
+      if ((response.statusCode == 200 || response.statusCode == 201)) {
         if (Get.isRegistered<TechnicianTasksController>()) {
           Get.find<TechnicianTasksController>().fetchTechnicianTasks();
         }

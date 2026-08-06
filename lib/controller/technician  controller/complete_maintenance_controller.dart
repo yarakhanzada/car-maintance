@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:senior_project/services/api_config.dart';
-import 'package:senior_project/view/Technician/NewTasksScreen.dart';
 import 'package:senior_project/view/Technician/TechnicianBottombar.dart';
 import '../../services/api_helper.dart';
 

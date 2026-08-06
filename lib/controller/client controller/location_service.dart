@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-import 'package:senior_project/services/api_config.dart';
-import 'package:senior_project/services/api_helper.dart';
 
 import 'route_service.dart';
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/controller/LoginController.dart';
-import 'package:senior_project/view/client/ClientBottombar.dart';
 import 'package:senior_project/view/shared/SignUpScreen.dart';
 import 'package:senior_project/view/shared/ForgotPasswordScreen.dart';
 import 'package:senior_project/widgets/CustomButton.dart';

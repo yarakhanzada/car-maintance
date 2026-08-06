@@ -22,10 +22,11 @@ class ServiceHistoryScreen extends StatelessWidget {
             _buildTopGradient(),
             SafeArea(
               child: Obx(() {
-                if (controller.isLoading.value)
+                if (controller.isLoading.value) {
                   return const Center(
                     child: CircularProgressIndicator(color: Color(0xFFE55757)),
                   );
+                }
                 return CustomScrollView(
                   physics: const BouncingScrollPhysics(),
                   slivers: [
@@ -123,11 +124,16 @@ class ServiceHistoryScreen extends StatelessWidget {
     bool isTablet,
   ) {
     bool isTowing = item.problemType == "towing";
-    return GestureDetector(
-      onTap: () => _showDetailsSheet(context, item),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 18),
-        padding: const EdgeInsets.all(20),
+   return GestureDetector(
+  onTap: () => _showDetailsSheet(context, item),
+  child: Stack(
+    clipBehavior: Clip.none,
+    children: [
+
+      Container(
+   
+  margin: const EdgeInsets.only(bottom: 18),
+  padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(28),
@@ -142,7 +148,9 @@ class ServiceHistoryScreen extends StatelessWidget {
         child: Row(
           children: [
             _buildIconTile(isTowing),
+
             const SizedBox(width: 15),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,29 +160,37 @@ class ServiceHistoryScreen extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: isTablet ? 18 : 16,
-                      color: const Color(0xFF1A1A1A),
                     ),
                   ),
+
                   Text(
                     "${item.vehicle?.brand} ${item.vehicle?.model}",
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: isTablet ? 14 : 13,
-                    ),
                   ),
+
                   const SizedBox(height: 4),
+
                   Text(
                     item.createdAt?.split('T')[0] ?? "",
-                    style: TextStyle(color: Colors.grey[400], fontSize: 11),
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
             ),
-            _buildStatusBadge(item.status ?? "جديد"),
           ],
         ),
       ),
-    );
+
+   Positioned(
+  top:0,
+  left: 5,
+  child: _buildStatusBadge(item.status ?? "جديد"),
+),
+    ],
+  ),
+);
   }
 
   Widget _buildIconTile(bool isTowing) {
@@ -194,25 +210,33 @@ class ServiceHistoryScreen extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(String status) {
-    Color color = status == "assigned"
-        ? Colors.blue
-        : (status == "new" ? Colors.orange : Colors.green);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+  Color color = status == "assigned"
+      ? Colors.blue
+      : (status == "new" ? Colors.orange : Colors.green);
+
+  return Container(
+padding: const EdgeInsets.symmetric(
+  horizontal: 14,
+  vertical: 7,
+),
+
+decoration: BoxDecoration(
+  color: color.withOpacity(0.12),
+  borderRadius: BorderRadius.circular(18),
+),
+    child: Text(
+      status.replaceAll("_", " "),
+      textAlign: TextAlign.center,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: color,
+        fontSize: 12,
+        fontWeight: FontWeight.w900,
       ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 9,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
+    ),
+  );
+}
 
   void _showDetailsSheet(BuildContext context, ServiceData item) {
     bool isTowing = item.problemType == "towing";

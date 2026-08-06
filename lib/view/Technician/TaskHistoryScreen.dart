@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:senior_project/controller/technician  controller/TechnicianHistoryController.dart';
 import 'package:senior_project/model/technician model/TechnicianHistoryModel.dart';
 class TaskHistoryScreen extends StatelessWidget {
@@ -151,7 +150,7 @@ class TaskHistoryScreen extends StatelessWidget {
                   const Icon(Icons.circle, size: 8, color: Colors.green),
                   const SizedBox(width: 5),
                   Text(
-                    task.status.toUpperCase(),
+                     task.status.toUpperCase(),
                     style: const TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ],

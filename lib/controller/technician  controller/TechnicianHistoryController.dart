@@ -33,7 +33,7 @@ debugPrint(
 
 print("==============================");
 
-      if (response != null && response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
 
         if (jsonData['status'] == 1) {
@@ -44,7 +44,7 @@ print("==============================");
           Get.snackbar("تنبيه", jsonData['message'] ?? "فشل في جلب البيانات");
         }
       } else {
-        Get.snackbar("خطأ", "فشل الاتصال بالسيرفر: ${response?.statusCode}");
+        Get.snackbar("خطأ", "فشل الاتصال بالسيرفر: ${response.statusCode}");
       }
     } catch (e) {
       print(" Error Fetching History: $e");

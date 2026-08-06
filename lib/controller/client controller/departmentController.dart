@@ -21,7 +21,8 @@ class DepartmentController extends GetxController {
 
       final response = await ApiHelper.get("${ApiConfig.baseUrl}/customer/departments");
       final data = jsonDecode(response.body);
-    
+      print("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK");
+        print(data);
       if (response.statusCode == 200 && data['status'] == 1) {
         List<dynamic> departmentsData = data['data'];
         departments.assignAll(
