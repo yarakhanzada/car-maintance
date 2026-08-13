@@ -238,9 +238,9 @@ class MaintenanceController extends GetxController {
         !selectedDepartmentIds.contains(initialDepartmentId)) {
       selectedDepartmentIds.add(initialDepartmentId!);
       problemControllers.putIfAbsent(
-  initialDepartmentId!,
-  () => TextEditingController(),
-);
+        initialDepartmentId!,
+        () => TextEditingController(),
+      );
     }
   }
 
@@ -248,17 +248,14 @@ class MaintenanceController extends GetxController {
     if (initialDepartmentId != null && id == initialDepartmentId) return;
 
     if (selectedDepartmentIds.contains(id)) {
-   selectedDepartmentIds.remove(id);
+      selectedDepartmentIds.remove(id);
 
-problemControllers[id]?.dispose();
-problemControllers.remove(id);
+      problemControllers[id]?.dispose();
+      problemControllers.remove(id);
     } else {
-     selectedDepartmentIds.add(id);
+      selectedDepartmentIds.add(id);
 
-problemControllers.putIfAbsent(
-  id,
-  () => TextEditingController(),
-);
+      problemControllers.putIfAbsent(id, () => TextEditingController());
     }
     selectedDepartmentIds.refresh();
   }
@@ -272,9 +269,9 @@ problemControllers.putIfAbsent(
   void updateMaintenanceType(bool immediate) {
     if (isimmediate.value == immediate) return;
     isimmediate.value = immediate;
-for (final controller in problemControllers.values) {
-  controller.clear();
-}
+    for (final controller in problemControllers.values) {
+      controller.clear();
+    }
     images.clear();
     _setImmediateDefaults();
   }
@@ -325,19 +322,19 @@ for (final controller in problemControllers.values) {
         'scheduled_time': formattedTime,
       };
 
-     if (initialDepartmentId != null) {
-  if (selectedDepartmentIds.isEmpty) {
-    selectedDepartmentIds.add(initialDepartmentId!);
-  }
+      if (initialDepartmentId != null) {
+        if (selectedDepartmentIds.isEmpty) {
+          selectedDepartmentIds.add(initialDepartmentId!);
+        }
 
-  for (int i = 0; i < selectedDepartmentIds.length; i++) {
-    final id = selectedDepartmentIds[i];
+        for (int i = 0; i < selectedDepartmentIds.length; i++) {
+          final id = selectedDepartmentIds[i];
 
-    fields['departments[$i][id]'] = id.toString();
-    fields['departments[$i][description]'] =
-        problemControllers[id]?.text ?? "";
-  }
-}
+          fields['departments[$i][id]'] = id.toString();
+          fields['departments[$i][description]'] =
+              problemControllers[id]?.text ?? "";
+        }
+      }
 
       final url = "${ApiConfig.baseUrl}/requests/maintenance";
 
@@ -352,22 +349,21 @@ for (final controller in problemControllers.values) {
       final jsonData = jsonDecode(response.body);
       print("Parsed Keys: ${jsonData.keys.toList()}");
 
-   if (response.statusCode == 200 && jsonData['status'] == 1) {
+      if (response.statusCode == 200 && jsonData['status'] == 1) {
+        for (final c in problemControllers.values) {
+          c.dispose();
+        }
 
-  for (final c in problemControllers.values) {
-    c.dispose();
-  }
+        problemControllers.clear();
+        selectedDepartmentIds.clear();
+        images.clear();
 
-  problemControllers.clear();
-  selectedDepartmentIds.clear();
-  images.clear();
+        isInitialized = false;
 
-  isInitialized = false;
+        Get.back();
 
-  Get.back();
-
-  _showServerSnackBar("Success", jsonData['message']);
-} else {
+        _showServerSnackBar("Success", jsonData['message']);
+      } else {
         String errorMsg = jsonData['message'] ?? "Request failed";
 
         if (jsonData['data'] != null && jsonData['data'] is Map) {
@@ -396,7 +392,7 @@ for (final controller in problemControllers.values) {
     TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: const TimeOfDay(hour: 8, minute: 0),
-      helpText: "Select a time between 8:00 AM and 1:00 PM",
+      helpText: "اختار وقت بين 8:00 صباحاً و 1:00 ظهراً",
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
           colorScheme: const ColorScheme.light(
@@ -410,10 +406,7 @@ for (final controller in problemControllers.values) {
 
     if (picked != null) {
       if (picked.hour < 8 || picked.hour >= 13) {
-        _showServerSnackBar(
-          "Warning",
-          "Select time between 8:00 AM and 1:00 PM",
-        );
+        _showServerSnackBar("تنبيه", "اختار وقت بين 8:00 صباحاً و 1:00 ظهراً");
       } else {
         selectedTime.value = picked;
       }
@@ -438,8 +431,7 @@ for (final controller in problemControllers.values) {
           child: child!,
         );
       },
-      selectableDayPredicate: (DateTime day) =>
-          day.weekday != DateTime.friday && day.weekday != DateTime.saturday,
+      selectableDayPredicate: (DateTime day) => day.weekday != DateTime.friday,
     );
 
     if (picked != null) selectedDate.value = picked;
@@ -447,8 +439,7 @@ for (final controller in problemControllers.values) {
 
   DateTime _firstValidDate() {
     DateTime date = DateTime.now();
-    while (date.weekday == DateTime.friday ||
-        date.weekday == DateTime.saturday) {
+    while (date.weekday == DateTime.friday) {
       date = date.add(const Duration(days: 1));
     }
     return date;
