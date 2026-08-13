@@ -12,7 +12,7 @@ class OTPScreen extends StatelessWidget {
   final OTPController controller = Get.put(OTPController());
   final String email = Get.arguments['email'];
   final String type = Get.arguments['type'];
-  
+
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
@@ -23,7 +23,9 @@ class OTPScreen extends StatelessWidget {
         child: Column(
           children: [
             const AuthHeaderIcon(icon: Icons.vibration_rounded),
+
             SizedBox(height: screenHeight * 0.03),
+
             const Text(
               "رمز التحقق",
               style: TextStyle(
@@ -32,11 +34,14 @@ class OTPScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             const SizedBox(height: 15),
+
             Text(
               "تم إرسال الرمز إلى $email",
               style: TextStyle(color: Colors.white.withOpacity(0.6)),
-              textDirection: TextDirection.ltr, ),
+              textDirection: TextDirection.ltr,
+            ),
 
             SizedBox(height: screenHeight * 0.05),
 
@@ -63,7 +68,8 @@ class OTPScreen extends StatelessWidget {
             ),
 
             SizedBox(height: screenHeight * 0.03),
-            _buildResendSection(),
+
+            if (type == "signup") _buildResendSection(),
           ],
         ),
       ),
@@ -79,6 +85,7 @@ class OTPScreen extends StatelessWidget {
             "لم تصلك الرسالة؟ ",
             style: TextStyle(color: Colors.white.withOpacity(0.5)),
           ),
+
           controller.isResending.value
               ? const SizedBox(
                   width: 20,
