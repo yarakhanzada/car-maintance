@@ -535,9 +535,13 @@ class ProfileScreen extends StatelessWidget {
         return const SizedBox();
       }
 
-      final freeBenefits = benefits['free_benefits'];
-      final discounts = benefits['permanent_discounts'];
+     final List<dynamic> freeBenefits =
+    (benefits['free_benefits'] as List?) ?? [];
 
+final Map<String, dynamic> discounts =
+    (benefits['permanent_discounts'] as Map?)?.cast<String, dynamic>() ?? {};
+print('freeBenefits type: ${freeBenefits.runtimeType}');
+print('freeBenefits: $freeBenefits');
       return Container(
         padding: const EdgeInsets.all(18),
 
@@ -583,14 +587,17 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            _buildBenefitItem(Icons.oil_barrel, freeBenefits['oil_change']),
-
-            _buildBenefitItem(Icons.electric_bolt, freeBenefits['spark_plugs']),
-
-            _buildBenefitItem(Icons.car_repair, freeBenefits['brake_pads']),
-
-            _buildBenefitItem(Icons.build, freeBenefits['mechanic_inspection']),
-
+         for (final benefit in freeBenefits)
+  _buildBenefitItem(
+    benefit['spare_part_id'] == 2
+        ? Icons.oil_barrel
+        : benefit['spare_part_id'] == 3
+            ? Icons.filter_alt
+            : benefit['spare_part_id'] == 4
+                ? Icons.electric_bolt
+                : Icons.build,
+    benefit,
+  ),
             const Divider(height: 30),
 
             const Text(
