@@ -94,17 +94,6 @@ class MaintenanceRequestScreen extends StatelessWidget {
     const SizedBox(height: 30),
   ],
 
-  _buildSectionHeader(
-    "الصور",
-    Icons.camera_enhance_rounded,
-  ),
-
-  const SizedBox(height: 15),
-
-  _buildImageUploader(),
-
-  const SizedBox(height: 30),
-
   if (categoryId != null && categoryId != 0) ...[
     _buildSectionHeader(
       "هل ترغب بإضافة أقسام أخرى؟",

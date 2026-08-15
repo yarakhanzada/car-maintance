@@ -1,20 +1,24 @@
 import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:senior_project/services/api_config.dart';
+
 import '../services/token_service.dart';
 
 class AuthController extends GetxController {
   Future<bool> refreshToken() async {
-    print(" [Refresh]  تحديث التوكن");
+    print("[Refresh] بدء تحديث التوكن");
+
     try {
-      String? refreshToken = await TokenService.getRefreshToken();
+      final refreshToken = await TokenService.getRefreshToken();
 
       if (refreshToken == null || refreshToken.isEmpty) {
+        print("[Refresh] لا يوجد Refresh Token");
         return false;
       }
 
-      var response = await http.post(
+      final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/refresh"),
         headers: {
           "Accept": "application/json",
@@ -23,24 +27,45 @@ class AuthController extends GetxController {
         },
       );
 
-      var jsonData = jsonDecode(response.body);
-      print(" [Refresh]  : $jsonData");
+      print("[Refresh] Status: ${response.statusCode}");
+      print("[Refresh] Body: ${response.body}");
 
-      if (response.statusCode == 200 && jsonData["status"] == 1) {
-        if (jsonData["data"] != null &&
-            jsonData["data"]["access_token"] != null) {
-          String newToken = jsonData["data"]["access_token"];
-          await TokenService.saveToken(newToken);
+      final jsonData = jsonDecode(response.body);
 
-          return true;
-        } else {
-          print(" غير موجود ");
+      if (response.statusCode == 200 &&
+          jsonData["status"] == 1 &&
+          jsonData["data"] != null) {
+        final data = jsonData["data"];
+
+        final newAccessToken = data["access_token"];
+        final newRefreshToken = data["refresh_token"];
+
+        if (newAccessToken == null ||
+            newAccessToken.toString().isEmpty) {
+          print("[Refresh] Access Token غير موجود");
+          return false;
         }
+
+        await TokenService.saveToken(
+          newAccessToken.toString(),
+        );
+
+        if (newRefreshToken != null &&
+            newRefreshToken.toString().isNotEmpty) {
+          await TokenService.saveRefreshToken(
+            newRefreshToken.toString(),
+          );
+        }
+
+        print("[Refresh] تم تحديث التوكنات بنجاح");
+
+        return true;
       }
 
+      print("[Refresh] فشل تحديث التوكن");
       return false;
     } catch (e) {
-      print(" [Refresh] (Exception): $e");
+      print("[Refresh] Exception: $e");
       return false;
     }
   }

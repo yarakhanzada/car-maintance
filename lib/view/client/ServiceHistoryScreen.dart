@@ -123,7 +123,7 @@ class ServiceHistoryScreen extends StatelessWidget {
     double width,
     bool isTablet,
   ) {
-    bool isTowing = item.problemType == "towing";
+    bool isTowing = item.towingRequest != null;
    return GestureDetector(
   onTap: () => _showDetailsSheet(context, item),
   child: Stack(

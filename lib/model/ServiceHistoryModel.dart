@@ -34,6 +34,8 @@ class ServiceData {
   int? vehiclesId;
   String? problemType;
   String? status;
+  String? statusLabel;
+  String? receivedAt;
   String? createdAt;
   String? updatedAt;
   Vehicle? vehicle;
@@ -47,6 +49,8 @@ class ServiceData {
     this.vehiclesId,
     this.problemType,
     this.status,
+    this.statusLabel,
+    this.receivedAt,
     this.createdAt,
     this.updatedAt,
     this.vehicle,
@@ -61,48 +65,67 @@ class ServiceData {
     vehiclesId = json['vehicles_id'];
     problemType = json['problem_type'];
     status = json['status'];
+    statusLabel = json['status_label'];
+    receivedAt = json['received_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+
     vehicle = json['vehicle'] != null
         ? Vehicle.fromJson(json['vehicle'])
         : null;
+
     towingRequest = json['towing_request'] != null
         ? TowingRequest.fromJson(json['towing_request'])
         : null;
+
     maintenanceRequest = json['maintenance_request'] != null
         ? MaintenanceRequest.fromJson(json['maintenance_request'])
         : null;
+
     if (json['request_status_history'] != null) {
       requestStatusHistory = <RequestStatusHistory>[];
+
       json['request_status_history'].forEach((v) {
-        requestStatusHistory!.add(RequestStatusHistory.fromJson(v));
+        requestStatusHistory!.add(
+          RequestStatusHistory.fromJson(v),
+        );
       });
     }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+
     data['id'] = id;
     data['user_id'] = userId;
     data['vehicles_id'] = vehiclesId;
     data['problem_type'] = problemType;
     data['status'] = status;
+    data['status_label'] = statusLabel;
+    data['received_at'] = receivedAt;
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
-    if (vehicle != null) data['vehicle'] = vehicle!.toJson();
-    if (towingRequest != null) data['towing_request'] = towingRequest!.toJson();
+
+    if (vehicle != null) {
+      data['vehicle'] = vehicle!.toJson();
+    }
+
+    if (towingRequest != null) {
+      data['towing_request'] = towingRequest!.toJson();
+    }
+
     if (maintenanceRequest != null) {
       data['maintenance_request'] = maintenanceRequest!.toJson();
     }
+
     if (requestStatusHistory != null) {
-      data['request_status_history'] = requestStatusHistory!
-          .map((v) => v.toJson())
-          .toList();
+      data['request_status_history'] =
+          requestStatusHistory!.map((v) => v.toJson()).toList();
     }
+
     return data;
   }
 }
-
 class Vehicle {
   int? id;
   int? userId;

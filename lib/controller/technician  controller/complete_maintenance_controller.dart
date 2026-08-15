@@ -39,19 +39,18 @@ class CompleteMaintenanceController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print(responseData);
-        if (responseData['status'] == 1) {
-          Get.snackbar(
-            "تمت العملية",
-            responseData['message'] ?? "اكتملت الصيانة بنجاح.",
-          );
+    if (responseData['status'] == 1) {
+  Get.snackbar(
+    "تمت العملية",
+    responseData['message'] ?? "اكتملت الصيانة بنجاح.",
+  );
 
-          notesController.clear();
-          beforeImages.clear();
-          afterImages.clear();
+  notesController.clear();
+  beforeImages.clear();
+  afterImages.clear();
 
-          Get.offAll(() => TechnicianBottombar());
-          return true; // نجاح
-        } else {
+  return true;
+} else {
           Get.snackbar(
             "تنبيه",
             responseData['message'] ?? "تعذر إكمال الصيانة.",

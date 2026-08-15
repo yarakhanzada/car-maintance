@@ -349,21 +349,17 @@ class MaintenanceController extends GetxController {
       final jsonData = jsonDecode(response.body);
       print("Parsed Keys: ${jsonData.keys.toList()}");
 
-      if (response.statusCode == 200 && jsonData['status'] == 1) {
-        for (final c in problemControllers.values) {
-          c.dispose();
-        }
+    if (response.statusCode == 200 && jsonData['status'] == 1) {
+  problemControllers.clear();
+  selectedDepartmentIds.clear();
+  images.clear();
 
-        problemControllers.clear();
-        selectedDepartmentIds.clear();
-        images.clear();
+  isInitialized = false;
 
-        isInitialized = false;
+  Get.back();
 
-        Get.back();
-
-        _showServerSnackBar("Success", jsonData['message']);
-      } else {
+  _showServerSnackBar("Success", jsonData['message']);
+} else {
         String errorMsg = jsonData['message'] ?? "Request failed";
 
         if (jsonData['data'] != null && jsonData['data'] is Map) {
@@ -444,4 +440,14 @@ class MaintenanceController extends GetxController {
     }
     return date;
   }
+  @override
+void onClose() {
+  for (final controller in problemControllers.values) {
+    controller.dispose();
+  }
+
+  problemControllers.clear();
+
+  super.onClose();
+}
 }

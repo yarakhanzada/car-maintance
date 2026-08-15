@@ -2,20 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:senior_project/controller/midleController.dart';
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
-class SplashScreen extends StatelessWidget {
-  final controller = Get.put(Midlecontroller());
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
 
- SplashScreen({super.key});
+class _SplashScreenState extends State<SplashScreen> {
+  late final Midlecontroller controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(Midlecontroller());
+    controller.checkLogin();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Future.microtask(() {
-      controller.checkLogin();
-    });
-
     return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }
