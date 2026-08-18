@@ -14,9 +14,18 @@ class InProgressTaskScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
+
     final TaskController controller = Get.find<TaskController>();
-final CompleteMaintenanceController completeCtrl =
-    Get.put(CompleteMaintenanceController(), permanent: false);
+
+    final TaskDetailsController detailsController = Get.put(
+      TaskDetailsController(),
+      permanent: false,
+    );
+
+    final CompleteMaintenanceController completeCtrl = Get.put(
+      CompleteMaintenanceController(),
+      permanent: false,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
@@ -39,14 +48,14 @@ final CompleteMaintenanceController completeCtrl =
                           _buildSectionLabel("ملاحظات المهندس"),
                           _buildCurrentJobCard(controller),
                           const SizedBox(height: 25),
-             _buildSectionLabel("المهام المطلوبة & القطع"),
-const SizedBox(height: 15),
-_buildRequiredTasksCard(),
-const SizedBox(height: 25),
+                          _buildSectionLabel("المهام المطلوبة & القطع"),
+                          const SizedBox(height: 15),
+                          _buildRequiredTasksCard(),
+                          const SizedBox(height: 25),
                           _buildSectionLabel("الخطوة 1: إضافة صور "),
                           const SizedBox(height: 10),
 
-                          // تصميم احترافي للصور
+                          // Professional design for images
                           Card(
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -198,15 +207,15 @@ const SizedBox(height: 25),
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: Colors.grey.shade200),
     ),
-   child: Obx(() {
-   final detailsController = Get.find<TaskDetailsController>();
- return Text(
-    detailsController.taskDetails.value?.inspection?.notes ??
-        "لا توجد تفاصيل",
-    softWrap: true,
-    maxLines: null,
-  );
-}),
+    child: Obx(() {
+      final detailsController = Get.find<TaskDetailsController>();
+      return Text(
+        detailsController.taskDetails.value?.inspection?.notes ??
+            "لا توجد تفاصيل",
+        softWrap: true,
+        maxLines: null,
+      );
+    }),
   );
 
   Widget _buildNotesTextField(CompleteMaintenanceController completeCtrl) =>
@@ -349,171 +358,167 @@ const SizedBox(height: 25),
       ),
     );
   }
-Widget _buildRequiredTasksCard() {
-  final detailsController = Get.find<TaskDetailsController>();
 
-  return Obx(() {
-    final faults =
-        detailsController.taskDetails.value?.inspection?.faults ?? [];
+  Widget _buildRequiredTasksCard() {
+    final detailsController = Get.find<TaskDetailsController>();
 
-    if (faults.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: const Center(
-          child: Text("لا توجد مهام أو قطع مطلوبة"),
-        ),
-      );
-    }
+    return Obx(() {
+      final faults =
+          detailsController.taskDetails.value?.inspection?.faults ?? [];
 
-    return Column(
-      children: faults.map((fault) {
+      if (faults.isEmpty) {
         return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.grey.shade200),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Color(0xFFFFECEC),
-                    child: Icon(
-                      Icons.build_rounded,
-                      size: 16,
-                      color: Color(0xFFE55757),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          fault.faultName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                        Text(
-                          fault.description,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (fault.time != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE55757).withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        "${fault.time} Min",
-                        style: const TextStyle(
-                          color: Color(0xFFE55757),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-
-              if (fault.spareParts.isNotEmpty) ...[
-                const Divider(height: 25),
-                const Row(
-                  children: [
-                    Icon(
-                      Icons.extension_rounded,
-                      size: 16,
-                      color: Colors.orange,
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      "قطع الغيار المطلوبة",
-                      style: TextStyle(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                ...fault.spareParts.map<Widget>(
-                  (part) => Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "• ${part.name} (x${part.pivot?.quantity ?? 1})",
-                        ),
-                       
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-
-              if (fault.laborServices.isNotEmpty) ...[
-                const Divider(height: 25),
-                const Row(
-                  children: [
-                    Icon(
-                      Icons.room_service_rounded,
-                      size: 16,
-                      color: Colors.blue,
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      "خدمات اليد العاملة",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                ...fault.laborServices.map<Widget>(
-                  (service) => Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("• ${service.name}"),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
+          child: const Center(child: Text("لا توجد مهام أو قطع مطلوبة")),
         );
-      }).toList(),
-    );
-  });
-}
+      }
+
+      return Column(
+        children: faults.map((fault) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Color(0xFFFFECEC),
+                      child: Icon(
+                        Icons.build_rounded,
+                        size: 16,
+                        color: Color(0xFFE55757),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            fault.faultName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          Text(
+                            fault.description,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (fault.time != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE55757).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          "${fault.time} Min",
+                          style: const TextStyle(
+                            color: Color(0xFFE55757),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                if (fault.spareParts.isNotEmpty) ...[
+                  const Divider(height: 25),
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.extension_rounded,
+                        size: 16,
+                        color: Colors.orange,
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        "قطع الغيار المطلوبة",
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  ...fault.spareParts.map<Widget>(
+                    (part) => Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "• ${part.name} (x${part.pivot?.quantity ?? 1})",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+
+                if (fault.laborServices.isNotEmpty) ...[
+                  const Divider(height: 25),
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.room_service_rounded,
+                        size: 16,
+                        color: Colors.blue,
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        "خدمات اليد العاملة",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  ...fault.laborServices.map<Widget>(
+                    (service) => Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [Text("• ${service.name}")],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+      );
+    });
+  }
 }

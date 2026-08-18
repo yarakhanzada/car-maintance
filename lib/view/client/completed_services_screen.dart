@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:senior_project/controller/client%20controller/completed_services_controller.dart';
 import 'package:senior_project/model/completed_service_model.dart';
 import 'package:senior_project/view/client/completed_service_details_screen.dart';
@@ -13,20 +14,9 @@ class CompletedServicesScreen extends StatefulWidget {
 }
 
 class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
-  final CompletedServicesController _controller = CompletedServicesController();
-  late Future<List<CompletedServiceModel>> _futureServices;
-
-  @override
-  void initState() {
-    super.initState();
-    _futureServices = _controller.fetchCompletedServices();
-  }
-
-  void _refreshData() {
-    setState(() {
-      _futureServices = _controller.fetchCompletedServices();
-    });
-  }
+  final CompletedServicesController _controller = Get.put(
+    CompletedServicesController(),
+  );
 
   String _formatPrice(dynamic price) {
     if (price == null || price.toString() == 'null') return "0";
@@ -53,49 +43,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(screenWidth),
-                  Expanded(
-                    child: FutureBuilder<List<CompletedServiceModel>>(
-                      future: _futureServices,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFFE55757),
-                              strokeWidth: 2.5,
-                            ),
-                          );
-                        } else if (snapshot.hasError) {
-                          return Center(
-                            child: Text(
-                              "خطأ: ${snapshot.error}",
-                              style: TextStyle(fontSize: screenWidth * 0.035),
-                            ),
-                          );
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return _buildEmptyState(screenWidth);
-                        }
-
-                        return RefreshIndicator(
-                          onRefresh: () async => _refreshData(),
-                          color: const Color(0xFFE55757),
-                          child: ListView.builder(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.045,
-                              vertical: 8,
-                            ),
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) => _buildServiceCard(
-                              snapshot.data![index],
-                              screenWidth,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  Expanded(child: _buildBody(screenWidth)),
                 ],
               ),
             ),
@@ -135,6 +83,40 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     );
   }
 
+  Widget _buildBody(double screenWidth) {
+    return Obx(() {
+      if (_controller.isLoading.value && _controller.services.isEmpty) {
+        return const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFFE55757),
+            strokeWidth: 2.5,
+          ),
+        );
+      }
+
+      if (_controller.services.isEmpty) {
+        return _buildEmptyState(screenWidth);
+      }
+
+      return RefreshIndicator(
+        onRefresh: _controller.fetchCompletedServices,
+        color: const Color(0xFFE55757),
+        child: ListView.builder(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.045,
+            vertical: 8,
+          ),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          itemCount: _controller.services.length,
+          itemBuilder: (context, index) =>
+              _buildServiceCard(_controller.services[index], screenWidth),
+        ),
+      );
+    });
+  }
+
   Widget _buildServiceCard(CompletedServiceModel service, double screenWidth) {
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -142,7 +124,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
         MaterialPageRoute(
           builder: (context) => CompletedServiceDetailsScreen(service: service),
         ),
-      ).then((_) => _refreshData()),
+      ).then((_) => _controller.fetchCompletedServices()),
       child: Container(
         margin: const EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
@@ -431,7 +413,9 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                         result['success'] ?? false,
                         screenWidth,
                       );
-                      if (result['success'] == true) _refreshData();
+                      if (result['success'] == true) {
+                        _controller.fetchCompletedServices();
+                      }
                     }
                   },
                   child: Text(
@@ -557,7 +541,7 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
                         _showSnackBar(message, isSuccess, screenWidth);
 
                         if (isSuccess) {
-                          _refreshData();
+                          _controller.fetchCompletedServices();
                         }
                       }
                     },

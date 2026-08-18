@@ -71,7 +71,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
 
   const SizedBox(height: 30),
 
-  /// إذا كانت صيانة عامة
+  /// If it's general maintenance
   if (categoryId == null || categoryId == 0) ...[
     _buildSectionHeader(
       "المشكلة",
@@ -190,7 +190,7 @@ class MaintenanceRequestScreen extends StatelessWidget {
                 ),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min, // ليأخذ حجم النص فقط
+                mainAxisSize: MainAxisSize.min, // to take up only the text's size
                 children: [
                   Icon(
                     isPrimary

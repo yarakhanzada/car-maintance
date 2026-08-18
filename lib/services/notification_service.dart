@@ -33,9 +33,9 @@ class NotificationService {
     }
   }
 
-  /// تهيئة الخدمة وطلب الأذونات
+  /// Initialize the service and request permissions
   static Future<void> init() async {
-    // 1. طلب الإذن من المستخدم
+    // 1. Request permission from the user
     NotificationSettings settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
@@ -47,7 +47,7 @@ class NotificationService {
       print(' تم منح إذن الإشعارات من قبل المستخدم');
     }
 
-    // 2. إعدادات الأندرويد (أيقونة التطبيق)
+    // 2. Android settings (app icon)
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
@@ -58,7 +58,7 @@ class NotificationService {
       iOS: iosSettings,
     );
 
-    // 3. تشغيل مكتبة الإشعارات المحلية
+    // 3. Initialize the local notifications library
     await _localNotifications.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
@@ -66,12 +66,12 @@ class NotificationService {
       },
     );
 
-    // 4. تفعيل مستمعي الأحداث
+    // 4. Enable event listeners
     _setupHandlers();
   }
 
   static void _setupHandlers() {
-    //   التطبيق مفتوح أمام المستخدم
+    // App is open in front of the user
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print(" وصل إشعار جديد (والتطبيق مفتوح):");
       print("العنوان: ${message.notification?.title}");
@@ -79,14 +79,14 @@ class NotificationService {
       _showLocalNotification(message);
     });
 
-    //  التطبيق في الخلفية وتم الضغط على الإشعار
+    // App is in the background and the notification was tapped
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print("🚀 تم فتح التطبيق عبر الضغط على الإشعار!");
       print("بيانات الإشعار (Data): ${message.data}");
     });
   }
 
-  /// عرض الإشعار
+  /// Show the notification
   static void _showLocalNotification(RemoteMessage message) {
     RemoteNotification? notification = message.notification;
 

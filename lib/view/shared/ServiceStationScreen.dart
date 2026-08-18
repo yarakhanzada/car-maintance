@@ -7,7 +7,7 @@ class ServiceStationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // استخدام MediaQuery لتحديد أبعاد الشاشة والاستجابة
+    // Use MediaQuery to determine screen dimensions and responsiveness
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
 
@@ -47,7 +47,7 @@ class ServiceStationScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: screenHeight * 0.08),
-                  // العنوان الرئيسي
+                  // Main title
                   const Text(
                     'محطة الخدمة',
                     style: TextStyle(
@@ -59,7 +59,7 @@ class ServiceStationScreen extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  // العنوان الفرعي
+                  // Subtitle
                   const Text(
                     'الحل الأمثل لجميع خدمات صيانة مركبتك',
                     style: TextStyle(color: Colors.white70, fontSize: 16),

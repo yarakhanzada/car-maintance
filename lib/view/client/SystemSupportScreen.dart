@@ -50,7 +50,7 @@ class _SystemSupportScreenState extends State<SystemSupportScreen> {
         backgroundColor: const Color(0xFFF5F5F7),
         body: Stack(
           children: [
-            // تأثير الخلفية المتدرجة في الزاوية العلوية اليمنى
+            // Gradient background effect in the top-right corner
             const SupportBackground(),
 
             SafeArea(
@@ -113,7 +113,7 @@ class _SystemSupportScreenState extends State<SystemSupportScreen> {
     );
   }
 
-  // كلاس الخلفية المدمج
+  // Embedded background class
   Widget _buildHeader() {
     return Row(
       children: [
@@ -307,7 +307,7 @@ class _SystemSupportScreenState extends State<SystemSupportScreen> {
     );
   }
 
-  // الدوال البرمجية
+  // Helper functions
   Future<void> _launchPhoneCall() async {
     final Uri uri = Uri(scheme: 'tel', path: '+963935573658');
     await launchUrl(uri);

@@ -17,7 +17,7 @@ class NotificationController extends GetxController {
     getUnreadCount();
   }
 
-  // 1. جلب قائمة الإشعارات
+  // 1. Fetch the list of notifications
   Future<void> fetchNotifications() async {
     try {
       print("NotificationController: Fetching notifications from API...");
@@ -46,7 +46,7 @@ class NotificationController extends GetxController {
     }
   }
 
-  // 2. جلب عدد الإشعارات غير المقروءة
+  // 2. Fetch the unread notifications count
   Future<void> getUnreadCount() async {
     try {
       print("NotificationController: Requesting unread count...");
@@ -67,7 +67,7 @@ class NotificationController extends GetxController {
     }
   }
 
-  // 3. تمييز إشعار واحد كمقروء
+  // 3. Mark a single notification as read
   Future<void> markAsRead(int id) async {
     try {
       print(
@@ -107,7 +107,7 @@ class NotificationController extends GetxController {
     }
   }
 
-  // 4. تمييز الكل كمقروء
+  // 4. Mark all as read
   Future<void> markAllAsRead() async {
     try {
       print("NotificationController: Marking all as read using POST...");

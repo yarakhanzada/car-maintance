@@ -56,7 +56,7 @@ class ClientNotificationsScreen extends StatelessWidget {
                           isUnread: !isReadValue,
                           width: width,
                           onTap: () {
-                            // نداء دالة الـ API وتحديث الحالة عند الضغط على الكرت
+                            // Call the API function and update the state when the card is tapped
                             controller.markAsRead(item['id']);
                           },
                         );
@@ -157,10 +157,10 @@ class ClientNotificationsScreen extends StatelessWidget {
     required bool isUnread,
     required double width,
     required VoidCallback
-    onTap, // تم إضافة الـ Callback هنا للـ GestureDetector
+    onTap, // this callback was added here for the GestureDetector
   }) {
     return GestureDetector(
-      onTap: onTap, // تفعيل الضغط على كامل مساحة الإشعار
+      onTap: onTap, // enable tapping across the whole notification area
       child: Container(
         width: width,
         margin: const EdgeInsets.only(bottom: 15),

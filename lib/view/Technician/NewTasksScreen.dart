@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:senior_project/controller/technician  controller/technician_tasks_controller.dart';
 import 'package:senior_project/controller/technician%20%20controller/task_action_controller.dart';
-import '../../controller/technician  controller/task_details_controller.dart'; // تأكد من مسار كنترولر التفاصيل الجديد
+import '../../controller/technician  controller/task_details_controller.dart'; // make sure this is the path to the new details controller
 import '../../model/technician model/maintenance_task_model.dart';
 
 class NewTasksScreen extends StatelessWidget {
@@ -82,7 +82,7 @@ class NewTasksScreen extends StatelessWidget {
                       );
                     }
 
-                    // 2. حالة عدم وجود مهام صيانة
+                    // 2. Case with no maintenance tasks
                     if (controller.taskList.isEmpty) {
                       return RefreshIndicator(
                         onRefresh: () => controller.fetchTechnicianTasks(),
@@ -118,7 +118,7 @@ class NewTasksScreen extends StatelessWidget {
                       );
                     }
 
-                    // 3. عرض قائمة المهام الرئيسية
+                    // 3. Display the main task list
                     return RefreshIndicator(
                       onRefresh: () => controller.fetchTechnicianTasks(),
                       color: const Color(0xFFE55757),
@@ -286,7 +286,7 @@ class NewTasksScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // 1. نوع المشكلة الأساسية
+              // 1. Main problem type
               _buildDetailInfoBox(
                 "المشكلة المبلغ عنها",
                 serviceReq?.problemType ?? "No description provided.",
@@ -294,7 +294,7 @@ class NewTasksScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 2. رقم لوحة السيارة ومعلومات الاتصال بالزبون
+              // 2. Vehicle plate number and customer contact info
               _buildDetailInfoBox(
                 "السيارة & معلومات الاتصال",
                 "رقم اللوحة: ${serviceReq?.vehicle?.plateNumber ?? 'N/A'}\nرقم الزبون : ${serviceReq?.user?.phone ?? 'N/A'}",
@@ -302,7 +302,7 @@ class NewTasksScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 3. عرض قائمة الأعطال والقطع المطلوبة والخدمات بالتفصيل الكامل
+              // 3. Display the list of faults, required parts, and services in full detail
               if (faults.isNotEmpty) ...[
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -384,7 +384,7 @@ class NewTasksScreen extends StatelessWidget {
                           ],
                         ),
 
-                        // عرض قطع الغيار المطلوبة لهذا العطل والـ Pivot الخاص بالسعر والكمية
+                        // Display the spare parts required for this fault and the price/quantity pivot
                         if (fault.spareParts != null &&
                             fault.spareParts.isNotEmpty) ...[
                           const Divider(height: 25),
@@ -434,7 +434,7 @@ class NewTasksScreen extends StatelessWidget {
                           ),
                         ],
 
-                        // عرض خدمات اليد العاملة وأجورها المطلوبة للصيانة
+                        // Display the labor services and their fees required for the maintenance
                         if (fault.laborServices != null &&
                             fault.laborServices.isNotEmpty) ...[
                           const Divider(height: 25),
@@ -490,7 +490,7 @@ class NewTasksScreen extends StatelessWidget {
                 const SizedBox(height: 20),
               ],
 
-              // 4. ملاحظات المهندس (إن وجدت)
+              // 4. Engineer's notes (if any)
               if (task.inspection?.notes != null &&
                   task.inspection!.notes!.isNotEmpty) ...[
                 _buildDetailInfoBox(
@@ -664,7 +664,7 @@ class NewTasksScreen extends StatelessWidget {
     );
   }
 
-  //  ديالوغ الرفض
+  // Rejection dialog
   void _showRejectDialog(BuildContext context, int taskId) {
     final actionController = Get.put(TaskActionController());
     final textController = TextEditingController();

@@ -108,11 +108,21 @@ class DriverTowingController extends GetxController {
         ).listen((Position pos) async {
           if (pos.latitude == 0 && pos.longitude == 0) return;
           driverLocation = LatLng(pos.latitude, pos.longitude);
+          update();
+          // move the marker instantly, don't wait on the route calls below
           _sendLocationToSocket();
           //  await updateDriverLocationAPI();
           _updateMapData();
         });
   }
+
+  // Once the driver has picked up the vehicle and is heading back, the
+  // route/ETA should point at the workshop instead of the customer.
+  bool get isReturningToWorkshop =>
+      isJobStarted && currentStatusIndex == statusSequence.length - 1;
+
+  LatLng? get _routeTarget =>
+      isReturningToWorkshop ? ApiConfig.workshopLocation : customerLocation;
 
   void _sendLocationToSocket() {
     if (socket != null && socket!.connected) {
@@ -126,21 +136,16 @@ class DriverTowingController extends GetxController {
   }
 
   Future<void> _updateMapData() async {
-    if (customerLocation == null) return;
+    final target = _routeTarget;
+    if (target == null) return;
 
-    final data = await MapHelper.getRouteData(
-      driverLocation,
-      customerLocation!,
-    );
+    final data = await MapHelper.getRouteData(driverLocation, target);
     if (data != null) {
       distanceToCustomer = data['distance'];
       estimatedTime = data['duration'];
     }
 
-    routePoints = await MapHelper.getPolylinePoints(
-      driverLocation,
-      customerLocation!,
-    );
+    routePoints = await MapHelper.getPolylinePoints(driverLocation, target);
     update();
   }
 
@@ -173,6 +178,7 @@ class DriverTowingController extends GetxController {
         (data['latitude'] as num).toDouble(),
         (data['longitude'] as num).toDouble(),
       );
+      update();
       _updateMapData();
     });
 
@@ -238,10 +244,14 @@ class DriverTowingController extends GetxController {
 
   void completeTowingViaSocket() {
     if (socket != null && socket!.connected) {
+      print("🚨 DRIVER EMIT: tow_completed");
+
       socket!.emit('tow_completed', {
         'customer_id': customerId,
         'driver_id': driverId,
       });
+    } else {
+      print("❌ Socket not connected");
     }
   }
 
@@ -300,7 +310,7 @@ class DriverTowingController extends GetxController {
         );
         _extractIds();
         update();
-        return null; // نجاح
+        return null; // success
       } else {
         return body['message'] ?? "فشل بدء المهمة";
       }
@@ -340,6 +350,7 @@ class DriverTowingController extends GetxController {
             requestData,
           );
           update();
+          _updateMapData(); // switch the route target (e.g. to the workshop) right away
         }
         return null;
       } else {

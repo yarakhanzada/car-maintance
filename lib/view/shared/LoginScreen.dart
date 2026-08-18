@@ -22,7 +22,7 @@ class LoginScreen extends StatelessWidget {
 
     return GlassScaffold(
       child: Directionality(
-        textDirection: TextDirection.rtl, // لدعم اللغة العربية بشكل صحيح
+        textDirection: TextDirection.rtl, // to properly support the Arabic language
         child: Column(
           children: [
             const Icon(
@@ -118,7 +118,7 @@ class LoginScreen extends StatelessWidget {
 
                   // ================= FORGOT PASSWORD =================
                   Align(
-                    alignment: Alignment.centerLeft, // تم التعديل لتناسب الاتجاه العربي
+                    alignment: Alignment.centerLeft, // adjusted to fit the Arabic layout direction
                     child: GestureDetector(
                       onTap: () => Get.to(() => ForgotPasswordScreen()),
                       child: const Text(

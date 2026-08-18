@@ -1,11 +1,23 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:senior_project/model/completed_service_model.dart';
 import 'package:senior_project/services/api_config.dart';
 import '../../services/api_helper.dart';
 
-class CompletedServicesController {
-  Future<List<CompletedServiceModel>> fetchCompletedServices() async {
+class CompletedServicesController extends GetxController {
+  var isLoading = true.obs;
+  var services = <CompletedServiceModel>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchCompletedServices();
+  }
+
+  Future<void> fetchCompletedServices() async {
     try {
+      if (services.isEmpty) isLoading(true);
+
       final response = await ApiHelper.get(
         "${ApiConfig.baseUrl}/customer/requests/completed",
       );
@@ -14,14 +26,14 @@ class CompletedServicesController {
         final List<dynamic> dataList = jsonData['data'];
         print("?????????????????????????????????????");
         print(dataList);
-        return dataList
-            .map((item) => CompletedServiceModel.fromJson(item))
-            .toList();
-      } else {
-        return [];
+        services.assignAll(
+          dataList.map((item) => CompletedServiceModel.fromJson(item)),
+        );
       }
     } catch (e) {
-      return [];
+      print("Error fetching completed services: $e");
+    } finally {
+      isLoading(false);
     }
   }
 

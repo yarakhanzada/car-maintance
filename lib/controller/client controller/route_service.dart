@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/utils/map_helper.dart';
 
 //location + route + distance
@@ -11,6 +12,13 @@ class RouteService {
 
   late String liveDistance;
   late String liveDuration;
+
+  // Once the driver has picked up the vehicle and is heading back, route
+  // toward the workshop instead of the customer.
+  bool isReturningToWorkshop = false;
+
+  LatLng get destination =>
+      isReturningToWorkshop ? ApiConfig.workshopLocation : userLocation;
 
   Function? onUpdate;
 
@@ -37,20 +45,20 @@ class RouteService {
 
   Future<void> updateRouteData(LatLng truckPos) async {
     try {
-      final points = await MapHelper.getPolylinePoints(truckPos, userLocation);
+      final dest = destination;
+      final points = await MapHelper.getPolylinePoints(truckPos, dest);
 
       if (points.isNotEmpty) {
         routePoints = points;
       }
 
-      final routeData = await MapHelper.getRouteData(truckPos, userLocation);
+      final routeData = await MapHelper.getRouteData(truckPos, dest);
 
       if (routeData != null) {
         liveDistance = "${routeData['distance']} كم";
         liveDuration = "${routeData['duration']} دقيقة";
       } else {
-        double airDist =
-            MapHelper.calculateAirDistance(truckPos, userLocation) / 1000;
+        double airDist = MapHelper.calculateAirDistance(truckPos, dest) / 1000;
 
         liveDistance = "${airDist.toStringAsFixed(1)} كم";
       }

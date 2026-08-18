@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'package:senior_project/controller/client%20controller/TowingTrackingController.dart';
+import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/token_service.dart';
 
 class RequestTrackingScreen extends StatefulWidget {
@@ -156,6 +157,15 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
             rotation: 0,
             infoWindow: const InfoWindow(title: "سيارة السحب"),
           ),
+        if (_controller.routeService.isReturningToWorkshop)
+          Marker(
+            markerId: const MarkerId("workshop_loc"),
+            position: ApiConfig.workshopLocation,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueOrange,
+            ),
+            infoWindow: const InfoWindow(title: "الورشة"),
+          ),
       },
     );
   }
@@ -233,6 +243,17 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
           //   ],
           // ),
           // const Divider(height: 30),
+          if (_controller.routeService.isReturningToWorkshop) ...[
+            Text(
+              "السائق في طريق العودة للورشة مع مركبتك",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: Colors.orange[800],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
           _infoRow(
             _controller.routeService.liveDuration,
             _controller.routeService.liveDistance,

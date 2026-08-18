@@ -37,7 +37,7 @@ class GlassScaffold extends StatelessWidget {
               ),
             ),
           ),
-          // زر العودة
+          // Back button
           if (showBackButton)
             const Positioned(top: 20, left: 10, child: GlassBackButton()),
         ],

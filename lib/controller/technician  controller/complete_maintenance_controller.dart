@@ -32,7 +32,7 @@ class CompleteMaintenanceController extends GetxController {
         beforeImages,
         afterImages,
       );
-      // --- إضافة طباعة لحالة الاستجابة ---
+      // --- Added logging of the response status ---
       print("Response Status Code: ${response.statusCode}");
       print("Response Body: ${response.body}");
       
@@ -55,13 +55,13 @@ class CompleteMaintenanceController extends GetxController {
             "تنبيه",
             responseData['message'] ?? "تعذر إكمال الصيانة.",
           );
-          return false; // فشل
+          return false; // failed
         }
       }
-      return false; // فشل
+      return false; // failed
     } catch (e) {
       Get.snackbar("خطأ", "حدث خطأ أثناء الإرسال: $e");
-      return false; // فشل
+      return false; // failed
     } finally {
       isLoading(false);
     }

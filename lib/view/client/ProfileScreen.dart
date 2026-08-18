@@ -25,6 +25,14 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
 
+    Future<void> refreshProfile() async {
+      await Future.wait([
+        controller.getProfile(),
+        subscriptionController.getMySubscriptions(),
+        subscriptionController.fetchBenefits(),
+      ]);
+    }
+
     return Directionality(
       textDirection: ui.TextDirection.rtl,
       child: Scaffold(
@@ -33,63 +41,69 @@ class ProfileScreen extends StatelessWidget {
           children: [
             _buildBackgroundGradient(),
             Obx(() {
-              if (controller.isLoading.value) {
+              if (controller.isLoading.value && controller.profile.value == null) {
                 return const Center(child: CircularProgressIndicator());
               }
               final user = controller.profile.value;
               if (user == null) {
                 return const Center(child: Text("لا توجد بيانات"));
               }
-              return CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(25, 70, 25, 20),
-                      child: Column(
-                        children: [
-                          _buildProfileHeader(user),
-                          const SizedBox(height: 40),
-                          _buildSubscriptionCard(context, width),
-                          const SizedBox(height: 20),
+              return RefreshIndicator(
+                color: const Color(0xFFE55757),
+                onRefresh: refreshProfile,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(25, 70, 25, 20),
+                        child: Column(
+                          children: [
+                            _buildProfileHeader(user),
+                            const SizedBox(height: 40),
+                            _buildSubscriptionCard(context, width),
+                            const SizedBox(height: 20),
 
-                          _buildBenefitsCard(),
-                        ],
+                            _buildBenefitsCard(),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _buildSectionTitle("إعدادات الحساب"),
-                        _buildMenuTile(
-                          icon: Icons.person_outline_rounded,
-                          title: "تعديل الملف الشخصي",
-                          subtitle: "حدث بياناتك الشخصية",
-                          onTap: () async {
-                            final result = await Get.to(
-                              () => EditProfileScreen(),
-                              arguments: user,
-                            );
-                            if (result == true) controller.getProfile();
-                          },
-                        ),
-                        _buildMenuTile(
-                          icon: Icons.history_rounded,
-                          title: "نظام الدعم والمعلومات ",
-                          subtitle: "تحقق من نظام الدعم والمعلومات  ",
-                          onTap: () =>
-                              Get.to(() => const SystemSupportScreen()),
-                        ),
-                        const SizedBox(height: 15),
-                        _buildSectionTitle("إجراءات"),
-                        _buildLogoutTile(),
-                        const SizedBox(height: 80),
-                      ]),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          _buildSectionTitle("إعدادات الحساب"),
+                          _buildMenuTile(
+                            icon: Icons.person_outline_rounded,
+                            title: "تعديل الملف الشخصي",
+                            subtitle: "حدث بياناتك الشخصية",
+                            onTap: () async {
+                              final result = await Get.to(
+                                () => EditProfileScreen(),
+                                arguments: user,
+                              );
+                              if (result == true) controller.getProfile();
+                            },
+                          ),
+                          _buildMenuTile(
+                            icon: Icons.history_rounded,
+                            title: "نظام الدعم والمعلومات ",
+                            subtitle: "تحقق من نظام الدعم والمعلومات  ",
+                            onTap: () =>
+                                Get.to(() => const SystemSupportScreen()),
+                          ),
+                          const SizedBox(height: 15),
+                          _buildSectionTitle("إجراءات"),
+                          _buildLogoutTile(),
+                          const SizedBox(height: 80),
+                        ]),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             }),
           ],
@@ -351,7 +365,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
 
-            // تلميح السحب أسفل اليسار
+            // Swipe hint, bottom-left
             Positioned(
               bottom: 12,
               left: 15,

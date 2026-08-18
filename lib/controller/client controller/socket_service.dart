@@ -112,7 +112,7 @@ class SocketService {
       });
     });
 
-    socket!.on('driver_location_update', (data) async {
+    socket!.on('driver_location_update', (data) {
       isAccepted = true;
 
       driverData = {
@@ -125,10 +125,14 @@ class SocketService {
         (data['longitude'] as num).toDouble(),
       );
 
-      if (towTruckLocation != null) {
-        await routeService.updateRouteData(towTruckLocation!);
+      final status = data['status']?.toString();
+      if (status != null) {
+        routeService.isReturningToWorkshop = status == 'tow_returning_to_workshop';
       }
 
+      // Notify right away so the marker moves instantly; the caller
+      // (TowingTrackingController) kicks off the route/ETA refresh in the
+      // background so movement never waits on the routing API calls.
       if (onUpdate != null) onUpdate!();
     });
 

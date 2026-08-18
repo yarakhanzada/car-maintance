@@ -39,8 +39,13 @@ class _MyGarageScreenState extends State<MyGarageScreen> {
             return Stack(
               children: [
                 const GarageBackground(),
-                CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
+                RefreshIndicator(
+                  onRefresh: controller.getVehicles,
+                  color: const Color(0xFFE55757),
+                  child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
                   slivers: [
                     GarageHeader(width: width),
                     SliverPadding(
@@ -137,6 +142,7 @@ class _MyGarageScreenState extends State<MyGarageScreen> {
                     }),
                     const SliverToBoxAdapter(child: SizedBox(height: 100)),
                   ],
+                  ),
                 ),
                 Obx(() => controller.isLoading.value && controller.vehicleList.isNotEmpty
                     ? const Positioned(

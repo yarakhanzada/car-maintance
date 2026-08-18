@@ -106,7 +106,7 @@ class _VehicleCardState extends State<VehicleCard> {
                 children: [
                   _buildGlassCarCard(width),
 
-                  // 🔥 التعديل البصري الجديد: مؤشر سهمين صريح وواضح جداً للسحب
+                  // 🔥 New visual tweak: a clear, explicit double-arrow indicator for swiping
                   if (dragOffset == 0)
                     Positioned(
                       left: 0,
@@ -115,7 +115,7 @@ class _VehicleCardState extends State<VehicleCard> {
                       child: Container(
                         width: 45,
                         decoration: BoxDecoration(
-                          // تدرج لوني ناعم يسحب عين المستخدم للحافة اليسرى
+                          // Soft color gradient that draws the user's eye to the left edge
                           gradient: LinearGradient(
                             colors: [
                               Colors.grey.withOpacity(0.15),

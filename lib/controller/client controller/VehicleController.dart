@@ -39,7 +39,7 @@ class VehicleController extends GetxController {
     }
   }
 
-  // 1. عرض السيارات
+  // 1. Display vehicles
   Future<void> getVehicles() async {
     try {
       isLoading(true);
@@ -66,7 +66,7 @@ class VehicleController extends GetxController {
     }
   }
 
-  // 2. إضافة سيارة
+  // 2. Add a vehicle
   Future<void> addVehicle({
     required String brand,
     required String model,
@@ -96,7 +96,7 @@ class VehicleController extends GetxController {
     }
   }
 
-  // 3. حذف سيارة
+  // 3. Delete a vehicle
   Future<void> deleteVehicle(int id) async {
     try {
       isLoading(true);

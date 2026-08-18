@@ -103,7 +103,7 @@ class _DriverMapScreenState extends State<DriverMapScreen>
     });
   }
 
-  // دالة الشاشة الفارغة
+  // Empty-state screen widget
   Widget _buildEmptyState() {
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFB),
@@ -289,27 +289,46 @@ class _DriverMapScreenState extends State<DriverMapScreen>
       //   }
       // },
       onPressed: () async {
-        String? message;
-
         if (!s.isJobStarted) {
-          message = await s.startTowing();
+          final message = await s.startTowing();
+          if (message == null) {
+            _mapController?.animateCamera(
+              CameraUpdate.newLatLngZoom(
+                LatLng(s.driverLocation.latitude, s.driverLocation.longitude),
+                16,
+              ),
+            );
+          }
+          Get.snackbar(
+            message == null ? "نجاح" : "تنبيه",
+            message ?? "تمت العملية بنجاح",
+            backgroundColor: message == null
+                ? Colors.green.withOpacity(0.9)
+                : Colors.red.withOpacity(0.9),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
         } else if (!isLastStep) {
           String nextStatusKey =
               s.statusSequence[s.currentStatusIndex + 1]['key'];
-          message = await s.updateTowStatusAPI(nextStatusKey);
+          final message = await s.updateTowStatusAPI(nextStatusKey);
+          Get.snackbar(
+            message == null ? "نجاح" : "تنبيه",
+            message ?? "تمت العملية بنجاح",
+            backgroundColor: message == null
+                ? Colors.green.withOpacity(0.9)
+                : Colors.red.withOpacity(0.9),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
         } else {
-          message = await s.completeTowingAPI();
+          // Must go through the socket so the server broadcasts
+          // 'tracking_ended' to the customer's room. Calling the REST
+          // endpoint directly here leaves the customer stuck on the
+          // tracking map since they only ever learn about completion
+          // through that socket event.
+          s.completeTowingViaSocket();
         }
-
-        Get.snackbar(
-          message == null ? "نجاح" : "تنبيه",
-          message ?? "تمت العملية بنجاح",
-          backgroundColor: message == null
-              ? Colors.green.withOpacity(0.9)
-              : Colors.red.withOpacity(0.9),
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
       },
       child: Text(
         !s.isJobStarted

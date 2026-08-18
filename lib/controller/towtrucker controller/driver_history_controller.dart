@@ -54,7 +54,7 @@ class DriverHistoryController extends GetxController {
 
       if (placemarks.isNotEmpty) {
         Placemark p = placemarks[0];
-        // ترجمة القيم الافتراضية إذا لزم الأمر
+        // Translate default values if needed
         String city = p.locality ?? "دمشق"; 
         String area = p.subLocality ?? "";
 
@@ -63,7 +63,7 @@ class DriverHistoryController extends GetxController {
             : city;
       }
     } catch (e) {
-      // نص بديل في حال تعذر تحديد الموقع
+      // Fallback text in case the location can't be determined
       addressCache[trip.towingRequestId] = "تم تحديد الموقع";
     }
   }

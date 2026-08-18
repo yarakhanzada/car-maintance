@@ -1,6 +1,8 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:senior_project/controller/client controller/HistoryController.dart';
 import 'package:senior_project/model/ServiceHistoryModel.dart';
 
@@ -10,8 +12,13 @@ class ServiceHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(HistoryController());
+
     final double width = MediaQuery.of(context).size.width;
     final bool isTablet = width >= 600;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchHistory();
+    });
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -20,38 +27,58 @@ class ServiceHistoryScreen extends StatelessWidget {
         body: Stack(
           children: [
             _buildTopGradient(),
+
             SafeArea(
               child: Obx(() {
-                if (controller.isLoading.value) {
+                if (controller.isLoading.value &&
+                    controller.requestsList.isEmpty) {
                   return const Center(
                     child: CircularProgressIndicator(color: Color(0xFFE55757)),
                   );
                 }
-                return CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    _buildDynamicHeader(
-                      width,
-                      context,
-                      controller.requestsList.length,
-                      isTablet,
+
+                return RefreshIndicator(
+                  color: const Color(0xFFE55757),
+                  backgroundColor: Colors.white,
+
+                  onRefresh: () async {
+                    await controller.fetchHistory();
+                  },
+
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
                     ),
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final item = controller.requestsList[index];
-                          return _buildServiceCard(
-                            context,
-                            item,
-                            width,
-                            isTablet,
-                          );
-                        }, childCount: controller.requestsList.length),
+                    slivers: [
+                      _buildDynamicHeader(
+                        width,
+                        context,
+                        controller.requestsList.length,
+                        isTablet,
                       ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 30)),
-                  ],
+
+                      SliverPadding(
+                        padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final item = controller.requestsList[index];
+
+                            return _buildServiceCard(
+                              context,
+                              item,
+                              width,
+                              isTablet,
+                            );
+                          }, childCount: controller.requestsList.length),
+                        ),
+                      ),
+
+                      const SliverToBoxAdapter(child: SizedBox(height: 30)),
+                    ],
+                  ),
                 );
               }),
             ),
@@ -74,6 +101,7 @@ class ServiceHistoryScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
+
             Stack(
               children: [
                 Column(
@@ -88,7 +116,9 @@ class ServiceHistoryScreen extends StatelessWidget {
                         letterSpacing: -1,
                       ),
                     ),
-                    const SizedBox(width: 15),
+
+                    const SizedBox(height: 15),
+
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -123,74 +153,72 @@ class ServiceHistoryScreen extends StatelessWidget {
     double width,
     bool isTablet,
   ) {
-    bool isTowing = item.towingRequest != null;
-   return GestureDetector(
-  onTap: () => _showDetailsSheet(context, item),
-  child: Stack(
-    clipBehavior: Clip.none,
-    children: [
+    final bool isTowing = item.towingRequest != null;
 
-      Container(
-   
-  margin: const EdgeInsets.only(bottom: 18),
-  padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+    return GestureDetector(
+      onTap: () => _showDetailsSheet(context, item),
+
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 18),
+            padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            _buildIconTile(isTowing),
+            child: Row(
+              children: [
+                _buildIconTile(isTowing),
 
-            const SizedBox(width: 15),
+                const SizedBox(width: 15),
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isTowing ? "خدمة السحب" : "الصيانة",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: isTablet ? 18 : 16,
-                    ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isTowing ? "خدمة السحب" : "الصيانة",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: isTablet ? 18 : 16,
+                        ),
+                      ),
+
+                      Text("${item.vehicle?.brand} ${item.vehicle?.model}"),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        item.createdAt?.split('T')[0] ?? "",
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
-
-                  Text(
-                    "${item.vehicle?.brand} ${item.vehicle?.model}",
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  Text(
-                    item.createdAt?.split('T')[0] ?? "",
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          Positioned(
+            top: 0,
+            left: 5,
+            child: _buildStatusBadge(item.status ?? "جديد"),
+          ),
+        ],
       ),
-
-   Positioned(
-  top:0,
-  left: 5,
-  child: _buildStatusBadge(item.status ?? "جديد"),
-),
-    ],
-  ),
-);
+    );
   }
 
   Widget _buildIconTile(bool isTowing) {
@@ -210,49 +238,51 @@ class ServiceHistoryScreen extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(String status) {
-  Color color = status == "assigned"
-      ? Colors.blue
-      : (status == "new" ? Colors.orange : Colors.green);
+    final Color color = status == "assigned"
+        ? Colors.blue
+        : (status == "new" ? Colors.orange : Colors.green);
 
-  return Container(
-padding: const EdgeInsets.symmetric(
-  horizontal: 14,
-  vertical: 7,
-),
-
-decoration: BoxDecoration(
-  color: color.withOpacity(0.12),
-  borderRadius: BorderRadius.circular(18),
-),
-    child: Text(
-      status.replaceAll("_", " "),
-      textAlign: TextAlign.center,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        color: color,
-        fontSize: 12,
-        fontWeight: FontWeight.w900,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(18),
       ),
-    ),
-  );
-}
+      child: Text(
+        status.replaceAll("_", " "),
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
 
   void _showDetailsSheet(BuildContext context, ServiceData item) {
-    bool isTowing = item.problemType == "towing";
+    final bool isTowing = item.problemType == "towing";
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.75,
+
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
         ),
+
         padding: const EdgeInsets.all(30),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+
           children: [
             Center(
               child: Container(
@@ -264,76 +294,104 @@ decoration: BoxDecoration(
                 ),
               ),
             ),
+
             const SizedBox(height: 25),
+
             Text(
               isTowing ? "تفاصيل السحب" : "تفاصيل الصيانة",
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
+
             const Divider(height: 40),
+
             _infoRow(
               Icons.directions_car,
               "المركبة",
-              "${item.vehicle?.brand} ${item.vehicle?.model} (${item.vehicle?.year})",
+              "${item.vehicle?.brand} "
+                  "${item.vehicle?.model} "
+                  "(${item.vehicle?.year})",
             ),
+
             _infoRow(
               Icons.fingerprint,
               "رقم الهيكل",
               item.vehicle?.plate_number ?? "غير متوفر",
             ),
+
             if (isTowing) ...[
               const SizedBox(height: 15),
+
               _infoRow(
                 Icons.map_outlined,
                 "المسافة",
                 "${item.towingRequest?.distance} كم",
               ),
+
               _infoRow(
                 Icons.location_on,
                 "الإحداثيات",
-                "${item.towingRequest?.location?.latitude}, ${item.towingRequest?.location?.longitude}",
+                "${item.towingRequest?.location?.latitude}, "
+                    "${item.towingRequest?.location?.longitude}",
               ),
+
               if (item.towingRequest?.towTruck != null)
                 _infoRow(
                   Icons.person,
                   "معلومات الشاحنة",
-                  "#${item.towingRequest?.towTruck?.id} (السعر: ${item.towingRequest?.towTruck?.pricePerKm}/كم)",
+                  "#${item.towingRequest?.towTruck?.id} "
+                      "(السعر: "
+                      "${item.towingRequest?.towTruck?.pricePerKm}"
+                      "/كم)",
                 ),
             ],
+
             if (!isTowing) ...[
               const SizedBox(height: 15),
+
               _infoRow(
                 Icons.event,
                 "تاريخ الموعد",
                 item.maintenanceRequest?.scheduledDate ?? "غير محدد",
               ),
+
               _infoRow(
                 Icons.info_outline,
                 "الحالة",
                 "الحالة الحالية: ${item.status}",
               ),
             ],
+
             const SizedBox(height: 20),
-            Text(
+
+            const Text(
               "التسلسل الزمني للطلب",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
+
             const SizedBox(height: 10),
+
             Expanded(
               child: ListView.builder(
                 itemCount: item.requestStatusHistory?.length ?? 0,
+
                 itemBuilder: (context, i) {
                   final hist = item.requestStatusHistory![i];
+
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
+
                     leading: const Icon(
                       Icons.check_circle,
                       color: Colors.green,
                       size: 16,
                     ),
+
                     title: Text(
-                      "تغيرت الحالة إلى ${hist.status}",
+                      "تغيرت الحالة إلى "
+                      "${hist.status}",
                       style: const TextStyle(fontSize: 13),
                     ),
+
                     subtitle: Text(
                       hist.changedAt?.split('T')[1].substring(0, 5) ?? "",
                       style: const TextStyle(fontSize: 11),
@@ -351,18 +409,23 @@ decoration: BoxDecoration(
   Widget _infoRow(IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
+
       child: Row(
         children: [
           Icon(icon, size: 20, color: const Color(0xFFE55757)),
+
           const SizedBox(width: 15),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
                 Text(
                   label,
                   style: TextStyle(color: Colors.grey[500], fontSize: 11),
                 ),
+
                 Text(
                   value,
                   style: const TextStyle(
@@ -382,15 +445,19 @@ decoration: BoxDecoration(
     return Positioned(
       top: -150,
       right: -100,
+
       child: Container(
         width: 400,
         height: 400,
+
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: const Color(0xFFE55757).withOpacity(0.05),
         ),
+
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+
           child: Container(color: Colors.transparent),
         ),
       ),

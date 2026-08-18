@@ -36,7 +36,7 @@ class TaskDetailsController extends GetxController {
       print("🔥 [TaskDetailsController]: حدث خطأ غير متوقع: $e");
       print(
         "StackTrace: $stackTrace",
-      ); // هذا سيخبرنا بالضبط أي سطر في الموديل هو المسبب
+      ); // this will tell us exactly which line in the model is the cause
     } finally {
       isLoadingDetails(false);
     }

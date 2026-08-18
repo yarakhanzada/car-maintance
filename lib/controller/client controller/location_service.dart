@@ -4,7 +4,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-
 import 'route_service.dart';
 
 //GPS +  Update location API
@@ -78,37 +77,6 @@ class LocationService {
       onUpdate!();
     }
   }
-
-  // Future<void> updateCustomerLocationApi(double lat, double lng) async {
-  //   final url = "${ApiConfig.baseUrl}/v1/customer/location/update";
-
-  //   final data = requestData.containsKey('data')
-  //       ? requestData['data']
-  //       : requestData;
-
-  //   final serviceRequestId = data['towing_request']?['service_request_id'] ?? 0;
-
-  //   print("DEBUG: Updating location for Service Request ID: $serviceRequestId");
-
-  //   try {
-  //     final response = await ApiHelper.post(url, {
-  //       "latitude": lat,
-  //       "longitude": lng,
-  //       "service_request_id": serviceRequestId,
-  //     });
-
-  //     if (response.statusCode == 200) {
-  //       final responseBody = json.decode(response.body);
-
-  //       print("✅ API Update: ${responseBody['message']}");
-  //     } else {
-  //       print(" Failed to update location. Status: ${response.statusCode}");
-  //       print(" Server Response: ${response.body}");
-  //     }
-  //   } catch (e) {
-  //     print(" Error: $e");
-  //   }
-  // }
 
   void dispose() {
     positionStream?.cancel();

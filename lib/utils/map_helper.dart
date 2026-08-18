@@ -33,8 +33,8 @@ class MapHelper {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['routes'].isNotEmpty) {
-          double dist = data['routes'][0]['distance'] / 1000; // تحويل لكم
-          double dur = data['routes'][0]['duration'] / 60; // تحويل لدقائق
+          double dist = data['routes'][0]['distance'] / 1000; // convert to km
+          double dur = data['routes'][0]['duration'] / 60; // convert to minutes
           return {
             'distance': dist.toStringAsFixed(1),
             'duration': dur.toStringAsFixed(0),

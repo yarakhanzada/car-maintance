@@ -90,7 +90,7 @@ class ApiHelper {
     http.Response response;
 
     try {
-      if (files != null && files.isNotEmpty) {
+      if (files != null) {
         final requestMultipart = http.MultipartRequest(
           method.toUpperCase(),
           uri,

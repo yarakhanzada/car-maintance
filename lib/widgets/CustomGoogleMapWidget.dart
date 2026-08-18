@@ -27,7 +27,7 @@ class CustomGoogleMapWidget extends StatelessWidget {
       zoomControlsEnabled: false,
 
       markers: {
-        // ماركر السائق
+        // Driver marker
         Marker(
           markerId: const MarkerId("driver"),
           position: driverLocation,
