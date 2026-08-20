@@ -29,6 +29,7 @@ class MaintenanceTask {
   final String startDate;
   final String? endDate;
   final String status;
+  final String? statusLabel;
   final int priority;
   final String? notes;
   final MaintenanceRequest? maintenanceRequest;
@@ -42,6 +43,7 @@ class MaintenanceTask {
     required this.startDate,
     this.endDate,
     required this.status,
+    this.statusLabel,
     required this.priority,
     this.notes,
     this.maintenanceRequest,
@@ -57,6 +59,7 @@ class MaintenanceTask {
       startDate: json['start_date'] ?? '',
       endDate: json['end_date'],
       status: json['status'] ?? 'pending',
+      statusLabel: json['status_label'],
       priority: json['priority'] ?? 1,
       notes: json['notes'],
       maintenanceRequest: json['maintenance_request'] != null

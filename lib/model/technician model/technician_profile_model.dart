@@ -20,6 +20,7 @@ class TechnicianData {
   final String email;
   final String phone;
   final String availabilityStatus;
+  final String? availabilityStatusLabel;
   final Department? department;
   final TasksSummary? tasksSummary;
   final String memberSince;
@@ -30,6 +31,7 @@ class TechnicianData {
     required this.email,
     required this.phone,
     required this.availabilityStatus,
+    this.availabilityStatusLabel,
     this.department,
     this.tasksSummary,
     required this.memberSince,
@@ -42,6 +44,7 @@ class TechnicianData {
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
       availabilityStatus: json['availability_status'] ?? 'available',
+      availabilityStatusLabel: json['availability_status_label'],
       department: json['department'] != null
           ? Department.fromJson(json['department'])
           : null,

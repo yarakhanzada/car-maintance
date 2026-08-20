@@ -199,7 +199,7 @@ class NewTasksScreen extends StatelessWidget {
                 task.department?.name ?? "Maintenance",
                 const Color(0xFFE55757),
               ),
-              _buildStatusBadge(task.status),
+              _buildStatusBadge(task.status, task.statusLabel ?? task.status),
             ],
           ),
           const SizedBox(height: 20),
@@ -547,7 +547,7 @@ class NewTasksScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(String status, String statusLabel) {
     Color badgeColor = Colors.orange;
     if (status == "in_progress") badgeColor = Colors.blue;
     if (status == "completed") badgeColor = Colors.green;
@@ -559,7 +559,7 @@ class NewTasksScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        status.toUpperCase(),
+        statusLabel,
         style: TextStyle(
           color: badgeColor,
           fontWeight: FontWeight.bold,

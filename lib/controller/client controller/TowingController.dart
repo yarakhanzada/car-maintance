@@ -7,6 +7,7 @@ import 'package:senior_project/services/location_service.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/api_helper.dart';
 import 'package:senior_project/services/token_service.dart';
+import 'package:senior_project/view/client/ClientBottombar.dart';
 import 'package:senior_project/view/client/TowingRequestScreen.dart';
 import 'package:senior_project/controller/client%20controller/VehicleController.dart';
 
@@ -89,5 +90,12 @@ class TowingController extends GetxController {
     selectedVehicleId.value = null;
     problemController.clear();
     images.clear();
+  }
+
+  void goToGarageToAddVehicle() {
+    if (Get.isRegistered<NavigationController>()) {
+      Get.find<NavigationController>().selectedIndex.value = 3;
+    }
+    Get.back();
   }
 }

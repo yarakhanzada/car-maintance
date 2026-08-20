@@ -69,15 +69,29 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                       );
                     }
                     if (ordersCtrl.ordersList.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          "لا توجد طلبات متاحة حالياً",
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                      return RefreshIndicator(
+                        color: const Color(0xFFE55757),
+                        onRefresh: () => ordersCtrl.fetchOrders(),
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: const [
+                            SizedBox(height: 200),
+                            Center(
+                              child: Text(
+                                "لا توجد طلبات متاحة حالياً",
+                                style: TextStyle(color: Colors.grey, fontSize: 16),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     }
 
-                    return ListView.builder(
+                    return RefreshIndicator(
+                      color: const Color(0xFFE55757),
+                      onRefresh: () => ordersCtrl.fetchOrders(),
+                      child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: ordersCtrl.ordersList.length,
                       padding: EdgeInsets.only(bottom: height * 0.025),
                       itemBuilder: (context, index) {
@@ -306,6 +320,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                           ),
                         );
                       },
+                      ),
                     );
                   }),
                 ),

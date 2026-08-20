@@ -383,12 +383,14 @@ class RequestStatusHistory {
   int? id;
   int? serviceRequestId;
   String? status;
+  String? statusLabel;
   String? changedAt;
 
   RequestStatusHistory({
     this.id,
     this.serviceRequestId,
     this.status,
+    this.statusLabel,
     this.changedAt,
   });
 
@@ -396,6 +398,7 @@ class RequestStatusHistory {
     id = json['id'];
     serviceRequestId = json['service_request_id'];
     status = json['status'];
+    statusLabel = json['status_label'];
     changedAt = json['changed_at'];
   }
 
@@ -404,6 +407,7 @@ class RequestStatusHistory {
     data['id'] = id;
     data['service_request_id'] = serviceRequestId;
     data['status'] = status;
+    data['status_label'] = statusLabel;
     data['changed_at'] = changedAt;
     return data;
   }

@@ -4,6 +4,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class CustomGoogleMapWidget extends StatelessWidget {
   final LatLng driverLocation;
   final LatLng? customerLocation;
+  final LatLng? workshopLocation;
+  final BitmapDescriptor? workshopIcon;
   final List<LatLng> routePoints;
   final bool isJobStarted;
   final Function(GoogleMapController) onMapCreated;
@@ -12,6 +14,8 @@ class CustomGoogleMapWidget extends StatelessWidget {
     super.key,
     required this.driverLocation,
     this.customerLocation,
+    this.workshopLocation,
+    this.workshopIcon,
     this.routePoints = const [],
     this.isJobStarted = false,
     required this.onMapCreated,
@@ -45,6 +49,18 @@ class CustomGoogleMapWidget extends StatelessWidget {
               BitmapDescriptor.hueRed,
             ),
             infoWindow: const InfoWindow(title: "موقع طلب السحب"),
+          ),
+
+        if (workshopLocation != null)
+          Marker(
+            markerId: const MarkerId("workshop"),
+            position: workshopLocation!,
+            icon:
+                workshopIcon ??
+                BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueViolet,
+                ),
+            infoWindow: const InfoWindow(title: "الورشة"),
           ),
       },
 

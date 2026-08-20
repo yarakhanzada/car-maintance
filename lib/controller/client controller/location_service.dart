@@ -19,6 +19,12 @@ class LocationService {
   DateTime? lastApiUpdate;
 
   StreamSubscription<Position>? positionStream;
+  Timer? _keepAliveTimer;
+
+  // GPS fixes reporting worse than this horizontal accuracy (in meters) are
+  // discarded — a noisy fix can otherwise report itself 20-50m off, making
+  // the marker visibly snap back and forth even while stationary.
+  static const double _maxAcceptableAccuracyMeters = 30;
 
   Function? onUpdate;
 
@@ -38,25 +44,27 @@ class LocationService {
         LatLng(position.latitude, position.longitude),
       );
 
+      // Re-sends the last known position on a timer even when the customer
+      // hasn't moved, so the server's proximity check (used to gate the
+      // driver's "tow_completed") never gets stuck with a stale/one-shot
+      // reading from before the socket was even connected.
+      _keepAliveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+        _emitLocation(routeService.userLocation);
+      });
+
       positionStream =
           Geolocator.getPositionStream(
             locationSettings: const LocationSettings(
               accuracy: LocationAccuracy.high,
-              distanceFilter: 10,
+              distanceFilter: 5,
             ),
           ).listen((Position pos) {
+            if (pos.accuracy > _maxAcceptableAccuracyMeters) return;
             routeService.updateUserLocation(
               LatLng(pos.latitude, pos.longitude),
             );
 
-            if (socket != null && socket!.connected) {
-              socket!.emit('update_customer_location', {
-                'customer_id': customerId,
-                'driver_id': driverId,
-                'latitude': pos.latitude,
-                'longitude': pos.longitude,
-              });
-            }
+            _emitLocation(LatLng(pos.latitude, pos.longitude));
 
             if (lastApiUpdate == null ||
                 DateTime.now().difference(lastApiUpdate!).inSeconds > 30) {
@@ -78,7 +86,36 @@ class LocationService {
     }
   }
 
+  void _emitLocation(LatLng position) {
+    if (socket != null && socket!.connected) {
+      socket!.emit('update_customer_location', {
+        'customer_id': customerId,
+        'driver_id': driverId,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+      });
+    }
+  }
+
+  // Called once the socket actually connects, so the server has a fresh
+  // customer position right away instead of waiting on the next >5m move
+  // (which may never come if the customer is standing still).
+  Future<void> sendCurrentLocationNow() async {
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      final latLng = LatLng(position.latitude, position.longitude);
+      routeService.updateUserLocation(latLng);
+      _emitLocation(latLng);
+      if (onUpdate != null) onUpdate!();
+    } catch (e) {
+      print("Error in sendCurrentLocationNow: $e");
+    }
+  }
+
   void dispose() {
     positionStream?.cancel();
+    _keepAliveTimer?.cancel();
   }
 }

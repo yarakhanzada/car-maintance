@@ -129,6 +129,10 @@ class MaintenanceRequestScreen extends StatelessWidget {
   }
 
   Widget _buildVehicleDropdown() {
+    if (controller.userVehicles.isEmpty) {
+      return _buildNoVehicleCard();
+    }
+
     return Container(
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -158,6 +162,63 @@ class MaintenanceRequestScreen extends StatelessWidget {
           }).toList(),
           onChanged: (val) => controller.selectedVehicleId.value = val,
         ),
+      ),
+    );
+  }
+
+  Widget _buildNoVehicleCard() {
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.directions_car_filled_outlined,
+                color: Colors.grey[400],
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  "لا توجد مركبات مسجلة في مرأبك بعد",
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => controller.goToGarageToAddVehicle(),
+              icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+              label: const Text("إضافة مركبة"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE55757),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

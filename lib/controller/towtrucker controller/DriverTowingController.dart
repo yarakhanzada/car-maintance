@@ -20,6 +20,9 @@ class DriverTowingController extends GetxController {
   List<LatLng> routePoints = [];
 
   StreamSubscription<Position>? positionStream;
+  Timer? _keepAliveTimer;
+
+  static const double _maxAcceptableAccuracyMeters = 30;
 
   late String customerId;
   late String driverId;
@@ -99,6 +102,11 @@ class DriverTowingController extends GetxController {
   Future<void> initLocationServices() async {
     _sendLocationToSocket();
     //  await updateDriverLocationAPI();
+
+    _keepAliveTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      _sendLocationToSocket();
+    });
+
     positionStream =
         Geolocator.getPositionStream(
           locationSettings: const LocationSettings(
@@ -107,19 +115,20 @@ class DriverTowingController extends GetxController {
           ),
         ).listen((Position pos) async {
           if (pos.latitude == 0 && pos.longitude == 0) return;
+
+          if (pos.accuracy > _maxAcceptableAccuracyMeters) return;
           driverLocation = LatLng(pos.latitude, pos.longitude);
           update();
-          // move the marker instantly, don't wait on the route calls below
           _sendLocationToSocket();
           //  await updateDriverLocationAPI();
           _updateMapData();
         });
   }
 
-  // Once the driver has picked up the vehicle and is heading back, the
-  // route/ETA should point at the workshop instead of the customer.
   bool get isReturningToWorkshop =>
-      isJobStarted && currentStatusIndex == statusSequence.length - 1;
+      isJobStarted &&
+      currentStatusIndex >=
+          statusSequence.indexWhere((s) => s['key'] == 'tow_in_progress');
 
   LatLng? get _routeTarget =>
       isReturningToWorkshop ? ApiConfig.workshopLocation : customerLocation;
@@ -131,21 +140,31 @@ class DriverTowingController extends GetxController {
         'driver_id': driverId,
         'latitude': driverLocation.latitude,
         'longitude': driverLocation.longitude,
+
+        'status': isJobStarted
+            ? statusSequence[currentStatusIndex]['key']
+            : 'tow_assigned',
       });
     }
   }
 
+  int _routeRequestSeq = 0;
+
   Future<void> _updateMapData() async {
     final target = _routeTarget;
     if (target == null) return;
+    final int seq = ++_routeRequestSeq;
 
     final data = await MapHelper.getRouteData(driverLocation, target);
+    if (seq != _routeRequestSeq) return;
     if (data != null) {
       distanceToCustomer = data['distance'];
       estimatedTime = data['duration'];
     }
 
-    routePoints = await MapHelper.getPolylinePoints(driverLocation, target);
+    final points = await MapHelper.getPolylinePoints(driverLocation, target);
+    if (seq != _routeRequestSeq) return;
+    routePoints = points;
     update();
   }
 
@@ -242,22 +261,36 @@ class DriverTowingController extends GetxController {
     );
   }
 
-  void completeTowingViaSocket() {
-    if (socket != null && socket!.connected) {
-      print("🚨 DRIVER EMIT: tow_completed");
-
-      socket!.emit('tow_completed', {
-        'customer_id': customerId,
-        'driver_id': driverId,
-      });
-    } else {
+  Future<void> completeTowingViaSocket() async {
+    if (socket == null || !socket!.connected) {
       print("❌ Socket not connected");
+      return;
     }
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+      );
+      driverLocation = LatLng(position.latitude, position.longitude);
+      update();
+    } catch (e) {
+      print("⚠️ Could not refresh location before completing: $e");
+    }
+
+    _sendLocationToSocket();
+
+    print("🚨 DRIVER EMIT: tow_completed");
+
+    socket!.emit('tow_completed', {
+      'customer_id': customerId,
+      'driver_id': driverId,
+    });
   }
 
   @override
   void onClose() {
     positionStream?.cancel();
+    _keepAliveTimer?.cancel();
     socket?.dispose();
     super.onClose();
   }
@@ -310,6 +343,7 @@ class DriverTowingController extends GetxController {
         );
         _extractIds();
         update();
+        _sendLocationToSocket();
         return null; // success
       } else {
         return body['message'] ?? "فشل بدء المهمة";
@@ -350,7 +384,9 @@ class DriverTowingController extends GetxController {
             requestData,
           );
           update();
-          _updateMapData(); // switch the route target (e.g. to the workshop) right away
+
+          _sendLocationToSocket();
+          _updateMapData();
         }
         return null;
       } else {

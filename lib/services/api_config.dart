@@ -7,7 +7,5 @@ class ApiConfig {
   static const String openRouteApiKey =
       'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjU0N2NmOWJkYjFmYjQwODM5YmZlNWRjMmQ1ODIzNmQ4IiwiaCI6Im11cm11cjY0In0=';
 
-  // Company workshop location — the destination once a tow truck is
-  // returning with a vehicle (matches the location set on the backend).
   static const LatLng workshopLocation = LatLng(33.4932432, 36.3181898);
 }

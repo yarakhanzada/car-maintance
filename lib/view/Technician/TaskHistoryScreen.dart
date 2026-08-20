@@ -35,15 +35,25 @@ class TaskHistoryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildPremiumHeader(),
-                      const Expanded(
-                        child: Center(
-                          child: Text(
-                            "لا توجد مهام مكتملة",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () => controller.fetchHistoryTasks(),
+                          color: const Color(0xFFE55757),
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: const [
+                              SizedBox(height: 200),
+                              Center(
+                                child: Text(
+                                  "لا توجد مهام مكتملة",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -78,14 +88,18 @@ class TaskHistoryScreen extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 110),
-                        itemCount: controller.historyTasks.length,
-                        itemBuilder: (context, index) =>
-                            _buildPremiumHistoryCard(
-                              controller.historyTasks[index],
-                            ),
+                      child: RefreshIndicator(
+                        onRefresh: () => controller.fetchHistoryTasks(),
+                        color: const Color(0xFFE55757),
+                        child: ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 110),
+                          itemCount: controller.historyTasks.length,
+                          itemBuilder: (context, index) =>
+                              _buildPremiumHistoryCard(
+                                controller.historyTasks[index],
+                              ),
+                        ),
                       ),
                     ),
                   ],
@@ -238,7 +252,7 @@ class TaskHistoryScreen extends StatelessWidget {
                   const Icon(Icons.circle, size: 8, color: Colors.green),
                   const SizedBox(width: 5),
                   Text(
-                    task.status.toUpperCase(),
+                    task.statusLabel ?? task.status,
                     style: const TextStyle(
                       color: Colors.green,
                       fontSize: 11,

@@ -22,18 +22,31 @@ class DriverHistoryScreen extends StatelessWidget {
                 Expanded(
                   child: Obx(() {
                     if (controller.historyList.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          "لا توجد طلبات متاحة",
-                          style: TextStyle(color: Colors.grey),
+                      return RefreshIndicator(
+                        color: const Color(0xFFE55757),
+                        onRefresh: () => controller.fetchHistory(),
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: const [
+                            SizedBox(height: 200),
+                            Center(
+                              child: Text(
+                                "لا توجد طلبات متاحة",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     }
 
-                    return ListView.builder(
+                    return RefreshIndicator(
+                      color: const Color(0xFFE55757),
+                      onRefresh: () => controller.fetchHistory(),
+                      child: ListView.builder(
                       itemCount: controller.historyList.length,
                       padding: const EdgeInsets.only(bottom: 20),
-                      physics: const BouncingScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         final trip = controller.historyList[index];
 
@@ -171,6 +184,7 @@ class DriverHistoryScreen extends StatelessWidget {
                           ),
                         );
                       },
+                      ),
                     );
                   }),
                 ),

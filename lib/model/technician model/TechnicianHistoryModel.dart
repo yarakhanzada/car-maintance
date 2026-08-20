@@ -27,6 +27,7 @@ class HistoryTask {
   final String startDate;
   final String endDate;
   final String status;
+  final String? statusLabel;
   final int priority;
   final int estimatedTime;
   final String notes;
@@ -44,6 +45,7 @@ final String exitedAt;
     required this.startDate,
     required this.endDate,
     required this.status,
+    this.statusLabel,
     required this.priority,
     required this.estimatedTime,
     required this.notes,
@@ -62,6 +64,7 @@ final String exitedAt;
       startDate: json['start_date'] ?? '',
       endDate: json['end_date'] ?? '',
       status: json['status'] ?? '',
+      statusLabel: json['status_label'],
       priority: json['priority'] ?? 0,
       estimatedTime: json['estimated_time'] ?? 0,
       notes: json['notes'] ?? '',

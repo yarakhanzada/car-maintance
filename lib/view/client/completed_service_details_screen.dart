@@ -154,9 +154,7 @@ class CompletedServiceDetailsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              service.status == "completed"
-                  ? "مكتمل"
-                  : service.status.toUpperCase(),
+              service.statusLabel ?? service.status,
               style: const TextStyle(
                 color: Color(0xFF4CAF50),
                 fontSize: 10,

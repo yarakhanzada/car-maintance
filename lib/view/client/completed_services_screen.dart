@@ -39,12 +39,18 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
           children: [
             _buildBackgroundGradient(screenWidth),
             SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(screenWidth),
-                  Expanded(child: _buildBody(screenWidth)),
-                ],
+              child: RefreshIndicator(
+                onRefresh: _controller.fetchCompletedServices,
+                color: const Color(0xFFE55757),
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  slivers: [
+                    _buildHeaderSliver(screenWidth),
+                    _buildBodySliver(screenWidth),
+                  ],
+                ),
               ),
             ),
           ],
@@ -53,65 +59,72 @@ class _CompletedServicesScreenState extends State<CompletedServicesScreen> {
     );
   }
 
-  Widget _buildHeader(double screenWidth) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        screenWidth * 0.05,
-        30,
-        screenWidth * 0.05,
-        10,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "الخدمات المكتملة",
-            style: TextStyle(
-              fontSize: screenWidth * 0.070,
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF1A1A1A),
-              letterSpacing: -1,
+  Widget _buildHeaderSliver(double screenWidth) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          screenWidth * 0.06,
+          30,
+          screenWidth * 0.06,
+          10,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "الخدمات المكتملة",
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1A1A1A),
+                letterSpacing: -1,
+              ),
             ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            "تتبع سجلات صيانة سيارتك المكتملة",
-            style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.035),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              "تتبع سجلات صيانة سيارتك المكتملة",
+              style: TextStyle(color: Colors.grey[500], fontSize: 15),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBody(double screenWidth) {
+  Widget _buildBodySliver(double screenWidth) {
     return Obx(() {
       if (_controller.isLoading.value && _controller.services.isEmpty) {
-        return const Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFFE55757),
-            strokeWidth: 2.5,
+        return const SliverToBoxAdapter(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(60.0),
+              child: CircularProgressIndicator(
+                color: Color(0xFFE55757),
+                strokeWidth: 2.5,
+              ),
+            ),
           ),
         );
       }
 
       if (_controller.services.isEmpty) {
-        return _buildEmptyState(screenWidth);
+        return SliverFillRemaining(
+          hasScrollBody: false,
+          child: _buildEmptyState(screenWidth),
+        );
       }
 
-      return RefreshIndicator(
-        onRefresh: _controller.fetchCompletedServices,
-        color: const Color(0xFFE55757),
-        child: ListView.builder(
-          padding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.045,
-            vertical: 8,
+      return SliverPadding(
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.045,
+          vertical: 8,
+        ),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) =>
+                _buildServiceCard(_controller.services[index], screenWidth),
+            childCount: _controller.services.length,
           ),
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          itemCount: _controller.services.length,
-          itemBuilder: (context, index) =>
-              _buildServiceCard(_controller.services[index], screenWidth),
         ),
       );
     });

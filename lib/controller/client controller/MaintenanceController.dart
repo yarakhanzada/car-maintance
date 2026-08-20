@@ -210,6 +210,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:senior_project/controller/client controller/VehicleController.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/api_helper.dart';
+import 'package:senior_project/view/client/ClientBottombar.dart';
 
 class MaintenanceController extends GetxController {
   var isLoading = false.obs;
@@ -264,6 +265,16 @@ class MaintenanceController extends GetxController {
   void onInit() {
     super.onInit();
     _setImmediateDefaults();
+  }
+
+  // Switches the client bottom nav to the garage tab and pops back to it
+  // (rather than pushing a new MyGarageScreen route) so the bottom bar
+  // stays visible.
+  void goToGarageToAddVehicle() {
+    if (Get.isRegistered<NavigationController>()) {
+      Get.find<NavigationController>().selectedIndex.value = 3;
+    }
+    Get.back();
   }
 
   void updateMaintenanceType(bool immediate) {

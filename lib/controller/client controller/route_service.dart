@@ -10,6 +10,9 @@ class RouteService {
 
   List<LatLng> routePoints = [];
 
+  // Fixed at request-creation time from the API response and never
+  // recalculated afterward — only the polyline (routePoints) keeps updating
+  // live as the truck moves.
   late String liveDistance;
   late String liveDuration;
 
@@ -21,6 +24,12 @@ class RouteService {
       isReturningToWorkshop ? ApiConfig.workshopLocation : userLocation;
 
   Function? onUpdate;
+
+  // Each GPS ping fires a new routing-API request; responses can arrive out
+  // of order (e.g. a stale "heading to customer" request resolving after a
+  // newer "heading to workshop" one), which made the route/marker visibly
+  // snap between destinations. Only the latest request's result is applied.
+  int _requestSeq = 0;
 
   RouteService({required this.requestData, this.onUpdate}) {
     initializeEstimatedStats();
@@ -44,23 +53,14 @@ class RouteService {
   }
 
   Future<void> updateRouteData(LatLng truckPos) async {
+    final int seq = ++_requestSeq;
     try {
       final dest = destination;
       final points = await MapHelper.getPolylinePoints(truckPos, dest);
+      if (seq != _requestSeq) return; // a newer request already landed
 
       if (points.isNotEmpty) {
         routePoints = points;
-      }
-
-      final routeData = await MapHelper.getRouteData(truckPos, dest);
-
-      if (routeData != null) {
-        liveDistance = "${routeData['distance']} كم";
-        liveDuration = "${routeData['duration']} دقيقة";
-      } else {
-        double airDist = MapHelper.calculateAirDistance(truckPos, dest) / 1000;
-
-        liveDistance = "${airDist.toStringAsFixed(1)} كم";
       }
 
       if (onUpdate != null) {

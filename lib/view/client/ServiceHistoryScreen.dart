@@ -214,7 +214,10 @@ class ServiceHistoryScreen extends StatelessWidget {
           Positioned(
             top: 0,
             left: 5,
-            child: _buildStatusBadge(item.status ?? "جديد"),
+            child: _buildStatusBadge(
+              item.status ?? "new",
+              item.statusLabel ?? "جديد",
+            ),
           ),
         ],
       ),
@@ -237,7 +240,7 @@ class ServiceHistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(String status, String statusLabel) {
     final Color color = status == "assigned"
         ? Colors.blue
         : (status == "new" ? Colors.orange : Colors.green);
@@ -249,7 +252,7 @@ class ServiceHistoryScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
       ),
       child: Text(
-        status.replaceAll("_", " "),
+        statusLabel,
         textAlign: TextAlign.center,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
@@ -357,7 +360,7 @@ class ServiceHistoryScreen extends StatelessWidget {
               _infoRow(
                 Icons.info_outline,
                 "الحالة",
-                "الحالة الحالية: ${item.status}",
+                "الحالة الحالية: ${item.statusLabel ?? item.status}",
               ),
             ],
 
@@ -388,7 +391,7 @@ class ServiceHistoryScreen extends StatelessWidget {
 
                     title: Text(
                       "تغيرت الحالة إلى "
-                      "${hist.status}",
+                      "${hist.statusLabel ?? hist.status}",
                       style: const TextStyle(fontSize: 13),
                     ),
 

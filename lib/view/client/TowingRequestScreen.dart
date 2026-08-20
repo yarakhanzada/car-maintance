@@ -6,6 +6,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:senior_project/controller/client%20controller/TowingTrackingController.dart';
 import 'package:senior_project/services/api_config.dart';
 import 'package:senior_project/services/token_service.dart';
+import 'package:senior_project/utils/map_helper.dart';
 
 class RequestTrackingScreen extends StatefulWidget {
   final Map<String, dynamic> requestData;
@@ -15,11 +16,19 @@ class RequestTrackingScreen extends StatefulWidget {
   State<RequestTrackingScreen> createState() => _RequestTrackingScreenState();
 }
 
-class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
+class _RequestTrackingScreenState extends State<RequestTrackingScreen>
+    with SingleTickerProviderStateMixin {
   GoogleMapController? _googleMapController;
   late TowingTrackingController _controller;
+  late AnimationController _truckAnimController;
 
   late String _estimatedFee;
+  bool _hasCenteredOnWorkshop = false;
+  BitmapDescriptor? _workshopIcon;
+
+  LatLng? _truckAnimFrom;
+  LatLng? _truckAnimTo;
+  LatLng? _displayedTruckLocation;
 
   @override
   void initState() {
@@ -27,9 +36,30 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
     //TokenService.clearActiveRequestForCurrentUser();
     print("DEBUG: Raw requestData received: ${widget.requestData}");
 
+    _truckAnimController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 1000),
+        )..addListener(() {
+          if (_truckAnimFrom == null || _truckAnimTo == null) return;
+          final t = Curves.easeInOut.transform(_truckAnimController.value);
+          setState(() {
+            _displayedTruckLocation = LatLng(
+              _truckAnimFrom!.latitude +
+                  (_truckAnimTo!.latitude - _truckAnimFrom!.latitude) * t,
+              _truckAnimFrom!.longitude +
+                  (_truckAnimTo!.longitude - _truckAnimFrom!.longitude) * t,
+            );
+          });
+        });
+
     _checkRequestValidity();
 
     _parseInitialData();
+
+    MapHelper.getWorkshopIcon().then((icon) {
+      if (mounted) setState(() => _workshopIcon = icon);
+    });
 
     _controller = TowingTrackingController(
       requestData: widget.requestData,
@@ -38,9 +68,14 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
           setState(() {
             if (_controller.isAccepted &&
                 _controller.towTruckLocation != null) {
-              _googleMapController?.animateCamera(
-                CameraUpdate.newLatLng(_controller.towTruckLocation!),
-              );
+              _animateTruckTo(_controller.towTruckLocation!);
+              if (_controller.routeService.isReturningToWorkshop) {
+                _centerOnWorkshopOnce(_controller.towTruckLocation!);
+              } else {
+                _googleMapController?.animateCamera(
+                  CameraUpdate.newLatLng(_controller.towTruckLocation!),
+                );
+              }
             }
           });
         }
@@ -54,6 +89,19 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
 
       if (mounted) setState(() {});
     });
+  }
+
+  void _animateTruckTo(LatLng newPosition) {
+    if (_truckAnimTo != null &&
+        _truckAnimTo!.latitude == newPosition.latitude &&
+        _truckAnimTo!.longitude == newPosition.longitude) {
+      return;
+    }
+    _truckAnimFrom = _displayedTruckLocation ?? newPosition;
+    _truckAnimTo = newPosition;
+    _truckAnimController
+      ..reset()
+      ..forward();
   }
 
   Future<void> _checkRequestValidity() async {
@@ -79,6 +127,38 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
     final data = widget.requestData;
     _estimatedFee =
         "${(data['estimated_cost'] as num?)?.toStringAsFixed(0) ?? "0"} ل.س";
+  }
+
+  // Fits both the truck and the workshop into view (centered) the moment
+  // the truck starts heading there, instead of leaving the workshop flag
+  // off-screen until the user manually pans the map.
+  void _centerOnWorkshopOnce(LatLng truckLocation) {
+    if (_hasCenteredOnWorkshop || _googleMapController == null) return;
+    _hasCenteredOnWorkshop = true;
+
+    final workshop = ApiConfig.workshopLocation;
+    final bounds = LatLngBounds(
+      southwest: LatLng(
+        truckLocation.latitude < workshop.latitude
+            ? truckLocation.latitude
+            : workshop.latitude,
+        truckLocation.longitude < workshop.longitude
+            ? truckLocation.longitude
+            : workshop.longitude,
+      ),
+      northeast: LatLng(
+        truckLocation.latitude > workshop.latitude
+            ? truckLocation.latitude
+            : workshop.latitude,
+        truckLocation.longitude > workshop.longitude
+            ? truckLocation.longitude
+            : workshop.longitude,
+      ),
+    );
+
+    _googleMapController!.animateCamera(
+      CameraUpdate.newLatLngBounds(bounds, 80),
+    );
   }
 
   @override
@@ -150,7 +230,7 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
         if (_controller.isAccepted && _controller.towTruckLocation != null)
           Marker(
             markerId: const MarkerId("driver_loc"),
-            position: _controller.towTruckLocation!,
+            position: _displayedTruckLocation ?? _controller.towTruckLocation!,
             icon: BitmapDescriptor.defaultMarkerWithHue(
               BitmapDescriptor.hueRed,
             ),
@@ -161,9 +241,11 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
           Marker(
             markerId: const MarkerId("workshop_loc"),
             position: ApiConfig.workshopLocation,
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              BitmapDescriptor.hueOrange,
-            ),
+            icon:
+                _workshopIcon ??
+                BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueViolet,
+                ),
             infoWindow: const InfoWindow(title: "الورشة"),
           ),
       },
@@ -210,39 +292,8 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _dragHandle(),
-          //   _buildStatusBadge(),
           const SizedBox(height: 15),
-          // Row(
-          //   children: [
-          //     CircleAvatar(
-          //       radius: 26,
-          //       backgroundColor: Colors.grey[200],
-          //       child: const Icon(Icons.person, size: 30, color: Colors.grey),
-          //     ),
-          //     const SizedBox(width: 12),
-          //     Expanded(
-          //       child: Column(
-          //         crossAxisAlignment: CrossAxisAlignment.start,
-          //         children: [
-          //           Text(
-          //             _controller.driverData?['driver_name'] ?? 'سائق السحب',
-          //             style: const TextStyle(
-          //               fontWeight: FontWeight.bold,
-          //               fontSize: 16,
-          //             ),
-          //           ),
-          //           Text(
-          //             _controller.driverData?['truck_model'] ?? 'شاحنة  ',
-          //             style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //     const SizedBox(width: 8),
-          //     _contactButton(Icons.phone, Colors.green, () {}),
-          //   ],
-          // ),
-          // const Divider(height: 30),
+
           if (_controller.routeService.isReturningToWorkshop) ...[
             Text(
               "السائق في طريق العودة للورشة مع مركبتك",
@@ -260,29 +311,6 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
             _estimatedFee,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge() {
-    bool isVeryClose =
-        _controller.routeService.liveDistance.contains("0.") ||
-        _controller.routeService.liveDistance == "0 كم";
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isVeryClose
-            ? Colors.orange.withOpacity(0.1)
-            : Colors.green.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        isVeryClose ? "السائق وصل تقريباً!" : "السائق يتجه إليك الآن",
-        style: TextStyle(
-          color: isVeryClose ? Colors.orange[800] : Colors.green[800],
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
       ),
     );
   }
@@ -359,6 +387,7 @@ class _RequestTrackingScreenState extends State<RequestTrackingScreen> {
 
   @override
   void dispose() {
+    _truckAnimController.dispose();
     _controller.dispose();
     _googleMapController?.dispose();
     super.dispose();

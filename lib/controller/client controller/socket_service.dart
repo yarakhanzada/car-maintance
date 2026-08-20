@@ -110,6 +110,11 @@ class SocketService {
         'customer_id': customerId,
         'driver_id': driverId,
       });
+
+      // Push a fresh position the moment the socket is actually usable —
+      // any GPS reading from before this point (or from the movement-gated
+      // stream, if the customer hasn't moved) never reached the server.
+      locationService.sendCurrentLocationNow();
     });
 
     socket!.on('driver_location_update', (data) {
@@ -127,7 +132,10 @@ class SocketService {
 
       final status = data['status']?.toString();
       if (status != null) {
-        routeService.isReturningToWorkshop = status == 'tow_returning_to_workshop';
+        // The truck is heading to the workshop from "جاري السحب" onward,
+        // not just once it hits the final "tow_returning_to_workshop" step.
+        routeService.isReturningToWorkshop =
+            status == 'tow_in_progress' || status == 'tow_returning_to_workshop';
       }
 
       // Notify right away so the marker moves instantly; the caller

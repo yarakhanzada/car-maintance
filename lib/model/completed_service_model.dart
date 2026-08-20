@@ -4,6 +4,7 @@ class CompletedServiceModel {
   final int id;
   final String problemType;
   final String status;
+  final String? statusLabel;
   final String brand;
   final String model;
   final String year;
@@ -37,6 +38,7 @@ final List<String> afterImages;
     required this.id,
     required this.problemType,
     required this.status,
+    this.statusLabel,
     required this.brand,
     required this.model,
     required this.year,
@@ -79,6 +81,7 @@ required this.afterImages,
       id: json['id'] ?? 0,
       problemType: json['problem_type'] ?? "unknown",
       status: json['status'] ?? "",
+      statusLabel: json['status_label'],
       brand: vehicle['brand'] ?? "Unknown",
       model: vehicle['model'] ?? "",
       year: vehicle['year']?.toString() ?? "",

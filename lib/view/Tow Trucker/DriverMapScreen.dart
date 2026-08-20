@@ -3,6 +3,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
 import 'package:senior_project/controller/towtrucker%20controller/DriverTowingController.dart';
 import 'package:senior_project/controller/towtrucker%20controller/DriverNavigationController.dart';
+import 'package:senior_project/services/api_config.dart';
+import 'package:senior_project/utils/map_helper.dart';
 import 'package:senior_project/widgets/CustomGoogleMapWidget.dart';
 
 class DriverMapScreen extends StatefulWidget {
@@ -16,6 +18,8 @@ class _DriverMapScreenState extends State<DriverMapScreen>
     with TickerProviderStateMixin {
   GoogleMapController? _mapController;
   late AnimationController _pulseController;
+  bool _hasCenteredOnWorkshop = false;
+  BitmapDescriptor? _workshopIcon;
 
   @override
   void initState() {
@@ -24,6 +28,23 @@ class _DriverMapScreenState extends State<DriverMapScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
+// MapHelper.getWorkshopIcon().then((icon) {
+//   if (mounted) setState(() => _workshopIcon = icon);
+// });
+    _loadWorkshopIcon();
+  }
+
+  Future<void> _loadWorkshopIcon() async {
+    final icon = await BitmapDescriptor.asset(
+      const ImageConfiguration(size: Size(28, 28)),
+      'lib/images/red_flag.png',
+    );
+
+    if (mounted) {
+      setState(() {
+        _workshopIcon = icon;
+      });
+    }
   }
 
   @override
@@ -68,12 +89,24 @@ class _DriverMapScreenState extends State<DriverMapScreen>
             s.driverLocation.longitude,
           );
 
+          if (s.isReturningToWorkshop) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _centerOnWorkshopOnce(driverLatLng);
+            });
+          } else {
+            _hasCenteredOnWorkshop = false;
+          }
+
           return Scaffold(
             body: Stack(
               children: [
                 CustomGoogleMapWidget(
                   driverLocation: driverLatLng,
                   customerLocation: s.customerLocation,
+                  workshopLocation: s.isReturningToWorkshop
+                      ? ApiConfig.workshopLocation
+                      : null,
+                  workshopIcon: _workshopIcon,
                   routePoints: s.routePoints,
                   isJobStarted: s.isJobStarted,
                   onMapCreated: (ctrl) {
@@ -101,6 +134,36 @@ class _DriverMapScreenState extends State<DriverMapScreen>
         },
       );
     });
+  }
+
+  // Fits both the driver and the workshop into view (centered) the moment
+  // the driver starts heading there, instead of leaving the workshop flag
+  // off-screen until the driver manually pans the map.
+  void _centerOnWorkshopOnce(LatLng driverLocation) {
+    if (_hasCenteredOnWorkshop || _mapController == null) return;
+    _hasCenteredOnWorkshop = true;
+
+    final workshop = ApiConfig.workshopLocation;
+    final bounds = LatLngBounds(
+      southwest: LatLng(
+        driverLocation.latitude < workshop.latitude
+            ? driverLocation.latitude
+            : workshop.latitude,
+        driverLocation.longitude < workshop.longitude
+            ? driverLocation.longitude
+            : workshop.longitude,
+      ),
+      northeast: LatLng(
+        driverLocation.latitude > workshop.latitude
+            ? driverLocation.latitude
+            : workshop.latitude,
+        driverLocation.longitude > workshop.longitude
+            ? driverLocation.longitude
+            : workshop.longitude,
+      ),
+    );
+
+    _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
   }
 
   // Empty-state screen widget
@@ -271,23 +334,7 @@ class _DriverMapScreenState extends State<DriverMapScreen>
         minimumSize: const Size(double.infinity, 40),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
-      // onPressed: () async {
-      //   if (!s.isJobStarted) {
-      //     bool success = await s.startTowing();
-      //     if (success) {
-      //       Get.snackbar("نجاح", "بدأت المهمة");
-      //     }
-      //   } else if (!isLastStep) {
-      //     String nextStatusKey =
-      //         s.statusSequence[s.currentStatusIndex + 1]['key'];
-      //     bool apiSuccess = await s.updateTowStatusAPI(nextStatusKey);
-      //     if (!apiSuccess) {
-      //       Get.snackbar("تنبيه", "فشل تحديث الحالة");
-      //     }
-      //   } else {
-      //     s.completeTowingViaSocket();
-      //   }
-      // },
+
       onPressed: () async {
         if (!s.isJobStarted) {
           final message = await s.startTowing();
@@ -322,11 +369,6 @@ class _DriverMapScreenState extends State<DriverMapScreen>
             snackPosition: SnackPosition.BOTTOM,
           );
         } else {
-          // Must go through the socket so the server broadcasts
-          // 'tracking_ended' to the customer's room. Calling the REST
-          // endpoint directly here leaves the customer stuck on the
-          // tracking map since they only ever learn about completion
-          // through that socket event.
           s.completeTowingViaSocket();
         }
       },
