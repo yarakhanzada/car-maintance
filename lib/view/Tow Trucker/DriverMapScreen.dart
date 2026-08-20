@@ -28,23 +28,10 @@ class _DriverMapScreenState extends State<DriverMapScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-// MapHelper.getWorkshopIcon().then((icon) {
-//   if (mounted) setState(() => _workshopIcon = icon);
-// });
-    _loadWorkshopIcon();
-  }
-
-  Future<void> _loadWorkshopIcon() async {
-    final icon = await BitmapDescriptor.asset(
-      const ImageConfiguration(size: Size(28, 28)),
-      'lib/images/red_flag.png',
-    );
-
-    if (mounted) {
-      setState(() {
-        _workshopIcon = icon;
-      });
-    }
+    MapHelper.getWorkshopIcon().then((icon) {
+      if (mounted) setState(() => _workshopIcon = icon);
+    });
+    // _loadWorkshopIcon();
   }
 
   @override
